@@ -1,246 +1,132 @@
 <!DOCTYPE html>
 <html lang="fa" dir="rtl">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport"
-        content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Zombie Car</title>
 
-  <meta name="theme-color" content="#090b0d">
+<style>
+* {
+    box-sizing: border-box;
+}
 
-  <title>Zombie Car</title>
+body {
+    margin: 0;
+    background: #111;
+    color: white;
+    font-family: Arial, sans-serif;
+    overflow: hidden;
+}
 
-  <link rel="stylesheet" href="style.css">
+.screen {
+    width: 100vw;
+    height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-direction: column;
+}
+
+.hidden {
+    display: none !important;
+}
+
+#menuScreen {
+    background: linear-gradient(#111, #292929);
+}
+
+h1 {
+    font-size: 42px;
+    margin-bottom: 40px;
+}
+
+#startBtn {
+    border: none;
+    border-radius: 15px;
+    padding: 18px 50px;
+    font-size: 24px;
+    font-weight: bold;
+    background: #e53935;
+    color: white;
+    cursor: pointer;
+}
+
+#startBtn:active {
+    transform: scale(.95);
+}
+
+#gameScreen {
+    position: relative;
+}
+
+#game {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    display: block;
+}
+</style>
 </head>
 
 <body>
 
-<!-- =========================
-     MAIN MENU
-========================= -->
+<div id="menuScreen" class="screen">
 
-<section id="menuScreen" class="screen">
+    <h1>🚗 Zombie Car 🧟</h1>
 
-  <div class="menu-content">
-
-    <div class="logo">
-      <div class="logo-small">ZOMBIE</div>
-      <div class="logo-big">CAR</div>
-    </div>
-
-    <div class="hero-car">
-      🚗
-    </div>
-
-    <div class="coins-display">
-      <span>🪙</span>
-      <span id="menuCoins">0</span>
-    </div>
-
-    <button id="startBtn" class="main-btn start-btn">
-      ▶ شروع بازی
+    <button id="startBtn">
+        ▶ شروع بازی
     </button>
 
-    <button id="garageBtn" class="main-btn">
-      🔧 گاراژ
-    </button>
+</div>
 
-    <div class="version">
-      ZOMBIE CAR • v1.0
-    </div>
+<div id="gameScreen" class="screen hidden">
 
-  </div>
+    <canvas id="game"></canvas>
 
-</section>
+</div>
 
+<script>
 
-<!-- =========================
-     GARAGE
-========================= -->
+const startBtn = document.getElementById("startBtn");
+const menuScreen = document.getElementById("menuScreen");
+const gameScreen = document.getElementById("gameScreen");
+const canvas = document.getElementById("game");
+const ctx = canvas.getContext("2d");
 
-<section id="garageScreen" class="screen hidden">
+function resizeCanvas() {
+    canvas.width = window.innerWidth;
+    canvas.height = window.innerHeight;
+}
 
-  <div class="garage-content">
+window.addEventListener("resize", resizeCanvas);
 
-    <button id="backBtn" class="back-btn">
-      ← بازگشت
-    </button>
+startBtn.addEventListener("click", function () {
 
-    <h1>🔧 گاراژ</h1>
+    console.log("START CLICKED");
 
-    <div class="garage-coins">
-      🪙 <span id="garageCoins">0</span>
-    </div>
+    menuScreen.classList.add("hidden");
+    gameScreen.classList.remove("hidden");
 
-    <div class="garage-car">
-      🚗
-    </div>
+    resizeCanvas();
 
-    <div class="upgrade-card">
+    ctx.fillStyle = "#222";
+    ctx.fillRect(0, 0, canvas.width, canvas.height);
 
-      <div>
-        <strong>⚡ سرعت ماشین</strong>
-        <small id="speedLevel">سطح 1</small>
-      </div>
+    ctx.fillStyle = "#fff";
+    ctx.font = "bold 30px Arial";
+    ctx.textAlign = "center";
 
-      <button id="speedUpgrade">
-        🪙 50
-      </button>
+    ctx.fillText(
+        "بازی شروع شد!",
+        canvas.width / 2,
+        canvas.height / 2
+    );
 
-    </div>
+});
 
-
-    <div class="upgrade-card">
-
-      <div>
-        <strong>❤️ زره ماشین</strong>
-        <small id="armorLevel">سطح 1</small>
-      </div>
-
-      <button id="armorUpgrade">
-        🪙 50
-      </button>
-
-    </div>
-
-
-    <div class="upgrade-card">
-
-      <div>
-        <strong>🔫 قدرت سلاح</strong>
-        <small id="weaponLevel">سطح 1</small>
-      </div>
-
-      <button id="weaponUpgrade">
-        🪙 50
-      </button>
-
-    </div>
-
-  </div>
-
-</section>
-
-
-<!-- =========================
-     GAME
-========================= -->
-
-<section id="gameScreen" class="hidden">
-
-  <canvas id="game"></canvas>
-
-
-  <!-- HUD -->
-
-  <div id="hud">
-
-    <div class="hud-item health">
-
-      <div class="hud-icon">❤️</div>
-
-      <div class="hud-info">
-
-        <div class="hud-title">
-          جان
-        </div>
-
-        <div class="health-bar">
-          <div id="hpFill"></div>
-        </div>
-
-        <span id="hp">100</span>
-
-      </div>
-
-    </div>
-
-
-    <div class="hud-item">
-      <span class="hud-icon">🪙</span>
-      <span id="coins">0</span>
-    </div>
-
-
-    <div class="hud-item">
-      <span class="hud-icon">☠️</span>
-      <span id="kills">0</span>
-    </div>
-
-  </div>
-
-
-  <!-- Score -->
-
-  <div id="score">
-    امتیاز: <b id="scoreValue">0</b>
-  </div>
-
-
-  <!-- Controls -->
-
-  <div id="controls">
-
-    <button id="left" class="control">
-      ◀
-    </button>
-
-    <button id="fire" class="control fire">
-      🔫
-    </button>
-
-    <button id="right" class="control">
-      ▶
-    </button>
-
-  </div>
-
-
-  <!-- Pause -->
-
-  <button id="pauseBtn">
-    ❚❚
-  </button>
-
-
-  <!-- GAME OVER -->
-
-  <div id="gameover" class="hidden">
-
-    <div class="gameover-box">
-
-      <div class="dead-icon">
-        💀
-      </div>
-
-      <h1>GAME OVER</h1>
-
-      <p>
-        زامبی‌های کشته شده:
-        <strong id="finalKills">0</strong>
-      </p>
-
-      <p>
-        امتیاز:
-        <strong id="finalScore">0</strong>
-      </p>
-
-      <button id="restart">
-        🔄 دوباره بازی کن
-      </button>
-
-      <button id="menuBtn">
-        🏠 منوی اصلی
-      </button>
-
-    </div>
-
-  </div>
-
-</section>
-
-
-<script src="https://telegram.org/js/telegram-web-app.js"></script>
-<script src="game.js"></script>
+</script>
 
 </body>
 </html>
