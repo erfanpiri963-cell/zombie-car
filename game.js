@@ -7,13 +7,33 @@ if (tg) {
 const canvas = document.getElementById("game");
 const ctx = canvas.getContext("2d");
 
-let W, H, dpr;
-let player, bullets, zombies, particles;
-let coins, kills, hp, score;
-let gameOver, keys, spawnTimer, last;
+let W = 0;
+let H = 0;
+let dpr = 1;
+
+let player;
+let bullets = [];
+let zombies = [];
+let particles = [];
+
+let coins = 0;
+let kills = 0;
+let score = 0;
+let distance = 0;
+let hp = 100;
+
+let gameOver = false;
+let keys = {
+  left: false,
+  right: false,
+  fire: false
+};
+
+let spawnTimer = 0;
+let lastTime = performance.now();
 let roadOffset = 0;
-let bloodFlash = 0;
 let shake = 0;
+let damageFlash = 0;
 
 // -------------------------
 // RESIZE
@@ -38,17 +58,31 @@ window.addEventListener("resize", resize);
 resize();
 
 // -------------------------
+// HUD
+// -------------------------
+
+function updateHUD() {
+  const hpElement = document.getElementById("hp");
+  const coinsElement = document.getElementById("coins");
+  const killsElement = document.getElementById("kills");
+
+  if (hpElement) hpElement.textContent = Math.max(0, Math.round(hp));
+  if (coinsElement) coinsElement.textContent = coins;
+  if (killsElement) killsElement.textContent = kills;
+}
+
+// -------------------------
 // RESET
 // -------------------------
 
 function reset() {
   player = {
     x: W / 2,
-    y: H - 145,
-    w: 52,
-    h: 86,
+    y: H - 150,
+    w: 54,
+    h: 88,
     speed: 6,
-    fire: 0
+    cooldown: 0
   };
 
   bullets = [];
@@ -57,51 +91,33 @@ function reset() {
 
   coins = 0;
   kills = 0;
-  hp = 100;
   score = 0;
+  distance = 0;
+  hp = 100;
 
   gameOver = false;
-  bloodFlash = 0;
-  shake = 0;
-
-  keys = {
-    l: false,
-    r: false,
-    f: false
-  };
-
-  spawnTimer = 0;
+  spawnTimer = 20;
   roadOffset = 0;
-  last = performance.now();
+  shake = 0;
+  damageFlash = 0;
 
-  const gameover = document.getElementById("gameover");
-  if (gameover) gameover.classList.add("hidden");
+  lastTime = performance.now();
 
-  updateHud();
-}
+  const gameOverScreen = document.getElementById("gameover");
+  if (gameOverScreen) {
+    gameOverScreen.classList.add("hidden");
+  }
 
-// -------------------------
-// HUD
-// -------------------------
-
-function updateHud() {
-  hp = Math.max(0, Math.round(hp));
-
-  const hpEl = document.getElementById("hp");
-  const coinsEl = document.getElementById("coins");
-  const killsEl = document.getElementById("kills");
-
-  if (hpEl) hpEl.textContent = hp;
-  if (coinsEl) coinsEl.textContent = coins;
-  if (killsEl) killsEl.textContent = kills;
+  updateHUD();
 }
 
 // -------------------------
 // CONTROLS
 // -------------------------
 
-function bind(id, key) {
+function bindButton(id, key) {
   const button = document.getElementById(id);
+
   if (!button) return;
 
   button.addEventListener("pointerdown", e => {
@@ -123,28 +139,51 @@ function bind(id, key) {
   });
 }
 
-bind("left", "l");
-bind("right", "r");
-bind("fire", "f");
+bindButton("left", "left");
+bindButton("right", "right");
+bindButton("fire", "fire");
 
 window.addEventListener("keydown", e => {
-  if (e.key === "ArrowLeft" || e.key === "a") keys.l = true;
-  if (e.key === "ArrowRight" || e.key === "d") keys.r = true;
-  if (e.code === "Space") keys.f = true;
+  if (e.key === "ArrowLeft" || e.key.toLowerCase() === "a") {
+    keys.left = true;
+  }
+
+  if (e.key === "ArrowRight" || e.key.toLowerCase() === "d") {
+    keys.right = true;
+  }
+
+  if (e.code === "Space") {
+    keys.fire = true;
+  }
 });
 
 window.addEventListener("keyup", e => {
-  if (e.key === "ArrowLeft" || e.key === "a") keys.l = false;
-  if (e.key === "ArrowRight" || e.key === "d") keys.r = false;
-  if (e.code === "Space") keys.f = false;
+  if (e.key === "ArrowLeft" || e.key.toLowerCase() === "a") {
+    keys.left = false;
+  }
+
+  if (e.key === "ArrowRight" || e.key.toLowerCase() === "d") {
+    keys.right = false;
+  }
+
+  if (e.code === "Space") {
+    keys.fire = false;
+  }
 });
 
-const restart = document.getElementById("restart");
-if (restart) restart.onclick = reset;
+const restartButton = document.getElementById("restart");
+
+if (restartButton) {
+  restartButton.onclick = reset;
+}
 
 // -------------------------
 // HELPERS
 // -------------------------
+
+function rand(min, max) {
+  return Math.random() * (max - min) + min;
+}
 
 function roundedRect(x, y, w, h, r) {
   ctx.beginPath();
@@ -152,117 +191,115 @@ function roundedRect(x, y, w, h, r) {
   ctx.fill();
 }
 
-function random(min, max) {
-  return Math.random() * (max - min) + min;
-}
-
 // -------------------------
 // ROAD
 // -------------------------
 
 function drawRoad() {
+  // dark background
+  const background = ctx.createLinearGradient(0, 0, 0, H);
 
-  // background
-  const bg = ctx.createLinearGradient(0, 0, 0, H);
-  bg.addColorStop(0, "#090d10");
-  bg.addColorStop(0.5, "#20282b");
-  bg.addColorStop(1, "#080b0d");
+  background.addColorStop(0, "#050809");
+  background.addColorStop(0.5, "#172023");
+  background.addColorStop(1, "#050708");
 
-  ctx.fillStyle = bg;
+  ctx.fillStyle = background;
   ctx.fillRect(0, 0, W, H);
 
-  // road dimensions
-  const roadW = Math.min(W * 0.92, 560);
-  const roadX = (W - roadW) / 2;
+  const roadWidth = Math.min(W * 0.92, 560);
+  const roadX = (W - roadWidth) / 2;
 
   // road
-  const roadGradient = ctx.createLinearGradient(0, 0, 0, H);
-  roadGradient.addColorStop(0, "#343b3e");
-  roadGradient.addColorStop(0.5, "#202628");
-  roadGradient.addColorStop(1, "#111719");
+  const road = ctx.createLinearGradient(0, 0, 0, H);
 
-  ctx.fillStyle = roadGradient;
-  ctx.fillRect(roadX, 0, roadW, H);
+  road.addColorStop(0, "#4a4f51");
+  road.addColorStop(0.5, "#292e30");
+  road.addColorStop(1, "#15191a");
 
-  // road shoulders
-  ctx.fillStyle = "#6b6f70";
-  ctx.fillRect(roadX, 0, 6, H);
-  ctx.fillRect(roadX + roadW - 6, 0, 6, H);
+  ctx.fillStyle = road;
+  ctx.fillRect(roadX, 0, roadWidth, H);
 
-  // dirty road marks
-  ctx.globalAlpha = 0.15;
-  ctx.fillStyle = "#000";
+  // road edge
+  ctx.fillStyle = "#8b8d8d";
 
-  for (let i = 0; i < 25; i++) {
-    const x = roadX + random(15, roadW - 15);
-    const y = random(0, H);
+  ctx.fillRect(roadX, 0, 5, H);
+  ctx.fillRect(roadX + roadWidth - 5, 0, 5, H);
 
-    ctx.fillRect(x, y, random(2, 7), random(20, 80));
+  // lane lines
+  ctx.strokeStyle = "#eeeeee";
+  ctx.lineWidth = 4;
+  ctx.setLineDash([40, 35]);
+  ctx.lineDashOffset = -roadOffset;
+
+  ctx.beginPath();
+  ctx.moveTo(W / 2, 0);
+  ctx.lineTo(W / 2, H);
+  ctx.stroke();
+
+  ctx.setLineDash([]);
+
+  // road cracks
+  ctx.globalAlpha = 0.22;
+  ctx.strokeStyle = "#090909";
+  ctx.lineWidth = 2;
+
+  for (let i = 0; i < 12; i++) {
+    const y = ((i * 180 + roadOffset * 1.2) % (H + 180)) - 90;
+    const x = roadX + rand(30, roadWidth - 30);
+
+    ctx.beginPath();
+    ctx.moveTo(x, y);
+    ctx.lineTo(x + rand(-15, 15), y + 30);
+    ctx.lineTo(x + rand(-20, 20), y + 55);
+    ctx.stroke();
   }
 
   ctx.globalAlpha = 1;
 
-  // center lane
-  ctx.strokeStyle = "#ddd";
-  ctx.lineWidth = 5;
-  ctx.setLineDash([42, 38]);
-  ctx.lineDashOffset = -roadOffset;
-
-  ctx.beginPath();
-  ctx.moveTo(W / 2, -50);
-  ctx.lineTo(W / 2, H + 50);
-  ctx.stroke();
-
-  ctx.setLineDash([]);
-
-  // side lane markings
-  ctx.strokeStyle = "#d9d9d9";
-  ctx.lineWidth = 3;
-
-  ctx.setLineDash([25, 30]);
-  ctx.lineDashOffset = -roadOffset * 0.8;
-
-  ctx.beginPath();
-  ctx.moveTo(roadX + roadW / 3, 0);
-  ctx.lineTo(roadX + roadW / 3, H);
-  ctx.stroke();
-
-  ctx.beginPath();
-  ctx.moveTo(roadX + roadW * 2 / 3, 0);
-  ctx.lineTo(roadX + roadW * 2 / 3, H);
-  ctx.stroke();
-
-  ctx.setLineDash([]);
-
-  // roadside silhouettes
-  drawRoadside(roadX, roadW);
+  drawRoadside(roadX, roadWidth);
 }
 
 // -------------------------
 // ROADSIDE
 // -------------------------
 
-function drawRoadside(roadX, roadW) {
-
-  ctx.fillStyle = "#0b1113";
-
-  for (let i = 0; i < 8; i++) {
-
-    const y = ((i * 170 + roadOffset * 1.3) % (H + 200)) - 100;
+function drawRoadside(roadX, roadWidth) {
+  for (let i = 0; i < 9; i++) {
+    const y =
+      ((i * 170 + roadOffset * 1.3) % (H + 220)) - 110;
 
     // left tree
+    ctx.fillStyle = "#080c0d";
+
     ctx.beginPath();
-    ctx.arc(roadX - 35, y, 18, 0, Math.PI * 2);
+    ctx.arc(roadX - 40, y, 20, 0, Math.PI * 2);
     ctx.fill();
 
-    ctx.fillRect(roadX - 38, y + 10, 6, 35);
+    ctx.fillRect(
+      roadX - 44,
+      y + 10,
+      7,
+      50
+    );
 
     // right tree
     ctx.beginPath();
-    ctx.arc(roadX + roadW + 35, y + 60, 20, 0, Math.PI * 2);
+    ctx.arc(
+      roadX + roadWidth + 40,
+      y + 50,
+      22,
+      0,
+      Math.PI * 2
+    );
+
     ctx.fill();
 
-    ctx.fillRect(roadX + roadW + 32, y + 70, 6, 35);
+    ctx.fillRect(
+      roadX + roadWidth + 36,
+      y + 60,
+      7,
+      55
+    );
   }
 }
 
@@ -271,76 +308,137 @@ function drawRoadside(roadX, roadW) {
 // -------------------------
 
 function drawCar() {
-
   ctx.save();
 
-  // shake
-  const sx = shake > 0 ? random(-shake, shake) : 0;
-  const sy = shake > 0 ? random(-shake, shake) : 0;
+  const sx = shake > 0 ? rand(-shake, shake) : 0;
+  const sy = shake > 0 ? rand(-shake, shake) : 0;
 
-  ctx.translate(player.x + sx, player.y + sy);
+  ctx.translate(
+    player.x + sx,
+    player.y + sy
+  );
 
   // shadow
   ctx.fillStyle = "rgba(0,0,0,.55)";
+
   ctx.beginPath();
-  ctx.ellipse(0, 34, 34, 12, 0, 0, Math.PI * 2);
+
+  ctx.ellipse(
+    0,
+    35,
+    36,
+    12,
+    0,
+    0,
+    Math.PI * 2
+  );
+
   ctx.fill();
 
   // wheels
-  ctx.fillStyle = "#080909";
+  ctx.fillStyle = "#070707";
 
-  roundedRect(-31, -30, 9, 25, 4);
-  roundedRect(22, -30, 9, 25, 4);
-  roundedRect(-31, 10, 9, 25, 4);
-  roundedRect(22, 10, 9, 25, 4);
+  roundedRect(-32, -30, 10, 26, 4);
+  roundedRect(22, -30, 10, 26, 4);
+  roundedRect(-32, 12, 10, 26, 4);
+  roundedRect(22, 12, 10, 26, 4);
 
-  // car body
-  const carGradient = ctx.createLinearGradient(-25, 0, 25, 0);
-  carGradient.addColorStop(0, "#9b111e");
-  carGradient.addColorStop(0.5, "#e52b38");
-  carGradient.addColorStop(1, "#7c0b14");
+  // body
+  const body = ctx.createLinearGradient(
+    -30,
+    0,
+    30,
+    0
+  );
 
-  ctx.fillStyle = carGradient;
-  roundedRect(-25, -43, 50, 88, 12);
+  body.addColorStop(0, "#650914");
+  body.addColorStop(0.5, "#e32132");
+  body.addColorStop(1, "#750b15");
+
+  ctx.fillStyle = body;
+
+  roundedRect(
+    -26,
+    -45,
+    52,
+    92,
+    12
+  );
 
   // hood
-  ctx.fillStyle = "#b91c28";
-  roundedRect(-20, -40, 40, 25, 8);
+  ctx.fillStyle = "#b91526";
+
+  roundedRect(
+    -21,
+    -42,
+    42,
+    25,
+    8
+  );
 
   // windshield
-  const glass = ctx.createLinearGradient(0, -35, 0, -5);
-  glass.addColorStop(0, "#a9d7e8");
-  glass.addColorStop(1, "#24383f");
+  const glass = ctx.createLinearGradient(
+    0,
+    -32,
+    0,
+    -5
+  );
+
+  glass.addColorStop(0, "#bde5f0");
+  glass.addColorStop(1, "#17272c");
 
   ctx.fillStyle = glass;
-  roundedRect(-18, -28, 36, 25, 7);
 
-  // windshield line
+  roundedRect(
+    -19,
+    -30,
+    38,
+    27,
+    7
+  );
+
+  // windshield divider
   ctx.strokeStyle = "rgba(255,255,255,.35)";
   ctx.lineWidth = 2;
 
   ctx.beginPath();
-  ctx.moveTo(0, -27);
+  ctx.moveTo(0, -29);
   ctx.lineTo(0, -5);
   ctx.stroke();
 
   // rear window
-  ctx.fillStyle = "#17252b";
-  roundedRect(-18, 6, 36, 18, 5);
+  ctx.fillStyle = "#172326";
+
+  roundedRect(
+    -18,
+    7,
+    36,
+    20,
+    5
+  );
 
   // headlights
-  ctx.fillStyle = "#fff4bd";
-  roundedRect(-18, -41, 10, 7, 3);
-  roundedRect(8, -41, 10, 7, 3);
+  ctx.fillStyle = "#fff3bd";
 
-  // red lights
-  ctx.fillStyle = "#ff1d25";
-  roundedRect(-18, 37, 10, 5, 2);
-  roundedRect(8, 37, 10, 5, 2);
+  roundedRect(-18, -42, 10, 7, 3);
+  roundedRect(8, -42, 10, 7, 3);
+
+  // rear lights
+  ctx.fillStyle = "#ff1825";
+
+  roundedRect(-18, 38, 10, 6, 2);
+  roundedRect(8, 38, 10, 6, 2);
 
   // bumper
-  ctx.fillStyle = "#252525";
-  roundedRect(-22, 43, 44, 5, 3);
+  ctx.fillStyle = "#222";
+
+  roundedRect(
+    -23,
+    44,
+    46,
+    6,
+    3
+  );
 
   ctx.restore();
 }
@@ -349,29 +447,31 @@ function drawCar() {
 // ZOMBIE SPAWN
 // -------------------------
 
-function spawn() {
+function spawnZombie() {
+  const roadWidth = Math.min(W * 0.92, 560);
+  const roadX =
+    (W - roadWidth) / 2 + 40;
 
-  const roadW = Math.min(W * 0.92, 560);
-  const roadX = (W - roadW) / 2 + 35;
+  const laneWidth =
+    (roadWidth - 80) / 3;
 
-  const lane = Math.floor(Math.random() * 3);
-
-  const laneW = (roadW - 70) / 3;
+  const lane =
+    Math.floor(Math.random() * 3);
 
   const x =
     roadX +
-    laneW * lane +
-    laneW / 2;
+    laneWidth * lane +
+    laneWidth / 2;
 
   zombies.push({
     x,
-    y: -60,
+    y: -70,
     w: 42,
-    h: 58,
-    spd: random(1.8, 3.4) + kills * 0.008,
+    h: 60,
+    speed: rand(1.8, 3.2),
     hp: 2,
     maxHp: 2,
-    walk: Math.random() * Math.PI * 2
+    walk: Math.random() * 10
   });
 }
 
@@ -380,167 +480,216 @@ function spawn() {
 // -------------------------
 
 function drawZombie(z) {
-
   ctx.save();
+
   ctx.translate(z.x, z.y);
 
-  const swing = Math.sin(z.walk) * 5;
+  const movement =
+    Math.sin(z.walk) * 5;
 
   // shadow
   ctx.fillStyle = "rgba(0,0,0,.45)";
+
   ctx.beginPath();
-  ctx.ellipse(0, 25, 25, 8, 0, 0, Math.PI * 2);
+
+  ctx.ellipse(
+    0,
+    30,
+    25,
+    8,
+    0,
+    0,
+    Math.PI * 2
+  );
+
   ctx.fill();
 
   // legs
-  ctx.strokeStyle = "#1b261e";
+  ctx.strokeStyle = "#26352a";
   ctx.lineWidth = 9;
   ctx.lineCap = "round";
 
   ctx.beginPath();
-  ctx.moveTo(-7, 15);
-  ctx.lineTo(-12, 35 + swing);
+  ctx.moveTo(-7, 12);
+  ctx.lineTo(-13, 35 + movement);
   ctx.stroke();
 
   ctx.beginPath();
-  ctx.moveTo(7, 15);
-  ctx.lineTo(13, 35 - swing);
+  ctx.moveTo(7, 12);
+  ctx.lineTo(13, 35 - movement);
   ctx.stroke();
 
   // arms
-  ctx.strokeStyle = "#6b8f54";
-  ctx.lineWidth = 8;
+  ctx.strokeStyle = "#6f9158";
 
   ctx.beginPath();
-  ctx.moveTo(-14, -5);
-  ctx.lineTo(-28, 8 + swing);
+  ctx.moveTo(-14, -4);
+  ctx.lineTo(-28, 10 + movement);
   ctx.stroke();
 
   ctx.beginPath();
-  ctx.moveTo(14, -5);
-  ctx.lineTo(28, 3 - swing);
+  ctx.moveTo(14, -4);
+  ctx.lineTo(28, 5 - movement);
   ctx.stroke();
 
   // body
-  ctx.fillStyle = "#354b38";
-  roundedRect(-17, -10, 34, 32, 8);
+  ctx.fillStyle = "#344936";
+
+  roundedRect(
+    -17,
+    -11,
+    34,
+    34,
+    8
+  );
 
   // neck
-  ctx.fillStyle = "#75955c";
-  ctx.fillRect(-6, -20, 12, 12);
+  ctx.fillStyle = "#79975e";
+
+  ctx.fillRect(
+    -6,
+    -21,
+    12,
+    12
+  );
 
   // head
-  ctx.fillStyle = "#7f9f64";
-
   ctx.beginPath();
-  ctx.arc(0, -28, 17, 0, Math.PI * 2);
+
+  ctx.arc(
+    0,
+    -29,
+    18,
+    0,
+    Math.PI * 2
+  );
+
   ctx.fill();
 
   // hair
-  ctx.fillStyle = "#20231f";
+  ctx.fillStyle = "#1c211c";
 
   ctx.beginPath();
-  ctx.arc(0, -36, 14, Math.PI, Math.PI * 2);
+
+  ctx.arc(
+    0,
+    -36,
+    14,
+    Math.PI,
+    Math.PI * 2
+  );
+
   ctx.fill();
 
   // eyes
-  ctx.fillStyle = "#dfff9b";
+  ctx.fillStyle = "#d9ff92";
+
   ctx.beginPath();
-  ctx.arc(-6, -30, 3, 0, Math.PI * 2);
-  ctx.arc(6, -30, 3, 0, Math.PI * 2);
+
+  ctx.arc(-6, -31, 3, 0, Math.PI * 2);
+  ctx.arc(6, -31, 3, 0, Math.PI * 2);
+
   ctx.fill();
 
   // mouth
-  ctx.fillStyle = "#241516";
-  ctx.fillRect(-8, -20, 16, 5);
+  ctx.fillStyle = "#211516";
+
+  ctx.fillRect(
+    -9,
+    -20,
+    18,
+    6
+  );
 
   // teeth
-  ctx.fillStyle = "#eee";
+  ctx.fillStyle = "#f2f2e5";
+
   ctx.fillRect(-5, -20, 3, 3);
   ctx.fillRect(2, -20, 3, 3);
 
-  // HP BAR
-  const barW = 46;
-  const barH = 5;
+  // HP bar
+  const barWidth = 48;
 
   ctx.fillStyle = "#111";
-  ctx.fillRect(-barW / 2, -52, barW, barH);
 
-  ctx.fillStyle = "#22e05a";
   ctx.fillRect(
-    -barW / 2,
-    -52,
-    barW * (z.hp / z.maxHp),
-    barH
+    -barWidth / 2,
+    -55,
+    barWidth,
+    6
+  );
+
+  ctx.fillStyle = "#28e15d";
+
+  ctx.fillRect(
+    -barWidth / 2,
+    -55,
+    barWidth * (z.hp / z.maxHp),
+    6
   );
 
   ctx.restore();
 }
 
 // -------------------------
-// BULLET
+// FIRE
 // -------------------------
 
 function fire() {
-
   bullets.push({
     x: player.x,
-    y: player.y - 48,
-    spd: 13,
-    r: 4
+    y: player.y - 50,
+    speed: 13,
+    radius: 4
   });
 
   // muzzle flash
-  for (let i = 0; i < 5; i++) {
-
+  for (let i = 0; i < 8; i++) {
     particles.push({
-      x: player.x + random(-4, 4),
-      y: player.y - 50,
-      vx: random(-2, 2),
-      vy: random(-4, -1),
-      life: 10,
+      x: player.x + rand(-5, 5),
+      y: player.y - 53,
+      vx: rand(-2, 2),
+      vy: rand(-5, -1),
+      life: 12,
       color: "#ffd54f"
     });
   }
 }
 
 // -------------------------
-// COLLISION
+// BLOOD EFFECT
 // -------------------------
 
-function hit(a, b) {
-
-  return (
-    Math.abs(a.x - b.x) <
-    (a.w + b.w) / 2
-    &&
-    Math.abs(a.y - b.y) <
-    (a.h + b.h) / 2
-  );
-}
-
-// -------------------------
-// BLOOD / PARTICLES
-// -------------------------
-
-function burst(x, y) {
-
-  for (let i = 0; i < 18; i++) {
-
+function bloodBurst(x, y) {
+  for (let i = 0; i < 20; i++) {
     particles.push({
       x,
       y,
-      vx: random(-5, 5),
-      vy: random(-5, 5),
-      life: random(15, 30),
-      color: Math.random() > 0.25
-        ? "#c62828"
-        : "#ff5252"
+      vx: rand(-5, 5),
+      vy: rand(-5, 5),
+      life: rand(15, 32),
+      color:
+        Math.random() > 0.25
+          ? "#c62828"
+          : "#ff5252"
     });
   }
 
-  bloodFlash = 0.25;
+  damageFlash = 0.25;
   shake = 5;
+}
+
+// -------------------------
+// COLLISION
+// -------------------------
+
+function collision(a, b) {
+  return (
+    Math.abs(a.x - b.x) <
+      (a.w + b.w) / 2 &&
+    Math.abs(a.y - b.y) <
+      (a.h + b.h) / 2
+  );
 }
 
 // -------------------------
@@ -548,7 +697,6 @@ function burst(x, y) {
 // -------------------------
 
 function endGame() {
-
   gameOver = true;
 
   const finalKills =
@@ -558,39 +706,41 @@ function endGame() {
     finalKills.textContent = kills;
   }
 
-  const gameover =
+  const screen =
     document.getElementById("gameover");
 
-  if (gameover) {
-    gameover.classList.remove("hidden");
+  if (screen) {
+    screen.classList.remove("hidden");
   }
 }
 
 // -------------------------
-// GAME UPDATE
+// UPDATE
 // -------------------------
 
 function update(dt) {
-
   roadOffset += 7 * dt;
 
+  distance += 0.15 * dt;
+
   // movement
-  if (keys.l) {
+  if (keys.left) {
     player.x -= player.speed * dt;
   }
 
-  if (keys.r) {
+  if (keys.right) {
     player.x += player.speed * dt;
   }
 
-  // road boundaries
-  const roadW = Math.min(W * 0.92, 560);
+  // boundaries
+  const roadWidth =
+    Math.min(W * 0.92, 560);
 
   const minX =
-    (W - roadW) / 2 + 35;
+    (W - roadWidth) / 2 + 35;
 
   const maxX =
-    (W + roadW) / 2 - 35;
+    (W + roadWidth) / 2 - 35;
 
   player.x =
     Math.max(
@@ -599,60 +749,57 @@ function update(dt) {
     );
 
   // shooting
-  player.fire -= dt;
+  player.cooldown -= dt;
 
-  if (keys.f && player.fire <= 0) {
-
+  if (
+    keys.fire &&
+    player.cooldown <= 0
+  ) {
     fire();
 
-    player.fire = 8;
+    player.cooldown = 8;
   }
 
   // spawn
   spawnTimer -= dt;
 
   if (spawnTimer <= 0) {
-
-    spawn();
+    spawnZombie();
 
     spawnTimer =
       Math.max(
-        15,
+        14,
         42 - kills * 0.15
       );
   }
 
   // bullets
   bullets.forEach(b => {
-    b.y -= b.spd * dt;
+    b.y -= b.speed * dt;
   });
 
   // zombies
   zombies.forEach(z => {
-
-    z.y += z.spd * dt;
-
+    z.y += z.speed * dt;
     z.walk += 0.15 * dt;
   });
 
-  // collision
+  // collisions
   for (
     let i = zombies.length - 1;
     i >= 0;
     i--
   ) {
-
     const z = zombies[i];
 
-    // escaped
     if (z.y > H + 80) {
       zombies.splice(i, 1);
       continue;
     }
 
-    // hit player
+    // zombie hits car
     if (
-      hit(
+      collision(
         {
           x: player.x,
           y: player.y,
@@ -662,14 +809,13 @@ function update(dt) {
         z
       )
     ) {
-
       zombies.splice(i, 1);
 
       hp -= 18;
 
-      burst(z.x, z.y);
+      bloodBurst(z.x, z.y);
 
-      updateHud();
+      updateHUD();
 
       if (hp <= 0) {
         endGame();
@@ -678,38 +824,35 @@ function update(dt) {
       continue;
     }
 
-    // bullets
+    // bullet hits zombie
     for (
       let j = bullets.length - 1;
       j >= 0;
       j--
     ) {
-
       const b = bullets[j];
 
       if (
-        Math.abs(b.x - z.x) < 27 &&
+        Math.abs(b.x - z.x) < 28 &&
         Math.abs(b.y - z.y) < 35
       ) {
-
         bullets.splice(j, 1);
 
         z.hp--;
 
-        burst(
+        bloodBurst(
           b.x,
           b.y
         );
 
         if (z.hp <= 0) {
-
           zombies.splice(i, 1);
 
           kills++;
           coins += 5;
           score += 10;
 
-          updateHud();
+          updateHUD();
         }
 
         break;
@@ -724,7 +867,6 @@ function update(dt) {
 
   // particles
   particles.forEach(p => {
-
     p.x += p.vx * dt;
     p.y += p.vy * dt;
 
@@ -738,8 +880,8 @@ function update(dt) {
       p => p.life > 0
     );
 
-  if (bloodFlash > 0) {
-    bloodFlash -= 0.02 * dt;
+  if (damageFlash > 0) {
+    damageFlash -= 0.02 * dt;
   }
 
   if (shake > 0) {
@@ -752,28 +894,25 @@ function update(dt) {
 // -------------------------
 
 function draw() {
-
   drawRoad();
 
-  // zombies
   zombies.forEach(drawZombie);
 
-  // car
   drawCar();
 
   // bullets
   bullets.forEach(b => {
-
-    ctx.shadowBlur = 12;
+    ctx.shadowBlur = 15;
     ctx.shadowColor = "#ffd54f";
 
-    ctx.fillStyle = "#fff59d";
+    ctx.fillStyle = "#fff6a0";
 
     ctx.beginPath();
+
     ctx.arc(
       b.x,
       b.y,
-      b.r,
+      b.radius,
       0,
       Math.PI * 2
     );
@@ -785,9 +924,8 @@ function draw() {
 
   // particles
   particles.forEach(p => {
-
     ctx.globalAlpha =
-      Math.max(0, p.life / 30);
+      Math.max(0, p.life / 32);
 
     ctx.fillStyle =
       p.color || "#ff7043";
@@ -797,7 +935,7 @@ function draw() {
     ctx.arc(
       p.x,
       p.y,
-      random(2, 5),
+      rand(2, 5),
       0,
       Math.PI * 2
     );
@@ -807,10 +945,9 @@ function draw() {
 
   ctx.globalAlpha = 1;
 
-  // red damage effect
-  if (bloodFlash > 0) {
-
-    const gradient =
+  // damage flash
+  if (damageFlash > 0) {
+    const red =
       ctx.createRadialGradient(
         W / 2,
         H / 2,
@@ -820,29 +957,29 @@ function draw() {
         H * 0.8
       );
 
-    gradient.addColorStop(
+    red.addColorStop(
       0,
-      "rgba(180,0,0,0)"
+      "rgba(255,0,0,0)"
     );
 
-    gradient.addColorStop(
+    red.addColorStop(
       1,
-      `rgba(220,0,0,${bloodFlash})`
+      `rgba(220,0,0,${damageFlash})`
     );
 
-    ctx.fillStyle = gradient;
+    ctx.fillStyle = red;
     ctx.fillRect(0, 0, W, H);
   }
 
-  // dark cinematic edges
+  // vignette
   const vignette =
     ctx.createRadialGradient(
       W / 2,
       H / 2,
-      H * 0.25,
+      H * 0.2,
       W / 2,
       H / 2,
-      H * 0.8
+      H * 0.85
     );
 
   vignette.addColorStop(
@@ -852,7 +989,7 @@ function draw() {
 
   vignette.addColorStop(
     1,
-    "rgba(0,0,0,.55)"
+    "rgba(0,0,0,.6)"
   );
 
   ctx.fillStyle = vignette;
@@ -860,18 +997,17 @@ function draw() {
 }
 
 // -------------------------
-// MAIN LOOP
+// LOOP
 // -------------------------
 
-function loop(t) {
-
+function loop(time) {
   const dt =
     Math.min(
-      (t - last) / 16.67,
+      (time - lastTime) / 16.67,
       2
     );
 
-  last = t;
+  lastTime = time;
 
   if (!gameOver) {
     update(dt);
