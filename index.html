@@ -1,374 +1,209 @@
 <!DOCTYPE html>
 <html lang="fa" dir="rtl">
-
 <head>
 <meta charset="UTF-8">
-
-<meta name="viewport"
-      content="width=device-width,
-               initial-scale=1.0,
-               maximum-scale=1.0,
-               user-scalable=no">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
 
 <title>Zombie Car</title>
 
 <style>
-
-* {
-    box-sizing: border-box;
-    margin: 0;
-    padding: 0;
-    -webkit-tap-highlight-color: transparent;
+*{
+    box-sizing:border-box;
+    margin:0;
+    padding:0;
+    -webkit-tap-highlight-color:transparent;
 }
 
-html,
-body {
-    width: 100%;
-    height: 100%;
-    overflow: hidden;
-    background: #0d1115;
-    font-family: Arial, sans-serif;
-    touch-action: none;
+html,body{
+    width:100%;
+    height:100%;
+    overflow:hidden;
+    background:#0b0f12;
+    font-family:Arial,sans-serif;
+    touch-action:none;
 }
 
-.hidden {
-    display: none !important;
+.hidden{
+    display:none!important;
 }
 
-
-/* =========================
-   MENU
-========================= */
-
-#menuScreen {
-
-    position: fixed;
-    inset: 0;
-
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-
+/* MENU */
+#menuScreen{
+    position:fixed;
+    inset:0;
+    display:flex;
+    flex-direction:column;
+    align-items:center;
+    justify-content:center;
     background:
-        radial-gradient(
-            circle at 50% 35%,
-            #3d464d 0%,
-            #181d21 45%,
-            #090b0d 100%
-        );
-
-    color: white;
+        radial-gradient(circle at 50% 35%,#454d54 0%,#1b2025 45%,#080a0c 100%);
+    color:white;
 }
 
-.logo {
-
-    font-size: clamp(34px, 10vw, 58px);
-
-    font-weight: 900;
-
-    text-align: center;
-
-    text-shadow:
-        0 4px 0 #000,
-        0 8px 25px rgba(0,0,0,.8);
-
-    margin-bottom: 12px;
+.logo{
+    font-size:clamp(34px,10vw,58px);
+    font-weight:900;
+    text-align:center;
+    text-shadow:0 4px 0 #000,0 8px 25px rgba(0,0,0,.8);
+    margin-bottom:12px;
 }
 
-.subtitle {
-
-    color: #b9c0c5;
-
-    font-size: 16px;
-
-    margin-bottom: 42px;
-
-    text-align: center;
+.subtitle{
+    color:#bfc5c9;
+    font-size:16px;
+    margin-bottom:42px;
 }
 
-#startBtn {
-
-    border: none;
-
-    padding: 18px 55px;
-
-    border-radius: 18px;
-
-    background:
-        linear-gradient(
-            #f44336,
-            #c62828
-        );
-
-    color: white;
-
-    font-size: 22px;
-
-    font-weight: bold;
-
-    box-shadow:
-        0 8px 25px rgba(0,0,0,.55),
-        inset 0 1px rgba(255,255,255,.25);
-
-    cursor: pointer;
+#startBtn{
+    border:0;
+    padding:18px 55px;
+    border-radius:18px;
+    background:linear-gradient(#f44336,#c62828);
+    color:white;
+    font-size:22px;
+    font-weight:bold;
+    box-shadow:0 8px 25px rgba(0,0,0,.55);
 }
 
-#startBtn:active {
-    transform: scale(.94);
+#startBtn:active{
+    transform:scale(.94);
 }
 
-
-/* =========================
-   GAME
-========================= */
-
-#gameScreen {
-
-    position: fixed;
-
-    inset: 0;
-
-    background: #111;
-
-    overflow: hidden;
+/* GAME */
+#gameScreen{
+    position:fixed;
+    inset:0;
+    overflow:hidden;
+    background:#111;
 }
 
-#game {
-
-    position: absolute;
-
-    inset: 0;
-
-    width: 100%;
-    height: 100%;
-
-    display: block;
+#game{
+    position:absolute;
+    inset:0;
+    width:100%;
+    height:100%;
+    display:block;
 }
 
-
-/* =========================
-   HUD
-========================= */
-
-#hud {
-
-    position: absolute;
-
-    top: 15px;
-
-    left: 12px;
-    right: 12px;
-
-    display: flex;
-
-    justify-content: space-between;
-
-    z-index: 20;
-
-    pointer-events: none;
+/* HUD */
+#hud{
+    position:absolute;
+    top:15px;
+    left:12px;
+    right:12px;
+    display:flex;
+    justify-content:space-between;
+    z-index:20;
+    pointer-events:none;
 }
 
-.hudBox {
-
-    min-width: 75px;
-
-    padding: 9px 13px;
-
-    border-radius: 13px;
-
-    background:
-        rgba(0,0,0,.62);
-
-    border:
-        1px solid rgba(255,255,255,.12);
-
-    color: white;
-
-    font-size: 17px;
-
-    font-weight: bold;
-
-    text-align: center;
-
-    backdrop-filter: blur(6px);
-
-    box-shadow:
-        0 5px 15px rgba(0,0,0,.3);
+.hudBox{
+    min-width:75px;
+    padding:9px 13px;
+    border-radius:13px;
+    background:rgba(0,0,0,.62);
+    border:1px solid rgba(255,255,255,.12);
+    color:white;
+    font-size:17px;
+    font-weight:bold;
+    text-align:center;
+    backdrop-filter:blur(6px);
 }
 
-
-/* =========================
-   CONTROLS
-========================= */
-
-#controls {
-
-    position: absolute;
-
-    left: 0;
-    right: 0;
-    bottom: 25px;
-
-    display: flex;
-
-    justify-content: space-between;
-
-    padding: 0 22px;
-
-    z-index: 30;
-
-    pointer-events: none;
+/* CONTROLS */
+#controls{
+    position:absolute;
+    left:0;
+    right:0;
+    bottom:25px;
+    display:grid;
+    grid-template-columns:1fr 1fr 1fr;
+    align-items:center;
+    z-index:30;
+    padding:0 22px;
+    direction:ltr;
 }
 
-.controlBtn {
-
-    width: 78px;
-    height: 78px;
-
-    border-radius: 50%;
-
-    border:
-        2px solid rgba(255,255,255,.2);
-
-    background:
-        rgba(0,0,0,.45);
-
-    color: white;
-
-    font-size: 30px;
-
-    font-weight: bold;
-
-    backdrop-filter: blur(7px);
-
-    box-shadow:
-        0 6px 20px rgba(0,0,0,.4);
-
-    pointer-events: auto;
-
-    touch-action: none;
+.controlBtn{
+    width:78px;
+    height:78px;
+    border-radius:50%;
+    border:2px solid rgba(255,255,255,.2);
+    background:rgba(0,0,0,.48);
+    color:white;
+    font-size:30px;
+    font-weight:bold;
+    backdrop-filter:blur(7px);
+    box-shadow:0 6px 20px rgba(0,0,0,.4);
+    touch-action:none;
 }
 
-.controlBtn:active {
-
-    transform: scale(.9);
-
-    background:
-        rgba(255,255,255,.25);
+#leftBtn{
+    justify-self:start;
 }
 
-
-/* =========================
-   FIRE BUTTON
-========================= */
-
-#fireBtn {
-
-    width: 88px;
-    height: 88px;
-
-    border-radius: 50%;
-
-    border:
-        2px solid rgba(255,255,255,.2);
-
-    background:
-        linear-gradient(
-            #ff7043,
-            #d84315
-        );
-
-    color: white;
-
-    font-size: 36px;
-
-    box-shadow:
-        0 7px 22px rgba(0,0,0,.5);
-
-    pointer-events: auto;
-
-    touch-action: none;
+#rightBtn{
+    justify-self:end;
 }
 
-#fireBtn:active {
-
-    transform: scale(.9);
+#fireBtn{
+    justify-self:center;
+    width:88px;
+    height:88px;
+    border-radius:50%;
+    border:2px solid rgba(255,255,255,.2);
+    background:linear-gradient(#ff7043,#d84315);
+    color:white;
+    font-size:36px;
+    box-shadow:0 7px 22px rgba(0,0,0,.5);
+    touch-action:none;
 }
 
-
-/* =========================
-   GAME OVER
-========================= */
-
-#gameOver {
-
-    position: absolute;
-
-    inset: 0;
-
-    z-index: 100;
-
-    display: flex;
-
-    flex-direction: column;
-
-    align-items: center;
-
-    justify-content: center;
-
-    background:
-        rgba(0,0,0,.82);
-
-    color: white;
-
-    text-align: center;
+.controlBtn:active,
+#fireBtn:active{
+    transform:scale(.9);
 }
 
-#gameOver h1 {
-
-    font-size: 42px;
-
-    margin-bottom: 15px;
+/* GAME OVER */
+#gameOver{
+    position:absolute;
+    inset:0;
+    z-index:100;
+    display:flex;
+    flex-direction:column;
+    align-items:center;
+    justify-content:center;
+    background:rgba(0,0,0,.82);
+    color:white;
+    text-align:center;
 }
 
-#gameOver p {
-
-    color: #ccc;
-
-    margin-bottom: 25px;
-
-    font-size: 18px;
+#gameOver h1{
+    font-size:42px;
+    margin-bottom:15px;
 }
 
-#restartBtn {
-
-    border: none;
-
-    border-radius: 14px;
-
-    padding: 15px 35px;
-
-    background: #e53935;
-
-    color: white;
-
-    font-size: 19px;
-
-    font-weight: bold;
+#gameOver p{
+    color:#ccc;
+    margin-bottom:25px;
+    font-size:18px;
 }
 
+#restartBtn{
+    border:0;
+    border-radius:14px;
+    padding:15px 35px;
+    background:#e53935;
+    color:white;
+    font-size:19px;
+    font-weight:bold;
+}
 </style>
 </head>
 
-
 <body>
 
-
-<!-- =========================
-     MENU
-========================= -->
-
+<!-- MENU -->
 <div id="menuScreen">
 
     <div class="logo">
@@ -386,15 +221,10 @@ body {
 </div>
 
 
-
-<!-- =========================
-     GAME
-========================= -->
-
+<!-- GAME -->
 <div id="gameScreen" class="hidden">
 
     <canvas id="game"></canvas>
-
 
     <div id="hud">
 
@@ -413,24 +243,23 @@ body {
     </div>
 
 
+    <!--
+        LTR عمداً استفاده شده:
+        چپ = سمت چپ
+        آتش = وسط
+        راست = سمت راست
+    -->
     <div id="controls">
 
-        <button
-            id="leftBtn"
-            class="controlBtn">
+        <button id="leftBtn" class="controlBtn">
             ◀
         </button>
 
-
-        <button
-            id="fireBtn">
+        <button id="fireBtn">
             🔫
         </button>
 
-
-        <button
-            id="rightBtn"
-            class="controlBtn">
+        <button id="rightBtn" class="controlBtn">
             ▶
         </button>
 
@@ -439,9 +268,7 @@ body {
 
     <div id="gameOver" class="hidden">
 
-        <h1>
-            💀 باختی!
-        </h1>
+        <h1>💀 باختی!</h1>
 
         <p>
             زامبی‌های کشته‌شده:
@@ -457,353 +284,201 @@ body {
 </div>
 
 
-
 <script>
 
+const startBtn=document.getElementById("startBtn");
+const restartBtn=document.getElementById("restartBtn");
 
-// =========================
-// ELEMENTS
-// =========================
+const menuScreen=document.getElementById("menuScreen");
+const gameScreen=document.getElementById("gameScreen");
 
-const startBtn =
-    document.getElementById("startBtn");
+const canvas=document.getElementById("game");
+const ctx=canvas.getContext("2d");
 
-const restartBtn =
-    document.getElementById("restartBtn");
+const leftBtn=document.getElementById("leftBtn");
+const rightBtn=document.getElementById("rightBtn");
+const fireBtn=document.getElementById("fireBtn");
 
-const menuScreen =
-    document.getElementById("menuScreen");
+let W=0;
+let H=0;
 
-const gameScreen =
-    document.getElementById("gameScreen");
+let carX=0;
+let roadOffset=0;
 
-const canvas =
-    document.getElementById("game");
+let movingLeft=false;
+let movingRight=false;
+let firing=false;
 
-const ctx =
-    canvas.getContext("2d");
+let bullets=[];
 
-const leftBtn =
-    document.getElementById("leftBtn");
+let running=false;
+let lastTime=0;
+let fireCooldown=0;
 
-const rightBtn =
-    document.getElementById("rightBtn");
-
-const fireBtn =
-    document.getElementById("fireBtn");
-
-
-// =========================
-// GAME VARIABLES
-// =========================
-
-let W = 0;
-let H = 0;
-
-let carX = 0;
-
-let roadOffset = 0;
-
-let movingLeft = false;
-let movingRight = false;
-let firing = false;
-
-let bullets = [];
-
-let running = false;
-
-let lastTime = 0;
+let hp=100;
+let coins=0;
+let kills=0;
 
 
-// =========================
-// HUD
-// =========================
+/* RESIZE */
 
-let hp = 100;
-let coins = 0;
-let kills = 0;
+function resize(){
 
+    W=window.innerWidth;
+    H=window.innerHeight;
 
-// =========================
-// RESIZE
-// =========================
+    canvas.width=W;
+    canvas.height=H;
 
-function resize() {
-
-    W = window.innerWidth;
-
-    H = window.innerHeight;
-
-    canvas.width = W;
-
-    canvas.height = H;
-
-    if (!carX) {
-
-        carX = W / 2;
-
+    if(!carX){
+        carX=W/2;
     }
-
 }
 
-window.addEventListener(
-    "resize",
-    resize
-);
+window.addEventListener("resize",resize);
 
 
-// =========================
-// START
-// =========================
+/* HUD */
 
-startBtn.addEventListener(
-    "click",
-    startGame
-);
+function updateHUD(){
+
+    document.getElementById("hp").textContent=hp;
+    document.getElementById("coins").textContent=coins;
+    document.getElementById("kills").textContent=kills;
+}
 
 
-function startGame() {
+/* START */
 
-    menuScreen.classList.add(
-        "hidden"
-    );
+startBtn.addEventListener("click",startGame);
 
-    gameScreen.classList.remove(
-        "hidden"
-    );
+function startGame(){
+
+    menuScreen.classList.add("hidden");
+    gameScreen.classList.remove("hidden");
 
     resize();
 
-    carX = W / 2;
+    carX=W/2;
 
-    hp = 100;
+    hp=100;
+    coins=0;
+    kills=0;
 
-    coins = 0;
+    bullets=[];
 
-    kills = 0;
+    roadOffset=0;
 
-    bullets = [];
-
-    roadOffset = 0;
-
-    running = true;
+    running=true;
 
     updateHUD();
 
-    lastTime =
-        performance.now();
+    lastTime=performance.now();
 
-    requestAnimationFrame(
-        gameLoop
-    );
+    requestAnimationFrame(gameLoop);
 }
 
 
-// =========================
-// RESTART
-// =========================
+/* RESTART */
 
-restartBtn.addEventListener(
-    "click",
-    function () {
+restartBtn.addEventListener("click",function(){
 
-        document
-            .getElementById("gameOver")
-            .classList.add("hidden");
+    document.getElementById("gameOver")
+        .classList.add("hidden");
 
-        startGame();
-
-    }
-);
+    startGame();
+});
 
 
-// =========================
-// BUTTON CONTROL
-// =========================
+/* BUTTON HOLD */
 
-function holdButton(
-    button,
-    start,
-    end
-) {
+function holdButton(button,start,end){
 
-    button.addEventListener(
-        "pointerdown",
-        function(e) {
+    button.addEventListener("pointerdown",function(e){
 
-            e.preventDefault();
+        e.preventDefault();
+        start();
 
-            start();
+    });
 
-        }
-    );
+    button.addEventListener("pointerup",function(e){
 
-    button.addEventListener(
-        "pointerup",
-        function(e) {
+        e.preventDefault();
+        end();
 
-            e.preventDefault();
+    });
 
-            end();
-
-        }
-    );
-
-    button.addEventListener(
-        "pointercancel",
-        end
-    );
-
-    button.addEventListener(
-        "pointerleave",
-        end
-    );
+    button.addEventListener("pointercancel",end);
+    button.addEventListener("pointerleave",end);
 }
 
 
 holdButton(
     leftBtn,
-    () => movingLeft = true,
-    () => movingLeft = false
+    ()=>movingLeft=true,
+    ()=>movingLeft=false
 );
-
 
 holdButton(
     rightBtn,
-    () => movingRight = true,
-    () => movingRight = false
+    ()=>movingRight=true,
+    ()=>movingRight=false
 );
-
 
 holdButton(
     fireBtn,
-    () => firing = true,
-    () => firing = false
+    ()=>firing=true,
+    ()=>firing=false
 );
 
 
-// =========================
-// KEYBOARD
-// =========================
+/* KEYBOARD */
 
-window.addEventListener(
-    "keydown",
-    function(e) {
+window.addEventListener("keydown",function(e){
 
-        if (e.key === "ArrowLeft") {
-
-            movingLeft = true;
-
-        }
-
-        if (e.key === "ArrowRight") {
-
-            movingRight = true;
-
-        }
-
-        if (e.code === "Space") {
-
-            firing = true;
-
-        }
-
+    if(e.key==="ArrowLeft"){
+        movingLeft=true;
     }
-);
 
-
-window.addEventListener(
-    "keyup",
-    function(e) {
-
-        if (e.key === "ArrowLeft") {
-
-            movingLeft = false;
-
-        }
-
-        if (e.key === "ArrowRight") {
-
-            movingRight = false;
-
-        }
-
-        if (e.code === "Space") {
-
-            firing = false;
-
-        }
-
+    if(e.key==="ArrowRight"){
+        movingRight=true;
     }
-);
+
+    if(e.code==="Space"){
+        firing=true;
+    }
+});
+
+window.addEventListener("keyup",function(e){
+
+    if(e.key==="ArrowLeft"){
+        movingLeft=false;
+    }
+
+    if(e.key==="ArrowRight"){
+        movingRight=false;
+    }
+
+    if(e.code==="Space"){
+        firing=false;
+    }
+});
 
 
-// =========================
-// HUD
-// =========================
+/* ROAD */
 
-function updateHUD() {
+function drawRoad(){
 
-    document.getElementById(
-        "hp"
-    ).textContent = hp;
+    ctx.fillStyle="#10151a";
+    ctx.fillRect(0,0,W,H);
 
-    document.getElementById(
-        "coins"
-    ).textContent = coins;
+    const roadWidth=Math.min(W*.88,520);
+    const roadX=(W-roadWidth)/2;
 
-    document.getElementById(
-        "kills"
-    ).textContent = kills;
+    ctx.fillStyle="#363b40";
+    ctx.fillRect(roadX,0,roadWidth,H);
 
-}
-
-
-// =========================
-// ROAD
-// =========================
-
-function drawRoad() {
-
-    ctx.fillStyle =
-        "#10151a";
-
-    ctx.fillRect(
-        0,
-        0,
-        W,
-        H
-    );
-
-
-    const roadWidth =
-        Math.min(
-            W * .88,
-            520
-        );
-
-
-    const roadX =
-        (W - roadWidth) / 2;
-
-
-    // asphalt
-
-    ctx.fillStyle =
-        "#363b40";
-
-    ctx.fillRect(
-        roadX,
-        0,
-        roadWidth,
-        H
-    );
-
-
-    // road edge
-
-    ctx.fillStyle =
-        "#aeb4b8";
+    ctx.fillStyle="#aeb4b8";
 
     ctx.fillRect(
         roadX,
@@ -813,98 +488,69 @@ function drawRoad() {
     );
 
     ctx.fillRect(
-        roadX +
-        roadWidth -
-        5,
+        roadX+roadWidth-5,
         0,
         5,
         H
     );
 
+    ctx.strokeStyle="#eeeeee";
+    ctx.lineWidth=5;
 
-    // center line
-
-    ctx.strokeStyle =
-        "#eeeeee";
-
-    ctx.lineWidth = 5;
-
-    ctx.setLineDash([
-        45,
-        35
-    ]);
-
-    ctx.lineDashOffset =
-        roadOffset;
+    ctx.setLineDash([45,35]);
+    ctx.lineDashOffset=roadOffset;
 
     ctx.beginPath();
 
-    ctx.moveTo(
-        W / 2,
-        0
-    );
-
-    ctx.lineTo(
-        W / 2,
-        H
-    );
+    ctx.moveTo(W/2,0);
+    ctx.lineTo(W/2,H);
 
     ctx.stroke();
 
     ctx.setLineDash([]);
 
+    roadOffset+=4;
 
-    roadOffset += 4;
-
-    if (roadOffset > 80) {
-
-        roadOffset = 0;
-
+    if(roadOffset>80){
+        roadOffset=0;
     }
-
 }
 
 
-// =========================
-// CAR
-// =========================
+/* CAR */
 
-function drawCar() {
+function drawCar(){
 
-    const y =
-        H - 150;
+    const y=H-150;
 
+    /* shadow */
 
-    // shadow
-
-    ctx.fillStyle =
-        "rgba(0,0,0,.45)";
+    ctx.fillStyle="rgba(0,0,0,.45)";
 
     ctx.beginPath();
 
     ctx.ellipse(
         carX,
-        y + 47,
+        y+47,
         39,
         12,
         0,
         0,
-        Math.PI * 2
+        Math.PI*2
     );
 
     ctx.fill();
 
 
-    // body
+    /* body */
 
-    ctx.fillStyle =
-        "#e53935";
+    ctx.fillStyle="#e53935";
 
     ctx.beginPath();
 
     ctx.roundRect(
-        carX - 30,
-        y - 55,
+        carX-30,
+        y-55,
         60,
         110,
         12
@@ -913,16 +559,15 @@ function drawCar() {
     ctx.fill();
 
 
-    // roof
+    /* roof */
 
-    ctx.fillStyle =
-        "#b71c1c";
+    ctx.fillStyle="#b71c1c";
 
     ctx.beginPath();
 
     ctx.roundRect(
-        carX - 23,
-        y - 38,
+        carX-23,
+        y-38,
         46,
         48,
         9
@@ -931,16 +576,15 @@ function drawCar() {
     ctx.fill();
 
 
-    // windshield
+    /* windshield */
 
-    ctx.fillStyle =
-        "#81d4fa";
+    ctx.fillStyle="#81d4fa";
 
     ctx.beginPath();
 
     ctx.roundRect(
-        carX - 18,
-        y - 32,
+        carX-18,
+        y-32,
         36,
         27,
         6
@@ -949,16 +593,15 @@ function drawCar() {
     ctx.fill();
 
 
-    // hood
+    /* hood */
 
-    ctx.fillStyle =
-        "#ef5350";
+    ctx.fillStyle="#ef5350";
 
     ctx.beginPath();
 
     ctx.roundRect(
-        carX - 24,
-        y + 8,
+        carX-24,
+        y+8,
         48,
         28,
         7
@@ -967,224 +610,170 @@ function drawCar() {
     ctx.fill();
 
 
-    // headlights
+    /* lights */
 
-    ctx.fillStyle =
-        "#fff59d";
+    ctx.fillStyle="#fff59d";
 
     ctx.fillRect(
-        carX - 20,
-        y + 32,
+        carX-20,
+        y+32,
         12,
         7
     );
 
     ctx.fillRect(
-        carX + 8,
-        y + 32,
+        carX+8,
+        y+32,
         12,
         7
     );
 
 
-    // wheels
+    /* wheels */
 
-    ctx.fillStyle =
-        "#070707";
+    ctx.fillStyle="#070707";
 
     ctx.fillRect(
-        carX - 38,
-        y - 32,
+        carX-38,
+        y-32,
         10,
         28
     );
 
     ctx.fillRect(
-        carX + 28,
-        y - 32,
+        carX+28,
+        y-32,
         10,
         28
     );
 
     ctx.fillRect(
-        carX - 38,
-        y + 18,
+        carX-38,
+        y+18,
         10,
         28
     );
 
     ctx.fillRect(
-        carX + 28,
-        y + 18,
+        carX+28,
+        y+18,
         10,
         28
     );
-
 }
 
 
-// =========================
-// BULLET
-// =========================
+/* SHOOT */
 
-function shoot() {
+function shoot(){
 
     bullets.push({
 
-        x: carX,
-
-        y: H - 210,
-
-        speed: 12
+        x:carX,
+        y:H-210,
+        speed:12
 
     });
-
 }
 
 
-// =========================
-// DRAW BULLETS
-// =========================
+/* BULLETS */
 
-function drawBullets() {
+function drawBullets(){
 
-    ctx.fillStyle =
-        "#ffd54f";
+    ctx.fillStyle="#ffd54f";
 
-    bullets.forEach(
-        function(b) {
+    bullets.forEach(function(b){
 
-            ctx.beginPath();
+        ctx.beginPath();
 
-            ctx.arc(
-                b.x,
-                b.y,
-                5,
-                0,
-                Math.PI * 2
-            );
+        ctx.arc(
+            b.x,
+            b.y,
+            5,
+            0,
+            Math.PI*2
+        );
 
-            ctx.fill();
+        ctx.fill();
 
-        }
+    });
+}
+
+
+/* GAME LOOP */
+
+function gameLoop(time){
+
+    if(!running)return;
+
+    const dt=Math.min(
+        (time-lastTime)/16.67,
+        2
     );
 
-}
+    lastTime=time;
 
 
-// =========================
-// GAME LOOP
-// =========================
+    /* movement */
 
-let fireCooldown = 0;
-
-function gameLoop(time) {
-
-    if (!running) return;
-
-
-    const dt =
-        Math.min(
-            (time - lastTime) / 16.67,
-            2
-        );
-
-    lastTime = time;
-
-
-    // movement
-
-    if (movingLeft) {
-
-        carX -=
-            7 * dt;
-
+    if(movingLeft){
+        carX-=7*dt;
     }
 
-    if (movingRight) {
-
-        carX +=
-            7 * dt;
-
+    if(movingRight){
+        carX+=7*dt;
     }
 
 
-    // road limits
+    /* road limits */
 
-    const roadWidth =
+    const roadWidth=Math.min(W*.88,520);
+    const roadX=(W-roadWidth)/2;
+
+    carX=Math.max(
+        roadX+45,
         Math.min(
-            W * .88,
-            520
-        );
-
-    const roadX =
-        (W - roadWidth) / 2;
+            roadX+roadWidth-45,
+            carX
+        )
+    );
 
 
-    carX =
-        Math.max(
-            roadX + 45,
-            Math.min(
-                roadX +
-                roadWidth -
-                45,
-                carX
-            )
-        );
+    /* shooting */
 
+    fireCooldown-=dt;
 
-    // shooting
-
-    fireCooldown -= dt;
-
-    if (
-        firing &&
-        fireCooldown <= 0
-    ) {
+    if(firing && fireCooldown<=0){
 
         shoot();
 
-        fireCooldown = 10;
-
+        fireCooldown=10;
     }
 
 
-    // bullets
+    /* bullets */
 
-    bullets.forEach(
-        function(b) {
+    bullets.forEach(function(b){
 
-            b.y -=
-                b.speed * dt;
+        b.y-=b.speed*dt;
 
-        }
+    });
+
+    bullets=bullets.filter(
+        b=>b.y>-20
     );
 
 
-    bullets =
-        bullets.filter(
-            function(b) {
-
-                return b.y > -20;
-
-            }
-        );
-
-
-    // draw
+    /* render */
 
     drawRoad();
-
     drawCar();
-
     drawBullets();
 
 
-    requestAnimationFrame(
-        gameLoop
-    );
+    requestAnimationFrame(gameLoop);
 }
-
 
 </script>
 
