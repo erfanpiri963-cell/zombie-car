@@ -1,13 +1,57 @@
 const tg = window.Telegram?.WebApp;
+
 if (tg) {
   tg.ready();
   tg.expand();
 }
 
-const canvas = document.getElementById("game");
-const ctx = canvas.getContext("2d");
 
-let W, H, dpr;
+/* =========================
+   ELEMENTS
+========================= */
+
+const menuScreen =
+  document.getElementById("menuScreen");
+
+const garageScreen =
+  document.getElementById("garageScreen");
+
+const gameScreen =
+  document.getElementById("gameScreen");
+
+const startBtn =
+  document.getElementById("startBtn");
+
+const garageBtn =
+  document.getElementById("garageBtn");
+
+const backBtn =
+  document.getElementById("backBtn");
+
+const menuBtn =
+  document.getElementById("menuBtn");
+
+const restartBtn =
+  document.getElementById("restart");
+
+const pauseBtn =
+  document.getElementById("pauseBtn");
+
+const canvas =
+  document.getElementById("game");
+
+const ctx =
+  canvas.getContext("2d");
+
+
+/* =========================
+   GAME VARIABLES
+========================= */
+
+let W;
+let H;
+let dpr;
+
 let player;
 
 let bullets = [];
@@ -21,14 +65,30 @@ let hp = 100;
 let score = 0;
 
 let gameOver = false;
-let keys = {};
+let paused = false;
 
-let spawnTimer = 0;
+let keys = {
+  l: false,
+  r: false,
+  f: false
+};
+
 let last = performance.now();
+
 let roadOffset = 0;
+let spawnTimer = 0;
 
 let screenShake = 0;
 let muzzleFlash = 0;
+
+
+/* =========================
+   UPGRADES
+========================= */
+
+let speedLevel = 1;
+let armorLevel = 1;
+let weaponLevel = 1;
 
 
 /* =========================
@@ -36,69 +96,227 @@ let muzzleFlash = 0;
 ========================= */
 
 function resize() {
-  dpr = Math.min(window.devicePixelRatio || 1, 2);
+
+  dpr =
+    Math.min(
+      window.devicePixelRatio || 1,
+      2
+    );
 
   W = window.innerWidth;
   H = window.innerHeight;
 
-  canvas.width = W * dpr;
-  canvas.height = H * dpr;
+  canvas.width =
+    W * dpr;
 
-  canvas.style.width = W + "px";
-  canvas.style.height = H + "px";
+  canvas.height =
+    H * dpr;
 
-  ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+  canvas.style.width =
+    W + "px";
+
+  canvas.style.height =
+    H + "px";
+
+  ctx.setTransform(
+    dpr,
+    0,
+    0,
+    dpr,
+    0,
+    0
+  );
 }
 
-window.addEventListener("resize", resize);
+window.addEventListener(
+  "resize",
+  resize
+);
+
 resize();
 
 
 /* =========================
-   RESET
+   LOCAL SAVE
 ========================= */
 
-function reset() {
+function loadData() {
+
+  coins =
+    Number(
+      localStorage.getItem(
+        "zombieCarCoins"
+      ) || 0
+    );
+
+  speedLevel =
+    Number(
+      localStorage.getItem(
+        "speedLevel"
+      ) || 1
+    );
+
+  armorLevel =
+    Number(
+      localStorage.getItem(
+        "armorLevel"
+      ) || 1
+    );
+
+  weaponLevel =
+    Number(
+      localStorage.getItem(
+        "weaponLevel"
+      ) || 1
+    );
+
+  updateMenuCoins();
+  updateGarage();
+}
+
+
+function saveData() {
+
+  localStorage.setItem(
+    "zombieCarCoins",
+    coins
+  );
+
+  localStorage.setItem(
+    "speedLevel",
+    speedLevel
+  );
+
+  localStorage.setItem(
+    "armorLevel",
+    armorLevel
+  );
+
+  localStorage.setItem(
+    "weaponLevel",
+    weaponLevel
+  );
+}
+
+
+/* =========================
+   UI
+========================= */
+
+function showScreen(screen) {
+
+  menuScreen.classList.add(
+    "hidden"
+  );
+
+  garageScreen.classList.add(
+    "hidden"
+  );
+
+  gameScreen.classList.add(
+    "hidden"
+  );
+
+  screen.classList.remove(
+    "hidden"
+  );
+}
+
+
+function updateMenuCoins() {
+
+  document.getElementById(
+    "menuCoins"
+  ).textContent = coins;
+
+  document.getElementById(
+    "garageCoins"
+  ).textContent = coins;
+}
+
+
+function updateGarage() {
+
+  document.getElementById(
+    "speedLevel"
+  ).textContent =
+    "سطح " + speedLevel;
+
+  document.getElementById(
+    "armorLevel"
+  ).textContent =
+    "سطح " + armorLevel;
+
+  document.getElementById(
+    "weaponLevel"
+  ).textContent =
+    "سطح " + weaponLevel;
+
+  updateMenuCoins();
+}
+
+
+/* =========================
+   START GAME
+========================= */
+
+function resetGame() {
+
   player = {
+
     x: W / 2,
-    y: H - 180,
+
+    y: H - 175,
+
     w: 58,
-    h: 95,
-    speed: 7,
+
+    h: 92,
+
+    speed:
+      6 +
+      speedLevel * .45,
+
     fire: 0
   };
+
 
   bullets = [];
   zombies = [];
   particles = [];
   floatingTexts = [];
 
-  coins = 0;
+  hp =
+    Math.min(
+      100 +
+      (armorLevel - 1) * 12,
+      160
+    );
+
   kills = 0;
-  hp = 100;
   score = 0;
 
   gameOver = false;
+  paused = false;
 
-  keys = {
-    l: false,
-    r: false,
-    f: false
-  };
-
-  spawnTimer = 20;
   roadOffset = 0;
+  spawnTimer = 15;
 
   screenShake = 0;
   muzzleFlash = 0;
 
-  const gameover = document.getElementById("gameover");
+  document
+    .getElementById("gameover")
+    .classList.add("hidden");
 
-  if (gameover) {
-    gameover.classList.add("hidden");
-  }
+  updateHUD();
+}
 
-  updateHud();
+
+function startGame() {
+
+  resetGame();
+
+  showScreen(gameScreen);
 }
 
 
@@ -106,27 +324,51 @@ function reset() {
    HUD
 ========================= */
 
-function updateHud() {
-  const hpEl = document.getElementById("hp");
-  const coinsEl = document.getElementById("coins");
-  const killsEl = document.getElementById("kills");
-  const hpFill = document.getElementById("hpFill");
+function updateHUD() {
 
-  if (hpEl) {
-    hpEl.textContent = Math.max(0, Math.round(hp));
-  }
+  const hpText =
+    document.getElementById("hp");
 
-  if (coinsEl) {
-    coinsEl.textContent = coins;
-  }
+  const coinsText =
+    document.getElementById("coins");
 
-  if (killsEl) {
-    killsEl.textContent = kills;
-  }
+  const killsText =
+    document.getElementById("kills");
 
-  if (hpFill) {
-    hpFill.style.width = Math.max(0, hp) + "%";
-  }
+  const scoreText =
+    document.getElementById("scoreValue");
+
+  const hpFill =
+    document.getElementById("hpFill");
+
+
+  hpText.textContent =
+    Math.round(
+      Math.max(0, hp)
+    );
+
+  coinsText.textContent =
+    coins;
+
+  killsText.textContent =
+    kills;
+
+  scoreText.textContent =
+    score;
+
+
+  const maxHp =
+    100 +
+    (armorLevel - 1) * 12;
+
+  hpFill.style.width =
+    Math.max(
+      0,
+      Math.min(
+        100,
+        hp / maxHp * 100
+      )
+    ) + "%";
 }
 
 
@@ -134,107 +376,284 @@ function updateHud() {
    CONTROLS
 ========================= */
 
-function bind(id, key) {
-  const button = document.getElementById(id);
+function bindButton(
+  id,
+  key
+) {
 
-  if (!button) return;
+  const button =
+    document.getElementById(id);
 
-  button.addEventListener("pointerdown", e => {
-    e.preventDefault();
-    keys[key] = true;
-  });
+  button.addEventListener(
+    "pointerdown",
+    e => {
 
-  ["pointerup", "pointercancel", "pointerleave"].forEach(event => {
-    button.addEventListener(event, e => {
       e.preventDefault();
-      keys[key] = false;
-    });
+
+      keys[key] = true;
+    }
+  );
+
+  [
+    "pointerup",
+    "pointercancel",
+    "pointerleave"
+  ].forEach(event => {
+
+    button.addEventListener(
+      event,
+      e => {
+
+        e.preventDefault();
+
+        keys[key] = false;
+      }
+    );
   });
 }
 
-bind("left", "l");
-bind("right", "r");
-bind("fire", "f");
+
+bindButton("left", "l");
+bindButton("right", "r");
+bindButton("fire", "f");
 
 
-window.addEventListener("keydown", e => {
-  if (e.key === "ArrowLeft") keys.l = true;
-  if (e.key === "ArrowRight") keys.r = true;
-  if (e.code === "Space") keys.f = true;
-});
+window.addEventListener(
+  "keydown",
+  e => {
+
+    if (
+      e.key === "ArrowLeft"
+    ) {
+      keys.l = true;
+    }
+
+    if (
+      e.key === "ArrowRight"
+    ) {
+      keys.r = true;
+    }
+
+    if (
+      e.code === "Space"
+    ) {
+      keys.f = true;
+    }
+  }
+);
 
 
-window.addEventListener("keyup", e => {
-  if (e.key === "ArrowLeft") keys.l = false;
-  if (e.key === "ArrowRight") keys.r = false;
-  if (e.code === "Space") keys.f = false;
-});
+window.addEventListener(
+  "keyup",
+  e => {
 
+    if (
+      e.key === "ArrowLeft"
+    ) {
+      keys.l = false;
+    }
 
-const restart = document.getElementById("restart");
+    if (
+      e.key === "ArrowRight"
+    ) {
+      keys.r = false;
+    }
 
-if (restart) {
-  restart.onclick = reset;
-}
+    if (
+      e.code === "Space"
+    ) {
+      keys.f = false;
+    }
+  }
+);
 
 
 /* =========================
-   HELPERS
+   MENU EVENTS
 ========================= */
 
-function roundedRect(x, y, w, h, r = 10) {
-  ctx.beginPath();
-  ctx.roundRect(x, y, w, h, r);
-  ctx.fill();
-}
+startBtn.onclick =
+  startGame;
 
 
-function clamp(value, min, max) {
-  return Math.max(min, Math.min(max, value));
-}
+garageBtn.onclick =
+  () => {
+
+    updateGarage();
+
+    showScreen(
+      garageScreen
+    );
+  };
+
+
+backBtn.onclick =
+  () => {
+
+    updateMenuCoins();
+
+    showScreen(
+      menuScreen
+    );
+  };
+
+
+menuBtn.onclick =
+  () => {
+
+    updateMenuCoins();
+
+    showScreen(
+      menuScreen
+    );
+  };
+
+
+restartBtn.onclick =
+  startGame;
 
 
 /* =========================
-   ROAD
+   PAUSE
+========================= */
+
+pauseBtn.onclick =
+  () => {
+
+    if (gameOver)
+      return;
+
+    paused =
+      !paused;
+
+    pauseBtn.textContent =
+      paused
+        ? "▶"
+        : "❚❚";
+  };
+
+
+/* =========================
+   UPGRADES
+========================= */
+
+function upgrade(
+  type
+) {
+
+  const cost = 50;
+
+  if (coins < cost) {
+
+    alert(
+      "سکه کافی نداری! 🪙"
+    );
+
+    return;
+  }
+
+
+  coins -= cost;
+
+
+  if (type === "speed") {
+    speedLevel++;
+  }
+
+  if (type === "armor") {
+    armorLevel++;
+  }
+
+  if (type === "weapon") {
+    weaponLevel++;
+  }
+
+
+  saveData();
+
+  updateGarage();
+}
+
+
+document.getElementById(
+  "speedUpgrade"
+).onclick =
+  () => upgrade("speed");
+
+
+document.getElementById(
+  "armorUpgrade"
+).onclick =
+  () => upgrade("armor");
+
+
+document.getElementById(
+  "weaponUpgrade"
+).onclick =
+  () => upgrade("weapon");
+
+
+/* =========================
+   DRAW ROAD
 ========================= */
 
 function drawRoad() {
 
-  // محیط اطراف
-  const bg = ctx.createLinearGradient(0, 0, 0, H);
-
-  bg.addColorStop(0, "#090e12");
-  bg.addColorStop(.5, "#151c21");
-  bg.addColorStop(1, "#050709");
-
-  ctx.fillStyle = bg;
-  ctx.fillRect(0, 0, W, H);
-
-
-  const roadWidth = Math.min(W * .92, 560);
-  const roadX = (W - roadWidth) / 2;
-
-
-  // نور کناره جاده
-  ctx.fillStyle = "#788087";
+  ctx.fillStyle =
+    "#080b0d";
 
   ctx.fillRect(
-    roadX - 7,
     0,
-    7,
-    H
-  );
-
-  ctx.fillRect(
-    roadX + roadWidth,
     0,
-    7,
+    W,
     H
   );
 
 
-  // جاده
-  const roadGradient =
+  const roadWidth =
+    Math.min(
+      W * .92,
+      560
+    );
+
+  const roadX =
+    (W - roadWidth) / 2;
+
+
+  /* اطراف جاده */
+
+  const outside =
+    ctx.createLinearGradient(
+      0,
+      0,
+      0,
+      H
+    );
+
+  outside.addColorStop(
+    0,
+    "#151b1e"
+  );
+
+  outside.addColorStop(
+    1,
+    "#050607"
+  );
+
+  ctx.fillStyle =
+    outside;
+
+  ctx.fillRect(
+    0,
+    0,
+    W,
+    H
+  );
+
+
+  /* خود جاده */
+
+  const road =
     ctx.createLinearGradient(
       roadX,
       0,
@@ -242,32 +661,33 @@ function drawRoad() {
       0
     );
 
-  roadGradient.addColorStop(
+  road.addColorStop(
     0,
-    "#171d21"
+    "#171d20"
   );
 
-  roadGradient.addColorStop(
-    .18,
-    "#343b40"
+  road.addColorStop(
+    .2,
+    "#30383c"
   );
 
-  roadGradient.addColorStop(
+  road.addColorStop(
     .5,
-    "#41484d"
+    "#41494d"
   );
 
-  roadGradient.addColorStop(
-    .82,
-    "#343b40"
+  road.addColorStop(
+    .8,
+    "#30383c"
   );
 
-  roadGradient.addColorStop(
+  road.addColorStop(
     1,
-    "#171d21"
+    "#171d20"
   );
 
-  ctx.fillStyle = roadGradient;
+  ctx.fillStyle =
+    road;
 
   ctx.fillRect(
     roadX,
@@ -277,32 +697,42 @@ function drawRoad() {
   );
 
 
-  // خطوط کنار جاده
-  ctx.strokeStyle = "#d5d5d5";
-  ctx.lineWidth = 3;
+  /* لبه‌ها */
 
-  ctx.setLineDash([35, 35]);
-  ctx.lineDashOffset = roadOffset * 1.5;
+  ctx.fillStyle =
+    "#b5babd";
 
-  ctx.beginPath();
-  ctx.moveTo(roadX + 18, 0);
-  ctx.lineTo(roadX + 18, H);
-  ctx.stroke();
+  ctx.fillRect(
+    roadX,
+    0,
+    5,
+    H
+  );
 
-  ctx.beginPath();
-  ctx.moveTo(roadX + roadWidth - 18, 0);
-  ctx.lineTo(roadX + roadWidth - 18, H);
-  ctx.stroke();
+  ctx.fillRect(
+    roadX +
+    roadWidth -
+    5,
+    0,
+    5,
+    H
+  );
 
-  ctx.setLineDash([]);
 
+  /* خطوط وسط */
 
-  // خط وسط
-  ctx.strokeStyle = "#f4f4f4";
-  ctx.lineWidth = 6;
+  ctx.strokeStyle =
+    "#f4f4f4";
 
-  ctx.setLineDash([55, 50]);
-  ctx.lineDashOffset = roadOffset;
+  ctx.lineWidth = 5;
+
+  ctx.setLineDash([
+    48,
+    45
+  ]);
+
+  ctx.lineDashOffset =
+    roadOffset;
 
   ctx.beginPath();
 
@@ -321,89 +751,59 @@ function drawRoad() {
   ctx.setLineDash([]);
 
 
-  // ترک‌های جاده
+  /* خطوط فرعی */
+
   ctx.strokeStyle =
-    "rgba(0,0,0,.28)";
+    "rgba(255,255,255,.4)";
 
   ctx.lineWidth = 2;
 
-  for (let i = 0; i < 10; i++) {
+  ctx.setLineDash([
+    25,
+    40
+  ]);
 
-    const y =
-      ((i * 210 +
-        roadOffset * 1.3) %
-        (H + 250)) - 120;
+  ctx.lineDashOffset =
+    roadOffset * 1.3;
 
-    ctx.beginPath();
+  ctx.beginPath();
 
-    ctx.moveTo(
-      roadX + 35,
-      y
-    );
-
-    ctx.lineTo(
-      roadX + 55,
-      y + 35
-    );
-
-    ctx.lineTo(
-      roadX + 42,
-      y + 75
-    );
-
-    ctx.stroke();
-
-
-    ctx.beginPath();
-
-    ctx.moveTo(
-      roadX + roadWidth - 35,
-      y + 60
-    );
-
-    ctx.lineTo(
-      roadX + roadWidth - 65,
-      y + 100
-    );
-
-    ctx.stroke();
-  }
-
-
-  // نور جاده
-  const light =
-    ctx.createRadialGradient(
-      W / 2,
-      H * .65,
-      20,
-      W / 2,
-      H * .65,
-      roadWidth * .7
-    );
-
-  light.addColorStop(
-    0,
-    "rgba(255,255,255,.07)"
+  ctx.moveTo(
+    roadX + 20,
+    0
   );
 
-  light.addColorStop(
-    1,
-    "rgba(0,0,0,0)"
-  );
-
-  ctx.fillStyle = light;
-
-  ctx.fillRect(
-    roadX,
-    0,
-    roadWidth,
+  ctx.lineTo(
+    roadX + 20,
     H
   );
+
+  ctx.stroke();
+
+  ctx.beginPath();
+
+  ctx.moveTo(
+    roadX +
+    roadWidth -
+    20,
+    0
+  );
+
+  ctx.lineTo(
+    roadX +
+    roadWidth -
+    20,
+    H
+  );
+
+  ctx.stroke();
+
+  ctx.setLineDash([]);
 }
 
 
 /* =========================
-   CAR
+   DRAW CAR
 ========================= */
 
 function drawCar() {
@@ -416,7 +816,8 @@ function drawCar() {
   );
 
 
-  // سایه
+  /* سایه */
+
   ctx.fillStyle =
     "rgba(0,0,0,.65)";
 
@@ -424,9 +825,9 @@ function drawCar() {
 
   ctx.ellipse(
     0,
-    45,
-    40,
-    14,
+    48,
+    42,
+    13,
     0,
     0,
     Math.PI * 2
@@ -435,81 +836,46 @@ function drawCar() {
   ctx.fill();
 
 
-  // نور زیر ماشین
-  const glow =
-    ctx.createRadialGradient(
-      0,
-      35,
-      2,
-      0,
-      35,
-      55
-    );
+  /* چرخ */
 
-  glow.addColorStop(
-    0,
-    "rgba(255,30,50,.18)"
-  );
+  ctx.fillStyle =
+    "#070809";
 
-  glow.addColorStop(
-    1,
-    "rgba(255,30,50,0)"
-  );
-
-  ctx.fillStyle = glow;
-
-  ctx.beginPath();
-
-  ctx.ellipse(
-    0,
-    35,
-    55,
-    25,
-    0,
-    0,
-    Math.PI * 2
-  );
-
-  ctx.fill();
-
-
-  // چرخ‌ها
-  ctx.fillStyle = "#07090a";
-
-  roundedRect(
-    -35,
-    -31,
+  roundRect(
+    -34,
+    -28,
     12,
-    29,
+    30,
     5
   );
 
-  roundedRect(
-    23,
-    -31,
+  roundRect(
+    22,
+    -28,
     12,
-    29,
+    30,
     5
   );
 
-  roundedRect(
-    -35,
-    19,
+  roundRect(
+    -34,
+    18,
     12,
-    29,
+    30,
     5
   );
 
-  roundedRect(
-    23,
-    19,
+  roundRect(
+    22,
+    18,
     12,
-    29,
+    30,
     5
   );
 
 
-  // بدنه
+  /* بدنه */
+
   const body =
     ctx.createLinearGradient(
       -30,
@@ -520,67 +886,57 @@ function drawCar() {
 
   body.addColorStop(
     0,
-    "#760615"
+    "#700612"
   );
 
   body.addColorStop(
-    .22,
-    "#d20d25"
+    .25,
+    "#d80d29"
   );
 
   body.addColorStop(
     .5,
-    "#ff3048"
+    "#ff304b"
   );
 
   body.addColorStop(
-    .78,
-    "#d20d25"
+    .75,
+    "#d80d29"
   );
 
   body.addColorStop(
     1,
-    "#760615"
+    "#700612"
   );
 
-  ctx.fillStyle = body;
+  ctx.fillStyle =
+    body;
 
-  roundedRect(
+  roundRect(
     -30,
-    -49,
+    -50,
     60,
-    98,
+    100,
     14
   );
 
 
-  // کاپوت
+  /* سقف */
+
   ctx.fillStyle =
-    "rgba(255,255,255,.08)";
+    "#a80b20";
 
-  roundedRect(
-    -20,
-    -44,
-    40,
-    14,
-    6
-  );
-
-
-  // سقف
-  ctx.fillStyle =
-    "#b90c22";
-
-  roundedRect(
+  roundRect(
     -24,
     -37,
     48,
-    45,
+    48,
     11
   );
 
 
-  // شیشه
+  /* شیشه */
+
   const glass =
     ctx.createLinearGradient(
       0,
@@ -591,22 +947,23 @@ function drawCar() {
 
   glass.addColorStop(
     0,
-    "#d9f7ff"
+    "#d9f5ff"
   );
 
   glass.addColorStop(
-    .4,
-    "#537583"
+    .45,
+    "#597985"
   );
 
   glass.addColorStop(
     1,
-    "#172b34"
+    "#14252d"
   );
 
-  ctx.fillStyle = glass;
+  ctx.fillStyle =
+    glass;
 
-  roundedRect(
+  roundRect(
     -20,
     -32,
     40,
@@ -615,81 +972,58 @@ function drawCar() {
   );
 
 
-  // انعکاس شیشه
+  /* شیشه عقب */
+
   ctx.fillStyle =
-    "rgba(255,255,255,.25)";
+    "#17282f";
 
-  ctx.fillRect(
-    -16,
-    -29,
-    3,
-    24
-  );
-
-
-  // شیشه عقب
-  ctx.fillStyle =
-    "#16242b";
-
-  roundedRect(
+  roundRect(
     -20,
     11,
     40,
-    22,
+    23,
     6
   );
 
 
-  // چراغ جلو
+  /* چراغ */
+
   ctx.fillStyle =
-    "#fff4a8";
+    "#fff0a0";
 
-  roundedRect(
-    -20,
-    -47,
-    13,
+  roundRect(
+    -21,
+    -48,
+    14,
     7,
     3
   );
 
-  roundedRect(
+  roundRect(
     7,
-    -47,
-    13,
+    -48,
+    14,
     7,
     3
   );
 
 
-  // چراغ عقب
   ctx.fillStyle =
     "#ff172f";
 
-  roundedRect(
-    -20,
-    39,
-    13,
-    6,
-    3
-  );
-
-  roundedRect(
+  roundRect(
+    -21,
+    40,
+    14,
     7,
-    39,
-    13,
-    6,
     3
   );
 
-
-  // خط قرمز بدنه
-  ctx.fillStyle =
-    "rgba(255,255,255,.15)";
-
-  ctx.fillRect(
-    -26,
-    5,
-    52,
+  roundRect(
+    7,
+    40,
+    14,
+    7,
     3
   );
 
@@ -699,99 +1033,116 @@ function drawCar() {
 
 
 /* =========================
-   ZOMBIE
+   ROUND RECT
+========================= */
+
+function roundRect(
+  x,
+  y,
+  w,
+  h,
+  r
+) {
+
+  ctx.beginPath();
+
+  ctx.roundRect(
+    x,
+    y,
+    w,
+    h,
+    r
+  );
+
+  ctx.fill();
+}
+
+
+/* =========================
+   SPAWN ZOMBIE
 ========================= */
 
 function spawnZombie() {
 
   const roadWidth =
-    Math.min(W * .92, 560);
+    Math.min(
+      W * .92,
+      560
+    );
 
   const roadX =
-    (W - roadWidth) / 2 + 50;
+    (W - roadWidth) / 2 + 45;
 
 
-  let x;
-  let tries = 0;
-
-  do {
-
-    x =
-      roadX +
-      Math.random() *
-      (roadWidth - 100);
-
-    tries++;
-
-  } while (
-    zombies.some(
-      z =>
-        Math.abs(z.x - x) < 65 &&
-        z.y < 150
-    ) &&
-    tries < 15
-  );
+  const x =
+    roadX +
+    Math.random() *
+    (roadWidth - 90);
 
 
-  const type =
+  const random =
     Math.random();
 
 
-  let zombie;
+  if (random < .18) {
 
+    zombies.push({
 
-  // زامبی سریع
-  if (type < .18) {
-
-    zombie = {
       x,
       y: -80,
+
       w: 43,
       h: 62,
-      spd: 3.2 + Math.random(),
-      health: 1,
-      type: "fast",
-      wobble: Math.random() * 6
-    };
 
-  }
+      speed:
+        3.2 +
+        Math.random(),
 
-  // زامبی قوی
-  else if (type < .32) {
+      hp: 1,
 
-    zombie = {
+      type: "fast"
+
+    });
+
+  } else if (random < .32) {
+
+    zombies.push({
+
       x,
-      y: -90,
+      y: -100,
+
       w: 62,
       h: 82,
-      spd: 1.1 + Math.random(),
-      health: 3,
-      type: "tank",
-      wobble: Math.random() * 6
-    };
 
-  }
+      speed:
+        1.2 +
+        Math.random(),
 
-  // زامبی عادی
-  else {
+      hp: 3,
 
-    zombie = {
+      type: "tank"
+
+    });
+
+  } else {
+
+    zombies.push({
+
       x,
-      y: -75,
+      y: -80,
+
       w: 50,
       h: 70,
-      spd:
-        1.7 +
-        Math.random() * 1.5 +
-        kills * .012,
-      health: 1,
-      type: "normal",
-      wobble: Math.random() * 6
-    };
+
+      speed:
+        1.8 +
+        Math.random() * 1.6,
+
+      hp: 1,
+
+      type: "normal"
+    });
   }
-
-
-  zombies.push(zombie);
 }
 
 
@@ -803,27 +1154,19 @@ function drawZombie(z) {
 
   ctx.save();
 
-
-  const wobble =
-    Math.sin(
-      z.wobble +
-      performance.now() / 180
-    ) * 3;
-
-
   ctx.translate(
-    z.x + wobble,
+    z.x,
     z.y
   );
 
 
-  const scale =
-    z.type === "tank"
-      ? 1.18
-      : z.type === "fast"
-        ? .88
-        : 1;
+  let scale = 1;
 
+  if (z.type === "tank")
+    scale = 1.18;
+
+  if (z.type === "fast")
+    scale = .88;
 
   ctx.scale(
     scale,
@@ -831,7 +1174,8 @@ function drawZombie(z) {
   );
 
 
-  // سایه
+  /* سایه */
+
   ctx.fillStyle =
     "rgba(0,0,0,.55)";
 
@@ -839,9 +1183,9 @@ function drawZombie(z) {
 
   ctx.ellipse(
     0,
-    39,
-    30,
-    10,
+    40,
+    28,
+    9,
     0,
     0,
     Math.PI * 2
@@ -850,81 +1194,63 @@ function drawZombie(z) {
   ctx.fill();
 
 
-  // پاها
-  ctx.fillStyle =
-    z.type === "tank"
-      ? "#17251a"
-      : "#1d3923";
+  /* پاها */
 
-  roundedRect(
-    -18,
+  ctx.fillStyle =
+    "#18301e";
+
+  roundRect(
+    -17,
     18,
-    14,
+    13,
     35,
-    7
+    6
   );
 
-  roundedRect(
+  roundRect(
     4,
     18,
-    14,
+    13,
     35,
-    7
+    6
   );
 
 
-  // بدن
-  const body =
-    ctx.createLinearGradient(
-      -22,
-      -10,
-      22,
-      35
-    );
+  /* بدن */
 
-  body.addColorStop(
-    0,
+  ctx.fillStyle =
     z.type === "tank"
-      ? "#3d6541"
-      : "#527d4b"
-  );
+      ? "#405e3d"
+      : "#527b4b";
 
-  body.addColorStop(
-    1,
-    "#1d3622"
-  );
-
-  ctx.fillStyle = body;
-
-  roundedRect(
+  roundRect(
     -22,
     -12,
     44,
     45,
-    11
+    10
   );
 
 
-  // دست‌ها
+  /* دست */
+
   ctx.strokeStyle =
-    z.type === "tank"
-      ? "#5f874b"
-      : "#79a957";
+    "#6f9d58";
 
-  ctx.lineWidth = 13;
+  ctx.lineWidth = 12;
+
   ctx.lineCap = "round";
-
 
   ctx.beginPath();
 
   ctx.moveTo(
     -18,
-    -3
+    -2
   );
 
   ctx.lineTo(
     -34,
-    16
+    15
   );
 
   ctx.stroke();
@@ -934,22 +1260,23 @@ function drawZombie(z) {
 
   ctx.moveTo(
     18,
-    -3
+    -2
   );
 
   ctx.lineTo(
-    35,
+    34,
     8
   );
 
   ctx.stroke();
 
 
-  // سر
+  /* سر */
+
   ctx.fillStyle =
     z.type === "tank"
-      ? "#527b43"
-      : "#75a653";
+      ? "#527743"
+      : "#76a555";
 
   ctx.beginPath();
 
@@ -964,15 +1291,16 @@ function drawZombie(z) {
   ctx.fill();
 
 
-  // مو
+  /* مو */
+
   ctx.fillStyle =
-    "#152218";
+    "#152117";
 
   ctx.beginPath();
 
   ctx.arc(
     0,
-    -38,
+    -37,
     18,
     Math.PI,
     Math.PI * 2
@@ -981,31 +1309,30 @@ function drawZombie(z) {
   ctx.fill();
 
 
-  // چشم
+  /* چشم */
+
   ctx.fillStyle =
     z.type === "fast"
-      ? "#ff5252"
-      : "#d5f47b";
-
+      ? "#ff4040"
+      : "#d7ff77";
 
   ctx.beginPath();
 
   ctx.arc(
     -8,
-    -32,
+    -31,
     4,
     0,
     Math.PI * 2
   );
 
   ctx.fill();
-
 
   ctx.beginPath();
 
   ctx.arc(
     8,
-    -32,
+    -31,
     4,
     0,
     Math.PI * 2
@@ -1014,11 +1341,12 @@ function drawZombie(z) {
   ctx.fill();
 
 
-  // دهان
-  ctx.fillStyle =
-    "#0c0c0c";
+  /* دهان */
 
-  roundedRect(
+  ctx.fillStyle =
+    "#080909";
+
+  roundRect(
     -11,
     -18,
     22,
@@ -1028,7 +1356,7 @@ function drawZombie(z) {
 
 
   ctx.fillStyle =
-    "#f2f2f2";
+    "#eee";
 
   ctx.fillRect(
     -8,
@@ -1045,28 +1373,29 @@ function drawZombie(z) {
   );
 
 
-  // نوار جان زامبی
-  if (z.health > 1) {
+  /* جان زامبی قوی */
+
+  if (z.hp > 1) {
 
     ctx.fillStyle =
-      "rgba(0,0,0,.8)";
+      "#101312";
 
-    roundedRect(
+    roundRect(
       -27,
-      -64,
+      -65,
       54,
       7,
       3
     );
 
-
     ctx.fillStyle =
-      "#35e85d";
+      "#42e35d";
 
     ctx.fillRect(
       -26,
-      -63,
-      52 * (z.health / 3),
+      -64,
+      52 *
+      (z.hp / 3),
       5
     );
   }
@@ -1077,17 +1406,22 @@ function drawZombie(z) {
 
 
 /* =========================
-   SHOOT
+   FIRE
 ========================= */
 
 function fire() {
 
   bullets.push({
+
     x: player.x,
-    y: player.y - 55,
-    spd: 14,
-    r: 5,
-    trail: []
+
+    y:
+      player.y - 58,
+
+    speed:
+      14,
+
+    radius: 5
   });
 
 
@@ -1096,9 +1430,9 @@ function fire() {
 
   burst(
     player.x,
-    player.y - 57,
+    player.y - 60,
     "#ffd54f",
-    6
+    7
   );
 }
 
@@ -1116,17 +1450,17 @@ function drawBullet(b) {
       1,
       b.x,
       b.y,
-      18
+      20
     );
 
   glow.addColorStop(
     0,
-    "#ffffff"
+    "#fff"
   );
 
   glow.addColorStop(
-    .25,
-    "#ffe45c"
+    .3,
+    "#ffd740"
   );
 
   glow.addColorStop(
@@ -1134,14 +1468,15 @@ function drawBullet(b) {
     "rgba(255,100,0,0)"
   );
 
-  ctx.fillStyle = glow;
+  ctx.fillStyle =
+    glow;
 
   ctx.beginPath();
 
   ctx.arc(
     b.x,
     b.y,
-    18,
+    20,
     0,
     Math.PI * 2
   );
@@ -1157,7 +1492,7 @@ function drawBullet(b) {
   ctx.arc(
     b.x,
     b.y,
-    b.r,
+    b.radius,
     0,
     Math.PI * 2
   );
@@ -1170,13 +1505,20 @@ function drawBullet(b) {
    COLLISION
 ========================= */
 
-function hit(a, b) {
+function collision(a, b) {
 
   return (
-    Math.abs(a.x - b.x) <
-      (a.w + b.w) / 2 &&
-    Math.abs(a.y - b.y) <
-      (a.h + b.h) / 2
+    Math.abs(
+      a.x - b.x
+    ) <
+    (a.w + b.w) / 2
+
+    &&
+
+    Math.abs(
+      a.y - b.y
+    ) <
+    (a.h + b.h) / 2
   );
 }
 
@@ -1188,11 +1530,15 @@ function hit(a, b) {
 function burst(
   x,
   y,
-  color = "#ff7043",
-  amount = 12
+  color,
+  amount
 ) {
 
-  for (let i = 0; i < amount; i++) {
+  for (
+    let i = 0;
+    i < amount;
+    i++
+  ) {
 
     particles.push({
 
@@ -1200,16 +1546,16 @@ function burst(
       y,
 
       vx:
-        (Math.random() - .5) *
-        8,
+        (Math.random() - .5)
+        * 8,
 
       vy:
-        (Math.random() - .5) *
-        8,
+        (Math.random() - .5)
+        * 8,
 
       life:
-        25 +
-        Math.random() * 25,
+        20 +
+        Math.random() * 30,
 
       size:
         2 +
@@ -1221,153 +1567,82 @@ function burst(
 }
 
 
+function drawParticles() {
+
+  particles.forEach(
+    p => {
+
+      ctx.globalAlpha =
+        p.life / 50;
+
+      ctx.fillStyle =
+        p.color;
+
+      ctx.fillRect(
+        p.x,
+        p.y,
+        p.size,
+        p.size
+      );
+    }
+  );
+
+  ctx.globalAlpha = 1;
+}
+
+
 /* =========================
    FLOATING TEXT
 ========================= */
 
-function floatingText(
+function textEffect(
   text,
   x,
   y
 ) {
 
   floatingTexts.push({
+
     text,
     x,
     y,
+
     life: 45
   });
 }
 
 
-function drawFloatingTexts() {
+function drawTextEffects() {
 
-  floatingTexts.forEach(t => {
+  floatingTexts.forEach(
+    t => {
 
-    ctx.globalAlpha =
-      t.life / 45;
+      ctx.globalAlpha =
+        t.life / 45;
 
-    ctx.fillStyle =
-      "#ffd54f";
+      ctx.fillStyle =
+        "#ffd54f";
 
-    ctx.font =
-      "bold 18px Arial";
+      ctx.font =
+        "bold 18px Arial";
 
-    ctx.textAlign =
-      "center";
+      ctx.textAlign =
+        "center";
 
-    ctx.fillText(
-      t.text,
-      t.x,
-      t.y
-    );
-  });
-
-  ctx.globalAlpha = 1;
-}
-
-
-/* =========================
-   PARTICLES UPDATE
-========================= */
-
-function updateParticles(dt) {
-
-  particles.forEach(p => {
-
-    p.x += p.vx * dt;
-    p.y += p.vy * dt;
-
-    p.vx *= .97;
-    p.vy *= .97;
-
-    p.life -= dt;
-  });
-
-
-  particles =
-    particles.filter(
-      p => p.life > 0
-    );
-
-
-  floatingTexts.forEach(t => {
-
-    t.y -= .8 * dt;
-    t.life -= dt;
-  });
-
-
-  floatingTexts =
-    floatingTexts.filter(
-      t => t.life > 0
-    );
-}
-
-
-/* =========================
-   DRAW PARTICLES
-========================= */
-
-function drawParticles() {
-
-  particles.forEach(p => {
-
-    ctx.globalAlpha =
-      Math.max(
-        0,
-        p.life / 45
+      ctx.fillText(
+        t.text,
+        t.x,
+        t.y
       );
-
-    ctx.fillStyle =
-      p.color;
-
-    ctx.fillRect(
-      p.x,
-      p.y,
-      p.size,
-      p.size
-    );
-  });
+    }
+  );
 
   ctx.globalAlpha = 1;
 }
 
 
 /* =========================
-   GAME OVER
-========================= */
-
-function endGame() {
-
-  gameOver = true;
-
-  const finalKills =
-    document.getElementById(
-      "finalKills"
-    );
-
-  if (finalKills) {
-    finalKills.textContent =
-      kills;
-  }
-
-
-  const gameover =
-    document.getElementById(
-      "gameover"
-    );
-
-  if (gameover) {
-    gameover.classList.remove(
-      "hidden"
-    );
-  }
-}
-
-
-/* =========================
-   UPDATE
+   GAME UPDATE
 ========================= */
 
 function update(dt) {
@@ -1376,40 +1651,50 @@ function update(dt) {
     7 * dt;
 
 
-  // حرکت ماشین
+  /* حرکت ماشین */
+
   if (keys.l) {
+
     player.x -=
       player.speed * dt;
   }
 
   if (keys.r) {
+
     player.x +=
       player.speed * dt;
   }
 
 
   const roadWidth =
-    Math.min(W * .92, 560);
-
-
-  const minX =
-    (W - roadWidth) / 2 + 40;
-
-
-  const maxX =
-    (W + roadWidth) / 2 - 40;
-
-
-  player.x =
-    clamp(
-      player.x,
-      minX,
-      maxX
+    Math.min(
+      W * .92,
+      560
     );
 
 
-  // شلیک
+  const minX =
+    (W - roadWidth) / 2 + 38;
+
+
+  const maxX =
+    (W + roadWidth) / 2 - 38;
+
+
+  player.x =
+    Math.max(
+      minX,
+      Math.min(
+        maxX,
+        player.x
+      )
+    );
+
+
+  /* شلیک */
+
   player.fire -= dt;
+
 
   if (
     keys.f &&
@@ -1418,56 +1703,65 @@ function update(dt) {
 
     fire();
 
-    player.fire = 8;
+    player.fire =
+      Math.max(
+        5,
+        10 -
+        weaponLevel * .7
+      );
   }
 
 
-  // فلش شلیک
-  if (muzzleFlash > 0) {
+  if (muzzleFlash > 0)
     muzzleFlash -= dt;
-  }
 
 
-  // تولید زامبی
+  /* زامبی */
+
   spawnTimer -= dt;
 
-  if (spawnTimer <= 0) {
+
+  if (
+    spawnTimer <= 0
+  ) {
 
     spawnZombie();
 
     spawnTimer =
       Math.max(
-        13,
-        40 -
-          kills * .13
+        14,
+        42 -
+        kills * .15
       );
   }
 
 
-  // گلوله
-  bullets.forEach(b => {
+  bullets.forEach(
+    b => {
 
-    b.y -=
-      b.spd * dt;
-  });
-
-
-  // زامبی
-  zombies.forEach(z => {
-
-    z.y +=
-      z.spd * dt;
-
-    z.wobble +=
-      .08 * dt;
-  });
+      b.y -=
+        b.speed * dt;
+    }
+  );
 
 
-  // برخورد
+  zombies.forEach(
+    z => {
+
+      z.y +=
+        z.speed * dt;
+    }
+  );
+
+
+  /* برخورد */
+
   for (
     let i =
       zombies.length - 1;
+
     i >= 0;
+
     i--
   ) {
 
@@ -1475,7 +1769,6 @@ function update(dt) {
       zombies[i];
 
 
-    // خارج شدن
     if (
       z.y >
       H + 100
@@ -1490,9 +1783,10 @@ function update(dt) {
     }
 
 
-    // برخورد ماشین
+    /* برخورد ماشین */
+
     if (
-      hit(
+      collision(
         {
           x: player.x,
           y: player.y,
@@ -1509,10 +1803,18 @@ function update(dt) {
       );
 
 
-      hp -=
+      const damage =
         z.type === "tank"
-          ? 30
-          : 20;
+          ? 28
+          : 18;
+
+
+      hp -=
+        Math.max(
+          5,
+          damage -
+          (armorLevel - 1) * 2
+        );
 
 
       screenShake = 10;
@@ -1521,26 +1823,26 @@ function update(dt) {
       burst(
         z.x,
         z.y,
-        "#e31b3b",
+        "#e51b3b",
         25
       );
 
 
-      floatingText(
-        "-20 ❤️",
+      textEffect(
+        "-" + damage + " ❤️",
         player.x,
         player.y - 70
       );
 
 
-      updateHud();
+      updateHUD();
 
 
-      if (hp <= 0) {
+      if (
+        hp <= 0
+      ) {
 
         hp = 0;
-
-        updateHud();
 
         endGame();
       }
@@ -1550,11 +1852,14 @@ function update(dt) {
     }
 
 
-    // برخورد گلوله
+    /* گلوله */
+
     for (
       let j =
         bullets.length - 1;
+
       j >= 0;
+
       j--
     ) {
 
@@ -1565,7 +1870,9 @@ function update(dt) {
       if (
         Math.abs(
           b.x - z.x
-        ) < 32 &&
+        ) < 32
+
+        &&
 
         Math.abs(
           b.y - z.y
@@ -1578,7 +1885,7 @@ function update(dt) {
         );
 
 
-        z.health--;
+        z.hp--;
 
 
         burst(
@@ -1590,7 +1897,7 @@ function update(dt) {
 
 
         if (
-          z.health <= 0
+          z.hp <= 0
         ) {
 
           zombies.splice(
@@ -1599,12 +1906,18 @@ function update(dt) {
           );
 
 
+          const reward =
+            z.type === "tank"
+              ? 15
+              : z.type === "fast"
+                ? 8
+                : 5;
+
+
           kills++;
 
           coins +=
-            z.type === "tank"
-              ? 15
-              : 5;
+            reward;
 
           score +=
             z.type === "tank"
@@ -1618,12 +1931,10 @@ function update(dt) {
               : 4;
 
 
-          floatingText(
+          textEffect(
             "+" +
-              (z.type === "tank"
-                ? 15
-                : 5) +
-              " 🪙",
+            reward +
+            " 🪙",
             z.x,
             z.y - 45
           );
@@ -1639,7 +1950,9 @@ function update(dt) {
           );
 
 
-          updateHud();
+          saveData();
+
+          updateHUD();
         }
 
 
@@ -1651,14 +1964,57 @@ function update(dt) {
 
   bullets =
     bullets.filter(
-      b => b.y > -30
+      b =>
+        b.y > -30
     );
 
 
-  updateParticles(dt);
+  particles.forEach(
+    p => {
+
+      p.x +=
+        p.vx * dt;
+
+      p.y +=
+        p.vy * dt;
+
+      p.vx *= .97;
+      p.vy *= .97;
+
+      p.life -= dt;
+    }
+  );
 
 
-  if (screenShake > 0) {
+  particles =
+    particles.filter(
+      p =>
+        p.life > 0
+    );
+
+
+  floatingTexts.forEach(
+    t => {
+
+      t.y -=
+        .8 * dt;
+
+      t.life -= dt;
+    }
+  );
+
+
+  floatingTexts =
+    floatingTexts.filter(
+      t =>
+        t.life > 0
+    );
+
+
+  if (
+    screenShake > 0
+  ) {
+
     screenShake -= dt;
   }
 }
@@ -1673,15 +2029,16 @@ function draw() {
   ctx.save();
 
 
-  // لرزش صفحه
-  if (screenShake > 0) {
+  if (
+    screenShake > 0
+  ) {
 
     ctx.translate(
-      (Math.random() - .5) *
-        screenShake,
+      (Math.random() - .5)
+      * screenShake,
 
-      (Math.random() - .5) *
-        screenShake
+      (Math.random() - .5)
+      * screenShake
     );
   }
 
@@ -1705,23 +2062,26 @@ function draw() {
   drawParticles();
 
 
-  drawFloatingTexts();
+  drawTextEffects();
 
 
-  // فلش شلیک
-  if (muzzleFlash > 0) {
+  /* شلیک */
+
+  if (
+    muzzleFlash > 0
+  ) {
 
     ctx.globalAlpha =
       muzzleFlash / 5;
 
     ctx.fillStyle =
-      "#fff3a0";
+      "#fff2a0";
 
     ctx.beginPath();
 
     ctx.arc(
       player.x,
-      player.y - 60,
+      player.y - 61,
       18,
       0,
       Math.PI * 2
@@ -1738,21 +2098,53 @@ function draw() {
 
 
 /* =========================
+   GAME OVER
+========================= */
+
+function endGame() {
+
+  gameOver = true;
+
+  document.getElementById(
+    "finalKills"
+  ).textContent =
+    kills;
+
+  document.getElementById(
+    "finalScore"
+  ).textContent =
+    score;
+
+  document.getElementById(
+    "gameover"
+  ).classList.remove(
+    "hidden"
+  );
+
+  saveData();
+}
+
+
+/* =========================
    MAIN LOOP
 ========================= */
 
-function loop(t) {
+function loop(time) {
 
   const dt =
     Math.min(
-      (t - last) / 16.67,
+      (time - last) / 16.67,
       2
     );
 
-  last = t;
+  last = time;
 
 
-  if (!gameOver) {
+  if (
+    !gameOver &&
+    !paused
+  ) {
+
     update(dt);
   }
 
@@ -1767,10 +2159,14 @@ function loop(t) {
 
 
 /* =========================
-   START
+   INIT
 ========================= */
 
-reset();
+loadData();
+
+showScreen(
+  menuScreen
+);
 
 requestAnimationFrame(
   loop
