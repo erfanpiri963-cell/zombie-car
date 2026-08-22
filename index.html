@@ -7,235 +7,227 @@
 
 <style>
 *{
-    box-sizing:border-box;
-    margin:0;
-    padding:0;
-    -webkit-tap-highlight-color:transparent;
+  box-sizing:border-box;
+  margin:0;
+  padding:0;
+  -webkit-tap-highlight-color:transparent;
 }
 
 html,body{
-    width:100%;
-    height:100%;
-    overflow:hidden;
-    background:#07090b;
-    font-family:Arial,sans-serif;
-    touch-action:none;
+  width:100%;
+  height:100%;
+  overflow:hidden;
+  background:#07090b;
+  font-family:Arial,sans-serif;
+  touch-action:none;
 }
 
 .hidden{display:none!important}
 
-/* MENU */
-
 #menuScreen{
-    position:fixed;
-    inset:0;
-    display:flex;
-    flex-direction:column;
-    align-items:center;
-    justify-content:center;
-    color:#fff;
-    background:
-        radial-gradient(circle at 50% 30%,#555d62,#20262b 40%,#080a0c);
+  position:fixed;
+  inset:0;
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+  justify-content:center;
+  color:#fff;
+  background:
+    radial-gradient(circle at 50% 30%,#555d62,#20262b 40%,#080a0c);
 }
 
 .logo{
-    font-size:clamp(34px,10vw,58px);
-    font-weight:900;
-    text-align:center;
-    text-shadow:0 4px #000,0 10px 30px #000;
-    margin-bottom:10px;
+  font-size:clamp(34px,10vw,58px);
+  font-weight:900;
+  text-align:center;
+  text-shadow:0 4px #000,0 10px 30px #000;
+  margin-bottom:10px;
 }
 
 .subtitle{
-    color:#c8ced2;
-    margin-bottom:30px;
+  color:#c8ced2;
+  margin-bottom:30px;
 }
 
 #startBtn,#restartBtn{
-    border:0;
-    border-radius:17px;
-    padding:17px 42px;
-    color:white;
-    font-size:20px;
-    font-weight:bold;
-    background:linear-gradient(#f45145,#b71c1c);
-    box-shadow:0 8px 25px #0009;
+  border:0;
+  border-radius:17px;
+  padding:17px 42px;
+  color:white;
+  font-size:20px;
+  font-weight:bold;
+  background:linear-gradient(#f45145,#b71c1c);
+  box-shadow:0 8px 25px #0009;
 }
 
 #startBtn:active,#restartBtn:active{
-    transform:scale(.94);
+  transform:scale(.94);
 }
 
-/* GAME */
-
 #gameScreen{
-    position:fixed;
-    inset:0;
-    overflow:hidden;
-    background:#111;
+  position:fixed;
+  inset:0;
+  overflow:hidden;
+  background:#111;
 }
 
 #game{
-    position:absolute;
-    inset:0;
-    width:100%;
-    height:100%;
-    display:block;
+  position:absolute;
+  inset:0;
+  width:100%;
+  height:100%;
+  display:block;
 }
 
-/* HUD */
-
 #hud{
-    position:absolute;
-    top:13px;
-    left:10px;
-    right:10px;
-    z-index:20;
-    display:flex;
-    justify-content:space-between;
-    pointer-events:none;
+  position:absolute;
+  top:13px;
+  left:10px;
+  right:10px;
+  z-index:20;
+  display:flex;
+  justify-content:space-between;
+  pointer-events:none;
 }
 
 .hudBox{
-    min-width:75px;
-    padding:8px 10px;
-    border-radius:13px;
-    color:white;
-    font-weight:bold;
-    font-size:15px;
-    text-align:center;
-    background:#050505b8;
-    border:1px solid #ffffff20;
-    backdrop-filter:blur(7px);
-    box-shadow:0 5px 18px #0008;
+  min-width:75px;
+  padding:8px 10px;
+  border-radius:13px;
+  color:white;
+  font-weight:bold;
+  font-size:15px;
+  text-align:center;
+  background:#050505b8;
+  border:1px solid #ffffff20;
+  backdrop-filter:blur(7px);
+  box-shadow:0 5px 18px #0008;
 }
 
 #stageBox{
-    position:absolute;
-    top:65px;
-    left:50%;
-    transform:translateX(-50%);
-    z-index:21;
-    color:#fff;
-    background:#0009;
-    padding:7px 18px;
-    border-radius:20px;
-    font-weight:bold;
-    border:1px solid #ffffff25;
+  position:absolute;
+  top:65px;
+  left:50%;
+  transform:translateX(-50%);
+  z-index:21;
+  color:#fff;
+  background:#0009;
+  padding:7px 18px;
+  border-radius:20px;
+  font-weight:bold;
+  border:1px solid #ffffff25;
 }
 
-/* CONTROLS */
-
 #controls{
-    position:absolute;
-    left:0;
-    right:0;
-    bottom:22px;
-    z-index:30;
-    display:grid;
-    grid-template-columns:1fr 1fr 1fr;
-    padding:0 20px;
-    direction:ltr;
-    align-items:center;
+  position:absolute;
+  left:0;
+  right:0;
+  bottom:22px;
+  z-index:30;
+  display:grid;
+  grid-template-columns:1fr 1fr 1fr;
+  padding:0 20px;
+  direction:ltr;
+  align-items:center;
 }
 
 .controlBtn{
-    width:78px;
-    height:78px;
-    border-radius:50%;
-    border:2px solid #ffffff25;
-    color:#fff;
-    background:#00000070;
-    font-size:30px;
-    font-weight:bold;
-    box-shadow:0 6px 20px #0008;
-    backdrop-filter:blur(7px);
-    touch-action:none;
+  width:78px;
+  height:78px;
+  border-radius:50%;
+  border:2px solid #ffffff25;
+  color:#fff;
+  background:#00000070;
+  font-size:30px;
+  font-weight:bold;
+  box-shadow:0 6px 20px #0008;
+  backdrop-filter:blur(7px);
+  touch-action:none;
 }
 
 #leftBtn{justify-self:start}
 #rightBtn{justify-self:end}
 
 #fireBtn{
-    justify-self:center;
-    width:90px;
-    height:90px;
-    border-radius:50%;
-    border:2px solid #ffffff30;
-    color:white;
-    font-size:35px;
-    background:linear-gradient(#ff7043,#c62828);
-    box-shadow:0 7px 25px #0009;
-    touch-action:none;
+  justify-self:center;
+  width:90px;
+  height:90px;
+  border-radius:50%;
+  border:2px solid #ffffff30;
+  color:white;
+  font-size:35px;
+  background:linear-gradient(#ff7043,#c62828);
+  box-shadow:0 7px 25px #0009;
+  touch-action:none;
 }
 
 .controlBtn:active,
 #fireBtn:active{
-    transform:scale(.9);
+  transform:scale(.9);
 }
 
-/* GAME OVER */
-
 #gameOver{
-    position:absolute;
-    inset:0;
-    z-index:100;
-    display:flex;
-    flex-direction:column;
-    align-items:center;
-    justify-content:center;
-    color:#fff;
-    text-align:center;
-    background:#000d;
+  position:absolute;
+  inset:0;
+  z-index:100;
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+  justify-content:center;
+  color:#fff;
+  text-align:center;
+  background:#000d;
 }
 
 #gameOver h1{
-    font-size:44px;
-    margin-bottom:15px;
+  font-size:44px;
+  margin-bottom:15px;
 }
 
 #gameOver p{
-    color:#ddd;
-    margin-bottom:25px;
+  color:#ddd;
+  margin-bottom:10px;
 }
 
-/* STAGE MESSAGE */
+#gameOver button{
+  margin-top:18px;
+}
 
 #stageMessage{
-    position:absolute;
-    inset:0;
-    z-index:80;
-    display:flex;
-    align-items:center;
-    justify-content:center;
-    pointer-events:none;
+  position:absolute;
+  inset:0;
+  z-index:80;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  pointer-events:none;
 }
 
 .stageText{
-    color:white;
-    font-size:42px;
-    font-weight:900;
-    text-shadow:0 4px 12px #000;
-    animation:stagePop 1.4s ease forwards;
+  color:white;
+  font-size:42px;
+  font-weight:900;
+  text-shadow:0 4px 12px #000;
+  animation:stagePop 1.4s ease forwards;
 }
 
 @keyframes stagePop{
-    0%{
-        opacity:0;
-        transform:scale(.5);
-    }
-    20%{
-        opacity:1;
-        transform:scale(1.15);
-    }
-    70%{
-        opacity:1;
-        transform:scale(1);
-    }
-    100%{
-        opacity:0;
-        transform:scale(1.1);
-    }
+  0%{
+    opacity:0;
+    transform:scale(.5);
+  }
+  20%{
+    opacity:1;
+    transform:scale(1.15);
+  }
+  70%{
+    opacity:1;
+    transform:scale(1);
+  }
+  100%{
+    opacity:0;
+    transform:scale(1.1);
+  }
 }
 </style>
 </head>
@@ -244,85 +236,82 @@ html,body{
 
 <div id="menuScreen">
 
-    <div class="logo">
-        🚗 ZOMBIE CAR 🧟
-    </div>
+  <div class="logo">
+    🚗 ZOMBIE CAR 🧟
+  </div>
 
-    <div class="subtitle">
-        جاده پر از زامبی شده...
-    </div>
+  <div class="subtitle">
+    جاده پر از زامبی شده...
+  </div>
 
-    <button id="startBtn">
-        ▶ شروع بازی
-    </button>
+  <button id="startBtn">
+    ▶ شروع بازی
+  </button>
 
 </div>
 
 
 <div id="gameScreen" class="hidden">
 
-    <canvas id="game"></canvas>
+  <canvas id="game"></canvas>
 
-    <div id="hud">
+  <div id="hud">
 
-        <div class="hudBox">
-            ❤️ <span id="hp">100</span>
-        </div>
-
-        <div class="hudBox">
-            🪙 <span id="coins">0</span>
-        </div>
-
-        <div class="hudBox">
-            ☠️ <span id="kills">0</span>
-        </div>
-
+    <div class="hudBox">
+      ❤️ <span id="hp">100</span>
     </div>
 
-    <div id="stageBox">
-        🎯 مرحله <span id="stage">1</span>
+    <div class="hudBox">
+      🪙 <span id="coins">0</span>
     </div>
 
-
-    <div id="stageMessage"></div>
-
-
-    <div id="controls">
-
-        <button id="leftBtn" class="controlBtn">
-            ◀
-        </button>
-
-        <button id="fireBtn">
-            🔫
-        </button>
-
-        <button id="rightBtn" class="controlBtn">
-            ▶
-        </button>
-
+    <div class="hudBox">
+      ☠️ <span id="kills">0</span>
     </div>
 
+  </div>
 
-    <div id="gameOver" class="hidden">
+  <div id="stageBox">
+    🎯 مرحله <span id="stage">1</span>
+  </div>
 
-        <h1>💀 باختی!</h1>
+  <div id="stageMessage"></div>
 
-        <p>
-            مرحله:
-            <b id="finalStage">1</b>
-        </p>
+  <div id="controls">
 
-        <p>
-            زامبی‌های کشته‌شده:
-            <b id="finalKills">0</b>
-        </p>
+    <button id="leftBtn" class="controlBtn">
+      ◀
+    </button>
 
-        <button id="restartBtn">
-            🔄 دوباره بازی کن
-        </button>
+    <button id="fireBtn">
+      🔫
+    </button>
 
-    </div>
+    <button id="rightBtn" class="controlBtn">
+      ▶
+    </button>
+
+  </div>
+
+  <div id="gameOver" class="hidden">
+
+    <h1>💀 باختی!</h1>
+
+    <p>
+      مرحله:
+      <b id="finalStage">1</b>
+    </p>
+
+    <p>
+      زامبی‌های کشته‌شده:
+      <b id="finalKills">0</b>
+    </p>
+
+    <button id="restartBtn">
+      🔄 دوباره بازی کن
+    </button>
+
+  </div>
 
 </div>
 
@@ -344,7 +333,6 @@ const fire=document.getElementById("fireBtn");
 
 let W=0;
 let H=0;
-
 let carX=0;
 
 let hp=100;
@@ -364,25 +352,30 @@ let fireDown=false;
 
 let running=false;
 let last=0;
-
 let fireTimer=0;
 let spawnTimer=0;
 let roadOffset=0;
+
+/*
+  این متغیر مهم است:
+  انتقال مرحله فقط یک بار انجام می‌شود.
+*/
+let stageChanging=false;
 
 
 /* RESIZE */
 
 function resize(){
 
-    W=innerWidth;
-    H=innerHeight;
+  W=innerWidth;
+  H=innerHeight;
 
-    canvas.width=W;
-    canvas.height=H;
+  canvas.width=W;
+  canvas.height=H;
 
-    if(!carX){
-        carX=W/2;
-    }
+  if(!carX){
+    carX=W/2;
+  }
 }
 
 addEventListener("resize",resize);
@@ -392,41 +385,91 @@ addEventListener("resize",resize);
 
 function updateHUD(){
 
-    document.getElementById("hp").textContent=
-        Math.max(0,hp);
+  document.getElementById("hp").textContent=
+    Math.max(0,Math.round(hp));
 
-    document.getElementById("coins").textContent=
-        coins;
+  document.getElementById("coins").textContent=
+    coins;
 
-    document.getElementById("kills").textContent=
-        kills;
+  document.getElementById("kills").textContent=
+    kills;
 
-    document.getElementById("stage").textContent=
-        stage;
+  document.getElementById("stage").textContent=
+    stage;
 }
 
 
-/* STAGE MESSAGE */
-
-function showStageMessage(text){
-
-    const box=
-        document.getElementById("stageMessage");
-
-    box.innerHTML=
-        `<div class="stageText">${text}</div>`;
-
-    setTimeout(()=>{
-        box.innerHTML="";
-    },1400);
-}
-
-
-/* STAGE REQUIREMENT */
+/* تعداد کشتن لازم */
 
 function requiredKills(){
 
-    return 8 + (stage-1)*7;
+  /*
+    مرحله ۱ = 8
+    مرحله ۲ = 15
+    مرحله ۳ = 22
+  */
+
+  return 8+(stage-1)*7;
+}
+
+
+/* پیام مرحله */
+
+function showStageMessage(text){
+
+  const box=
+    document.getElementById("stageMessage");
+
+  box.innerHTML=
+    '<div class="stageText">'+text+'</div>';
+
+  setTimeout(()=>{
+
+    box.innerHTML="";
+
+  },1400);
+}
+
+
+/*
+  انتقال امن به مرحله بعد
+*/
+
+function nextStage(){
+
+  if(stageChanging)return;
+
+  stageChanging=true;
+
+  stage++;
+
+  stageKills=0;
+
+  /*
+    دشمن‌های مرحله قبلی کاملاً پاک می‌شوند.
+  */
+
+  zombies.length=0;
+  bullets.length=0;
+
+  updateHUD();
+
+  showStageMessage(
+    "🎯 مرحله "+stage
+  );
+
+  /*
+    چند لحظه صبر می‌کنیم تا مرحله
+    جدید تمیز شروع شود.
+  */
+
+  spawnTimer=50;
+
+  setTimeout(()=>{
+
+    stageChanging=false;
+
+  },1200);
 }
 
 
@@ -434,42 +477,44 @@ function requiredKills(){
 
 start.onclick=()=>{
 
-    menu.classList.add("hidden");
+  menu.classList.add("hidden");
 
-    game.classList.remove("hidden");
+  game.classList.remove("hidden");
 
-    document
-        .getElementById("gameOver")
-        .classList.add("hidden");
+  document
+    .getElementById("gameOver")
+    .classList.add("hidden");
 
-    resize();
+  resize();
 
-    carX=W/2;
+  carX=W/2;
 
-    hp=100;
-    coins=0;
-    kills=0;
+  hp=100;
+  coins=0;
+  kills=0;
 
-    stage=1;
-    stageKills=0;
+  stage=1;
+  stageKills=0;
 
-    bullets=[];
-    zombies=[];
-    particles=[];
+  bullets=[];
+  zombies=[];
+  particles=[];
 
-    fireTimer=0;
-    spawnTimer=15;
-    roadOffset=0;
+  fireTimer=0;
+  spawnTimer=15;
+  roadOffset=0;
 
-    updateHUD();
+  stageChanging=false;
 
-    showStageMessage("🎯 مرحله ۱");
+  updateHUD();
 
-    running=true;
+  showStageMessage("🎯 مرحله ۱");
 
-    last=performance.now();
+  running=true;
 
-    requestAnimationFrame(loop);
+  last=performance.now();
+
+  requestAnimationFrame(loop);
 };
 
 
@@ -477,7 +522,7 @@ start.onclick=()=>{
 
 restart.onclick=()=>{
 
-    start.click();
+  start.click();
 
 };
 
@@ -486,49 +531,49 @@ restart.onclick=()=>{
 
 function hold(btn,on,off){
 
-    btn.addEventListener("pointerdown",e=>{
+  btn.addEventListener("pointerdown",e=>{
 
-        e.preventDefault();
+    e.preventDefault();
 
-        on();
+    on();
 
-    });
+  });
 
-    btn.addEventListener("pointerup",e=>{
+  btn.addEventListener("pointerup",e=>{
 
-        e.preventDefault();
+    e.preventDefault();
 
-        off();
+    off();
 
-    });
+  });
 
-    btn.addEventListener(
-        "pointercancel",
-        off
-    );
+  btn.addEventListener(
+    "pointercancel",
+    off
+  );
 
-    btn.addEventListener(
-        "pointerleave",
-        off
-    );
+  btn.addEventListener(
+    "pointerleave",
+    off
+  );
 }
 
 hold(
-    left,
-    ()=>leftDown=true,
-    ()=>leftDown=false
+  left,
+  ()=>leftDown=true,
+  ()=>leftDown=false
 );
 
 hold(
-    right,
-    ()=>rightDown=true,
-    ()=>rightDown=false
+  right,
+  ()=>rightDown=true,
+  ()=>rightDown=false
 );
 
 hold(
-    fire,
-    ()=>fireDown=true,
-    ()=>fireDown=false
+  fire,
+  ()=>fireDown=true,
+  ()=>fireDown=false
 );
 
 
@@ -536,27 +581,27 @@ hold(
 
 addEventListener("keydown",e=>{
 
-    if(e.key==="ArrowLeft")
-        leftDown=true;
+  if(e.key==="ArrowLeft")
+    leftDown=true;
 
-    if(e.key==="ArrowRight")
-        rightDown=true;
+  if(e.key==="ArrowRight")
+    rightDown=true;
 
-    if(e.code==="Space")
-        fireDown=true;
+  if(e.code==="Space")
+    fireDown=true;
 
 });
 
 addEventListener("keyup",e=>{
 
-    if(e.key==="ArrowLeft")
-        leftDown=false;
+  if(e.key==="ArrowLeft")
+    leftDown=false;
 
-    if(e.key==="ArrowRight")
-        rightDown=false;
+  if(e.key==="ArrowRight")
+    rightDown=false;
 
-    if(e.code==="Space")
-        fireDown=false;
+  if(e.code==="Space")
+    fireDown=false;
 
 });
 
@@ -565,128 +610,87 @@ addEventListener("keyup",e=>{
 
 function drawRoad(){
 
-    ctx.fillStyle="#0d1510";
+  ctx.fillStyle="#0d1510";
+  ctx.fillRect(0,0,W,H);
+
+  const rw=Math.min(W*.88,520);
+  const rx=(W-rw)/2;
+
+  ctx.fillStyle="#152218";
+
+  ctx.fillRect(0,0,rx,H);
+
+  ctx.fillRect(
+    rx+rw,
+    0,
+    rx,
+    H
+  );
+
+  ctx.fillStyle="#30363a";
+
+  ctx.fillRect(
+    rx,
+    0,
+    rw,
+    H
+  );
+
+  ctx.fillStyle="#3b4145";
+
+  for(
+    let y=-80;
+    y<H;
+    y+=100
+  ){
 
     ctx.fillRect(
-        0,
-        0,
-        W,
-        H
+      rx+15,
+      y+(roadOffset%100),
+      rw-30,
+      2
     );
+  }
 
-    const rw=Math.min(
-        W*.88,
-        520
-    );
+  ctx.fillStyle="#d2d2d2";
 
-    const rx=(W-rw)/2;
+  ctx.fillRect(
+    rx,
+    0,
+    5,
+    H
+  );
 
+  ctx.fillRect(
+    rx+rw-5,
+    0,
+    5,
+    H
+  );
 
-    /* grass */
+  ctx.strokeStyle="#eee";
+  ctx.lineWidth=5;
 
-    ctx.fillStyle="#152218";
+  ctx.setLineDash([
+    42,
+    34
+  ]);
 
-    ctx.fillRect(
-        0,
-        0,
-        rx,
-        H
-    );
+  ctx.lineDashOffset=roadOffset;
 
-    ctx.fillRect(
-        rx+rw,
-        0,
-        rx,
-        H
-    );
+  ctx.beginPath();
 
+  ctx.moveTo(W/2,0);
+  ctx.lineTo(W/2,H);
 
-    /* asphalt */
+  ctx.stroke();
 
-    ctx.fillStyle="#30363a";
+  ctx.setLineDash([]);
 
-    ctx.fillRect(
-        rx,
-        0,
-        rw,
-        H
-    );
+  roadOffset+=4+(stage*.35);
 
-
-    /* road texture */
-
-    ctx.fillStyle="#3b4145";
-
-    for(
-        let y=-80;
-        y<H;
-        y+=100
-    ){
-
-        ctx.fillRect(
-            rx+15,
-            y+(roadOffset%100),
-            rw-30,
-            2
-        );
-    }
-
-
-    /* edge */
-
-    ctx.fillStyle="#d2d2d2";
-
-    ctx.fillRect(
-        rx,
-        0,
-        5,
-        H
-    );
-
-    ctx.fillRect(
-        rx+rw-5,
-        0,
-        5,
-        H
-    );
-
-
-    /* center */
-
-    ctx.strokeStyle="#eee";
-
-    ctx.lineWidth=5;
-
-    ctx.setLineDash([
-        42,
-        34
-    ]);
-
-    ctx.lineDashOffset=
-        roadOffset;
-
-    ctx.beginPath();
-
-    ctx.moveTo(
-        W/2,
-        0
-    );
-
-    ctx.lineTo(
-        W/2,
-        H
-    );
-
-    ctx.stroke();
-
-    ctx.setLineDash([]);
-
-
-    roadOffset+=
-        4+(stage*.35);
-
-    if(roadOffset>76)
-        roadOffset=0;
+  if(roadOffset>76)
+    roadOffset=0;
 }
 
 
@@ -694,477 +698,391 @@ function drawRoad(){
 
 function drawCar(){
 
-    const y=H-145;
+  const y=H-145;
 
+  ctx.fillStyle="#0008";
 
-    /* shadow */
+  ctx.beginPath();
 
-    ctx.fillStyle="#0008";
+  ctx.ellipse(
+    carX,
+    y+52,
+    43,
+    12,
+    0,
+    0,
+    Math.PI*2
+  );
 
-    ctx.beginPath();
+  ctx.fill();
 
-    ctx.ellipse(
-        carX,
-        y+52,
-        43,
-        12,
-        0,
-        0,
-        Math.PI*2
+  ctx.fillStyle="#ff1744";
+
+  ctx.fillRect(
+    carX-22,
+    y+33,
+    13,
+    8
+  );
+
+  ctx.fillRect(
+    carX+9,
+    y+33,
+    13,
+    8
+  );
+
+  const grad=
+    ctx.createLinearGradient(
+      carX-30,
+      y,
+      carX+30,
+      y
     );
 
-    ctx.fill();
+  grad.addColorStop(
+    0,
+    "#9d1010"
+  );
 
+  grad.addColorStop(
+    .45,
+    "#ef3d32"
+  );
 
-    /* rear lights */
+  grad.addColorStop(
+    1,
+    "#8d0c0c"
+  );
 
-    ctx.fillStyle="#ff1744";
+  ctx.fillStyle=grad;
 
-    ctx.fillRect(
-        carX-22,
-        y+33,
-        13,
-        8
+  ctx.beginPath();
+
+  ctx.roundRect(
+    carX-31,
+    y-56,
+    62,
+    111,
+    13
+  );
+
+  ctx.fill();
+
+  ctx.fillStyle="#8d1111";
+
+  ctx.beginPath();
+
+  ctx.roundRect(
+    carX-24,
+    y-42,
+    48,
+    50,
+    10
+  );
+
+  ctx.fill();
+
+  const glass=
+    ctx.createLinearGradient(
+      0,
+      y-40,
+      0,
+      y+8
     );
 
-    ctx.fillRect(
-        carX+9,
-        y+33,
-        13,
-        8
-    );
+  glass.addColorStop(
+    0,
+    "#b3ecff"
+  );
+
+  glass.addColorStop(
+    1,
+    "#1976a8"
+  );
+
+  ctx.fillStyle=glass;
+
+  ctx.beginPath();
+
+  ctx.roundRect(
+    carX-19,
+    y-35,
+    38,
+    29,
+    6
+  );
+
+  ctx.fill();
+
+  ctx.fillStyle="#ffcc80";
+
+  ctx.fillRect(
+    carX-2,
+    y-1,
+    4,
+    30
+  );
+
+  ctx.fillStyle="#444";
+
+  ctx.fillRect(
+    carX-25,
+    y+40,
+    50,
+    7
+  );
+
+  ctx.fillStyle="#080808";
+
+  ctx.fillRect(
+    carX-39,
+    y-33,
+    11,
+    31
+  );
+
+  ctx.fillRect(
+    carX+28,
+    y-33,
+    11,
+    31
+  );
+
+  ctx.fillRect(
+    carX-39,
+    y+18,
+    11,
+    31
+  );
+
+  ctx.fillRect(
+    carX+28,
+    y+18,
+    11,
+    31
+  );
+
+  ctx.fillStyle="#777";
+
+  ctx.fillRect(
+    carX-37,
+    y-25,
+    7,
+    15
+  );
+
+  ctx.fillRect(
+    carX+30,
+    y-25,
+    7,
+    15
+  );
+
+  ctx.fillRect(
+    carX-37,
+    y+25,
+    7,
+    15
+  );
+
+  ctx.fillRect(
+    carX+30,
+    y+25,
+    7,
+    15
+  );
+}
 
 
-    /* body */
+/* SPAWN ZOMBIE */
 
-    const grad=
-        ctx.createLinearGradient(
-            carX-30,
-            y,
-            carX+30,
-            y
-        );
+function spawnZombie(){
 
-    grad.addColorStop(
-        0,
-        "#9d1010"
-    );
+  if(stageChanging)return;
 
-    grad.addColorStop(
-        .45,
-        "#ef3d32"
-    );
+  const rw=Math.min(W*.88,520);
+  const rx=(W-rw)/2;
 
-    grad.addColorStop(
-        1,
-        "#8d0c0c"
-    );
+  /*
+    باس از مرحله ۴ به بعد ظاهر می‌شود.
+  */
 
-    ctx.fillStyle=grad;
+  if(
+    stage>=4 &&
+    stageKills>=requiredKills()-1 &&
+    !zombies.some(z=>z.boss)
+  ){
 
-    ctx.beginPath();
+    zombies.push({
 
-    ctx.roundRect(
-        carX-31,
-        y-56,
-        62,
-        111,
-        13
-    );
+      x:rx+rw/2,
 
-    ctx.fill();
+      y:-100,
 
+      speed:1,
 
-    /* roof */
+      w:75,
 
-    ctx.fillStyle="#8d1111";
+      h:100,
 
-    ctx.beginPath();
+      boss:true,
 
-    ctx.roundRect(
-        carX-24,
-        y-42,
-        48,
-        50,
-        10
-    );
+      hp:5,
 
-    ctx.fill();
+      maxHp:5
+    });
 
+    return;
+  }
 
-    /* glass */
+  zombies.push({
 
-    const glass=
-        ctx.createLinearGradient(
-            0,
-            y-40,
-            0,
-            y+8
-        );
+    x:
+      rx+
+      35+
+      Math.random()*(rw-70),
 
-    glass.addColorStop(
-        0,
-        "#b3ecff"
-    );
+    y:-65,
 
-    glass.addColorStop(
-        1,
-        "#1976a8"
-    );
+    speed:
+      1.4+
+      Math.random()*1.5+
+      stage*.25,
 
-    ctx.fillStyle=glass;
+    w:42,
+    h:60,
 
-    ctx.beginPath();
+    boss:false,
 
-    ctx.roundRect(
-        carX-19,
-        y-35,
-        38,
-        29,
-        6
-    );
-
-    ctx.fill();
-
-
-    /* center */
-
-    ctx.fillStyle="#ffcc80";
-
-    ctx.fillRect(
-        carX-2,
-        y-1,
-        4,
-        30
-    );
-
-
-    /* bumper */
-
-    ctx.fillStyle="#444";
-
-    ctx.fillRect(
-        carX-25,
-        y+40,
-        50,
-        7
-    );
-
-
-    /* wheels */
-
-    ctx.fillStyle="#080808";
-
-    ctx.fillRect(
-        carX-39,
-        y-33,
-        11,
-        31
-    );
-
-    ctx.fillRect(
-        carX+28,
-        y-33,
-        11,
-        31
-    );
-
-    ctx.fillRect(
-        carX-39,
-        y+18,
-        11,
-        31
-    );
-
-    ctx.fillRect(
-        carX+28,
-        y+18,
-        11,
-        31
-    );
-
-
-    /* rims */
-
-    ctx.fillStyle="#777";
-
-    ctx.fillRect(
-        carX-37,
-        y-25,
-        7,
-        15
-    );
-
-    ctx.fillRect(
-        carX+30,
-        y-25,
-        7,
-        15
-    );
-
-    ctx.fillRect(
-        carX-37,
-        y+25,
-        7,
-        15
-    );
-
-    ctx.fillRect(
-        carX+30,
-        y+25,
-        7,
-        15
-    );
+    hp:1
+  });
 }
 
 
 /* ZOMBIE */
 
-function spawnZombie(){
-
-    const rw=Math.min(
-        W*.88,
-        520
-    );
-
-    const rx=(W-rw)/2;
-
-
-    /* Boss */
-
-    if(
-        stage>=4 &&
-        stageKills===requiredKills()-1
-    ){
-
-        zombies.push({
-
-            x:rx+rw/2,
-
-            y:-100,
-
-            speed:1.0,
-
-            w:75,
-
-            h:100,
-
-            boss:true,
-
-            hp:5,
-
-            maxHp:5
-
-        });
-
-        return;
-    }
-
-
-    zombies.push({
-
-        x:
-            rx+
-            35+
-            Math.random()*
-            (rw-70),
-
-        y:-65,
-
-        speed:
-            1.4+
-            Math.random()*1.5+
-            stage*.25,
-
-        w:42,
-
-        h:60,
-
-        boss:false,
-
-        hp:1
-
-    });
-}
-
-
-/* ZOMBIE DRAW */
-
 function drawZombie(z){
 
-    ctx.save();
+  ctx.save();
 
-    ctx.translate(
-        z.x,
-        z.y
-    );
+  ctx.translate(
+    z.x,
+    z.y
+  );
 
+  if(z.boss){
 
-    if(z.boss){
-
-        drawBoss(z);
-
-        ctx.restore();
-
-        return;
-    }
-
-
-    /* shadow */
-
-    ctx.fillStyle="#0006";
-
-    ctx.beginPath();
-
-    ctx.ellipse(
-        0,
-        31,
-        23,
-        7,
-        0,
-        0,
-        Math.PI*2
-    );
-
-    ctx.fill();
-
-
-    /* legs */
-
-    ctx.strokeStyle="#283c29";
-
-    ctx.lineWidth=9;
-
-    ctx.lineCap="round";
-
-    ctx.beginPath();
-
-    ctx.moveTo(
-        -9,
-        25
-    );
-
-    ctx.lineTo(
-        -13,
-        42
-    );
-
-    ctx.moveTo(
-        9,
-        25
-    );
-
-    ctx.lineTo(
-        13,
-        42
-    );
-
-    ctx.stroke();
-
-
-    /* body */
-
-    ctx.fillStyle=
-        stage>=3
-        ? "#694238"
-        : "#395c42";
-
-    ctx.beginPath();
-
-    ctx.roundRect(
-        -19,
-        -4,
-        38,
-        38,
-        8
-    );
-
-    ctx.fill();
-
-
-    /* arms */
-
-    ctx.strokeStyle="#69a94d";
-
-    ctx.lineWidth=8;
-
-    ctx.beginPath();
-
-    ctx.moveTo(
-        -17,
-        0
-    );
-
-    ctx.lineTo(
-        -31,
-        15
-    );
-
-    ctx.moveTo(
-        17,
-        0
-    );
-
-    ctx.lineTo(
-        31,
-        15
-    );
-
-    ctx.stroke();
-
-
-    /* head */
-
-    ctx.fillStyle=
-        stage>=3
-        ? "#7e9b4d"
-        : "#69a94d";
-
-    ctx.beginPath();
-
-    ctx.arc(
-        0,
-        -23,
-        19,
-        0,
-        Math.PI*2
-    );
-
-    ctx.fill();
-
-
-    /* eyes */
-
-    ctx.fillStyle="#160d0d";
-
-    ctx.fillRect(
-        -9,
-        -27,
-        5,
-        6
-    );
-
-    ctx.fillRect(
-        4,
-        -27,
-        5,
-        6
-    );
-
-
-    /* mouth */
-
-    ctx.fillStyle="#eee";
-
-    ctx.fillRect(
-        -9,
-        -13,
-        18,
-        5
-    );
-
+    drawBoss(z);
 
     ctx.restore();
+
+    return;
+  }
+
+  ctx.fillStyle="#0006";
+
+  ctx.beginPath();
+
+  ctx.ellipse(
+    0,
+    31,
+    23,
+    7,
+    0,
+    0,
+    Math.PI*2
+  );
+
+  ctx.fill();
+
+  ctx.strokeStyle="#283c29";
+  ctx.lineWidth=9;
+  ctx.lineCap="round";
+
+  ctx.beginPath();
+
+  ctx.moveTo(-9,25);
+  ctx.lineTo(-13,42);
+
+  ctx.moveTo(9,25);
+  ctx.lineTo(13,42);
+
+  ctx.stroke();
+
+  ctx.fillStyle=
+    stage>=3
+    ? "#694238"
+    : "#395c42";
+
+  ctx.beginPath();
+
+  ctx.roundRect(
+    -19,
+    -4,
+    38,
+    38,
+    8
+  );
+
+  ctx.fill();
+
+  ctx.strokeStyle="#69a94d";
+  ctx.lineWidth=8;
+
+  ctx.beginPath();
+
+  ctx.moveTo(-17,0);
+  ctx.lineTo(-31,15);
+
+  ctx.moveTo(17,0);
+  ctx.lineTo(31,15);
+
+  ctx.stroke();
+
+  ctx.fillStyle=
+    stage>=3
+    ? "#7e9b4d"
+    : "#69a94d";
+
+  ctx.beginPath();
+
+  ctx.arc(
+    0,
+    -23,
+    19,
+    0,
+    Math.PI*2
+  );
+
+  ctx.fill();
+
+  ctx.fillStyle="#160d0d";
+
+  ctx.fillRect(
+    -9,
+    -27,
+    5,
+    6
+  );
+
+  ctx.fillRect(
+    4,
+    -27,
+    5,
+    6
+  );
+
+  ctx.fillStyle="#eee";
+
+  ctx.fillRect(
+    -9,
+    -13,
+    18,
+    5
+  );
+
+  ctx.restore();
 }
 
 
@@ -1172,192 +1090,118 @@ function drawZombie(z){
 
 function drawBoss(z){
 
-    const s=1.25;
+  const s=1.25;
 
-    ctx.scale(
-        s,
-        s
-    );
+  ctx.scale(s,s);
 
+  ctx.fillStyle="#0008";
 
-    /* shadow */
+  ctx.beginPath();
 
-    ctx.fillStyle="#0008";
+  ctx.ellipse(
+    0,
+    45,
+    38,
+    10,
+    0,
+    0,
+    Math.PI*2
+  );
 
-    ctx.beginPath();
+  ctx.fill();
 
-    ctx.ellipse(
-        0,
-        45,
-        38,
-        10,
-        0,
-        0,
-        Math.PI*2
-    );
+  ctx.fillStyle="#4a194d";
 
-    ctx.fill();
+  ctx.beginPath();
 
+  ctx.roundRect(
+    -30,
+    -5,
+    60,
+    55,
+    12
+  );
 
-    /* body */
+  ctx.fill();
 
-    ctx.fillStyle="#4a194d";
+  ctx.strokeStyle="#8e6a55";
+  ctx.lineWidth=13;
+  ctx.lineCap="round";
 
-    ctx.beginPath();
+  ctx.beginPath();
 
-    ctx.roundRect(
-        -30,
-        -5,
-        60,
-        55,
-        12
-    );
+  ctx.moveTo(-27,0);
+  ctx.lineTo(-48,28);
 
-    ctx.fill();
+  ctx.moveTo(27,0);
+  ctx.lineTo(48,28);
 
+  ctx.stroke();
 
-    /* arms */
+  ctx.fillStyle="#759c4a";
 
-    ctx.strokeStyle="#8e6a55";
+  ctx.beginPath();
 
-    ctx.lineWidth=13;
+  ctx.arc(
+    0,
+    -28,
+    27,
+    0,
+    Math.PI*2
+  );
 
-    ctx.lineCap="round";
+  ctx.fill();
 
-    ctx.beginPath();
+  ctx.fillStyle="#ffd54f";
 
-    ctx.moveTo(
-        -27,
-        0
-    );
+  ctx.beginPath();
 
-    ctx.lineTo(
-        -48,
-        28
-    );
+  ctx.moveTo(-22,-50);
+  ctx.lineTo(-13,-67);
+  ctx.lineTo(0,-53);
+  ctx.lineTo(13,-67);
+  ctx.lineTo(22,-50);
+  ctx.closePath();
 
-    ctx.moveTo(
-        27,
-        0
-    );
+  ctx.fill();
 
-    ctx.lineTo(
-        48,
-        28
-    );
+  ctx.fillStyle="#ff1744";
 
-    ctx.stroke();
+  ctx.beginPath();
 
+  ctx.arc(-11,-31,5,0,Math.PI*2);
+  ctx.arc(11,-31,5,0,Math.PI*2);
 
-    /* head */
+  ctx.fill();
 
-    ctx.fillStyle="#759c4a";
+  ctx.fillStyle="#111";
 
-    ctx.beginPath();
+  ctx.fillRect(
+    -14,
+    -15,
+    28,
+    8
+  );
 
-    ctx.arc(
-        0,
-        -28,
-        27,
-        0,
-        Math.PI*2
-    );
+  /* Boss HP */
 
-    ctx.fill();
+  ctx.fillStyle="#222";
 
+  ctx.fillRect(
+    -35,
+    62,
+    70,
+    7
+  );
 
-    /* crown */
+  ctx.fillStyle="#e53935";
 
-    ctx.fillStyle="#ffd54f";
-
-    ctx.beginPath();
-
-    ctx.moveTo(
-        -22,
-        -50
-    );
-
-    ctx.lineTo(
-        -13,
-        -67
-    );
-
-    ctx.lineTo(
-        0,
-        -53
-    );
-
-    ctx.lineTo(
-        13,
-        -67
-    );
-
-    ctx.lineTo(
-        22,
-        -50
-    );
-
-    ctx.closePath();
-
-    ctx.fill();
-
-
-    /* eyes */
-
-    ctx.fillStyle="#ff1744";
-
-    ctx.beginPath();
-
-    ctx.arc(
-        -11,
-        -31,
-        5,
-        0,
-        Math.PI*2
-    );
-
-    ctx.arc(
-        11,
-        -31,
-        5,
-        0,
-        Math.PI*2
-    );
-
-    ctx.fill();
-
-
-    /* mouth */
-
-    ctx.fillStyle="#111";
-
-    ctx.fillRect(
-        -14,
-        -15,
-        28,
-        8
-    );
-
-
-    /* boss health */
-
-    ctx.fillStyle="#222";
-
-    ctx.fillRect(
-        -35,
-        62,
-        70,
-        7
-    );
-
-    ctx.fillStyle="#e53935";
-
-    ctx.fillRect(
-        -35,
-        62,
-        70*(z.hp/z.maxHp),
-        7
-    );
+  ctx.fillRect(
+    -35,
+    62,
+    70*(z.hp/z.maxHp),
+    7
+  );
 }
 
 
@@ -1365,41 +1209,35 @@ function drawBoss(z){
 
 function shoot(){
 
-    bullets.push({
+  bullets.push({
 
-        x:carX,
+    x:carX,
+    y:H-205,
+    speed:14,
+    damage:1
+  });
 
-        y:H-205,
+  for(let i=0;i<6;i++){
 
-        speed:14,
+    particles.push({
 
-        damage:1
+      x:
+        carX+
+        (Math.random()-.5)*12,
 
+      y:H-205,
+
+      vx:
+        (Math.random()-.5)*3,
+
+      vy:
+        -Math.random()*4,
+
+      life:12,
+
+      type:"flash"
     });
-
-
-    for(let i=0;i<6;i++){
-
-        particles.push({
-
-            x:
-                carX+
-                (Math.random()-.5)*12,
-
-            y:H-205,
-
-            vx:
-                (Math.random()-.5)*3,
-
-            vy:
-                -Math.random()*4,
-
-            life:12,
-
-            type:"flash"
-
-        });
-    }
+  }
 }
 
 
@@ -1407,43 +1245,42 @@ function shoot(){
 
 function updateBullets(dt){
 
-    bullets.forEach(
-        b=>{
-            b.y-=b.speed*dt;
-        }
-    );
+  bullets.forEach(b=>{
 
-    bullets=
-        bullets.filter(
-            b=>b.y>-30
-        );
+    b.y-=b.speed*dt;
+
+  });
+
+  bullets=
+    bullets.filter(
+      b=>b.y>-30
+    );
 }
 
 
 function drawBullets(){
 
-    bullets.forEach(b=>{
+  bullets.forEach(b=>{
 
-        ctx.shadowBlur=15;
+    ctx.shadowBlur=15;
+    ctx.shadowColor="#ffcf33";
 
-        ctx.shadowColor="#ffcf33";
+    ctx.fillStyle="#ffd740";
 
-        ctx.fillStyle="#ffd740";
+    ctx.beginPath();
 
-        ctx.beginPath();
+    ctx.arc(
+      b.x,
+      b.y,
+      5,
+      0,
+      Math.PI*2
+    );
 
-        ctx.arc(
-            b.x,
-            b.y,
-            5,
-            0,
-            Math.PI*2
-        );
+    ctx.fill();
 
-        ctx.fill();
-
-        ctx.shadowBlur=0;
-    });
+    ctx.shadowBlur=0;
+  });
 }
 
 
@@ -1451,75 +1288,70 @@ function drawBullets(){
 
 function burst(x,y){
 
-    for(let i=0;i<18;i++){
+  for(let i=0;i<18;i++){
 
-        particles.push({
+    particles.push({
 
-            x:x,
+      x:x,
+      y:y,
 
-            y:y,
+      vx:
+        (Math.random()-.5)*7,
 
-            vx:
-                (Math.random()-.5)*7,
+      vy:
+        (Math.random()-.5)*7,
 
-            vy:
-                (Math.random()-.5)*7,
+      life:
+        25+
+        Math.random()*15,
 
-            life:
-                25+
-                Math.random()*15,
-
-            type:"hit"
-
-        });
-    }
+      type:"hit"
+    });
+  }
 }
 
 
 function updateParticles(dt){
 
-    particles.forEach(p=>{
+  particles.forEach(p=>{
 
-        p.x+=p.vx*dt;
+    p.x+=p.vx*dt;
+    p.y+=p.vy*dt;
+    p.life-=dt;
 
-        p.y+=p.vy*dt;
+  });
 
-        p.life-=dt;
-
-    });
-
-    particles=
-        particles.filter(
-            p=>p.life>0
-        );
+  particles=
+    particles.filter(
+      p=>p.life>0
+    );
 }
 
 
 function drawParticles(){
 
-    particles.forEach(p=>{
+  particles.forEach(p=>{
 
-        ctx.globalAlpha=
-            Math.max(
-                0,
-                p.life/30
-            );
+    ctx.globalAlpha=
+      Math.max(
+        0,
+        p.life/30
+      );
 
-        ctx.fillStyle=
-            p.type==="flash"
-            ? "#fff176"
-            : "#ff7043";
+    ctx.fillStyle=
+      p.type==="flash"
+      ? "#fff176"
+      : "#ff7043";
 
-        ctx.fillRect(
-            p.x,
-            p.y,
-            5,
-            5
-        );
+    ctx.fillRect(
+      p.x,
+      p.y,
+      5,
+      5
+    );
+  });
 
-    });
-
-    ctx.globalAlpha=1;
+  ctx.globalAlpha=1;
 }
 
 
@@ -1527,32 +1359,11 @@ function drawParticles(){
 
 function hit(a,b){
 
-    return Math.abs(a.x-b.x)<
-        (a.w+b.w)/2
-        &&
-        Math.abs(a.y-b.y)<
-        (a.h+b.h)/2;
-}
-
-
-/* NEXT STAGE */
-
-function nextStage(){
-
-    stage++;
-
-    stageKills=0;
-
-    zombies=[];
-
-    bullets=[];
-
-    updateHUD();
-
-    showStageMessage(
-        "🎯 مرحله "+
-        stage
-    );
+  return Math.abs(a.x-b.x)<
+    (a.w+b.w)/2
+    &&
+    Math.abs(a.y-b.y)<
+    (a.h+b.h)/2;
 }
 
 
@@ -1560,337 +1371,350 @@ function nextStage(){
 
 function gameOver(){
 
-    running=false;
+  running=false;
 
-    document.getElementById(
-        "finalKills"
-    ).textContent=kills;
+  document.getElementById(
+    "finalKills"
+  ).textContent=kills;
 
-    document.getElementById(
-        "finalStage"
-    ).textContent=stage;
+  document.getElementById(
+    "finalStage"
+  ).textContent=stage;
 
-    document
-        .getElementById("gameOver")
-        .classList.remove("hidden");
+  document
+    .getElementById("gameOver")
+    .classList.remove("hidden");
 }
 
 
-/* LOOP */
+/* MAIN LOOP */
 
 function loop(t){
 
-    if(!running)return;
+  if(!running)return;
 
-
-    const dt=
-        Math.min(
-            (t-last)/16.67,
-            2
-        );
-
-    last=t;
-
-
-    /* movement */
-
-    if(leftDown)
-        carX-=7*dt;
-
-    if(rightDown)
-        carX+=7*dt;
-
-
-    /* road limit */
-
-    const rw=
-        Math.min(
-            W*.88,
-            520
-        );
-
-    const rx=
-        (W-rw)/2;
-
-
-    carX=Math.max(
-        rx+45,
-        Math.min(
-            rx+rw-45,
-            carX
-        )
+  const dt=
+    Math.min(
+      (t-last)/16.67,
+      2
     );
 
-
-    /* shooting */
-
-    fireTimer-=dt;
-
-    if(
-        fireDown &&
-        fireTimer<=0
-    ){
-
-        shoot();
-
-        fireTimer=9;
-    }
+  last=t;
 
 
-    /* spawning */
+  /* حرکت ماشین */
 
-    spawnTimer-=dt;
+  if(leftDown)
+    carX-=7*dt;
 
-    if(
-        spawnTimer<=0
-    ){
-
-        spawnZombie();
-
-        /*
-         * هر مرحله زامبی‌ها
-         * سریع‌تر و بیشتر می‌شوند.
-         */
-
-        spawnTimer=
-            Math.max(
-                13,
-                48-
-                stage*5-
-                kills*.12
-            );
-    }
+  if(rightDown)
+    carX+=7*dt;
 
 
-    /* move */
+  /* محدوده جاده */
 
-    zombies.forEach(z=>{
+  const rw=
+    Math.min(
+      W*.88,
+      520
+    );
 
-        z.y+=
-            z.speed*dt;
+  const rx=
+    (W-rw)/2;
 
-    });
+  carX=Math.max(
+    rx+45,
+    Math.min(
+      rx+rw-45,
+      carX
+    )
+  );
 
 
-    updateBullets(dt);
+  /* شلیک */
 
-    updateParticles(dt);
+  fireTimer-=dt;
+
+  if(
+    fireDown &&
+    fireTimer<=0
+  ){
+
+    shoot();
+
+    fireTimer=9;
+  }
 
 
-    /* collision */
+  /* ایجاد زامبی */
+
+  spawnTimer-=dt;
+
+  if(
+    spawnTimer<=0 &&
+    !stageChanging
+  ){
+
+    spawnZombie();
+
+    spawnTimer=
+      Math.max(
+        15,
+        48-
+        stage*5-
+        kills*.12
+      );
+  }
+
+
+  /* حرکت زامبی‌ها */
+
+  zombies.forEach(z=>{
+
+    z.y+=
+      z.speed*dt;
+
+  });
+
+
+  updateBullets(dt);
+  updateParticles(dt);
+
+
+  /*
+    این متغیر را جدا نگه می‌داریم.
+    مرحله فقط بعد از پایان کامل این فریم
+    عوض می‌شود.
+  */
+
+  let shouldChangeStage=false;
+
+
+  /* برخوردها */
+
+  for(
+    let i=zombies.length-1;
+    i>=0;
+    i--
+  ){
+
+    const z=zombies[i];
+
+    let dead=false;
+
+
+    /* گلوله */
 
     for(
-        let i=zombies.length-1;
-        i>=0;
-        i--
+      let j=bullets.length-1;
+      j>=0;
+      j--
     ){
 
-        const z=zombies[i];
+      const b=bullets[j];
 
-        let dead=false;
+      if(
+        Math.abs(b.x-z.x)<
+        (z.boss?45:27)
 
+        &&
 
-        for(
-            let j=bullets.length-1;
-            j>=0;
-            j--
-        ){
+        Math.abs(b.y-z.y)<
+        (z.boss?55:38)
+      ){
 
-            const b=bullets[j];
-
-
-            if(
-                Math.abs(
-                    b.x-z.x
-                )<
-                (z.boss?45:27)
-
-                &&
-
-                Math.abs(
-                    b.y-z.y
-                )<
-                (z.boss?55:38)
-            ){
-
-                bullets.splice(
-                    j,
-                    1
-                );
+        bullets.splice(j,1);
 
 
-                if(z.boss){
+        /* BOSS */
 
-                    z.hp-=b.damage;
+        if(z.boss){
 
-                    burst(
-                        z.x,
-                        z.y
-                    );
+          z.hp-=b.damage;
 
+          burst(
+            z.x,
+            z.y
+          );
 
-                    if(z.hp<=0){
-
-                        zombies.splice(
-                            i,
-                            1
-                        );
-
-                        kills++;
-
-                        stageKills++;
-
-                        coins+=50;
-
-                        burst(
-                            z.x,
-                            z.y
-                        );
-
-                        updateHUD();
-
-                        if(
-                            stage>=4 &&
-                            stageKills>=requiredKills()
-                        ){
-
-                            nextStage();
-
-                        }
-
-                        dead=true;
-
-                    }
-
-                }
-
-                else{
-
-                    zombies.splice(
-                        i,
-                        1
-                    );
-
-                    kills++;
-
-                    stageKills++;
-
-                    coins+=5;
-
-                    burst(
-                        z.x,
-                        z.y
-                    );
-
-                    updateHUD();
-
-                    /*
-                     * مرحله بعد
-                     */
-
-                    if(
-                        stageKills>=
-                        requiredKills()
-                        &&
-                        stage<4
-                    ){
-
-                        nextStage();
-
-                    }
-
-                    dead=true;
-
-                }
-
-                break;
-            }
-        }
-
-
-        if(dead)continue;
-
-
-        /* CAR */
-
-        if(
-            hit(
-                {
-                    x:carX,
-                    y:H-145,
-                    w:55,
-                    h:95
-                },
-                z
-            )
-        ){
+          if(z.hp<=0){
 
             zombies.splice(
-                i,
-                1
+              i,
+              1
             );
 
-            hp-=
-                z.boss
-                ? 35
-                : 20;
+            kills++;
+            stageKills++;
+
+            coins+=50;
 
             burst(
-                z.x,
-                z.y
+              z.x,
+              z.y
             );
 
             updateHUD();
 
+            /*
+              باس که کشته شد،
+              مرحله بعدی بعداً شروع می‌شود.
+            */
 
-            if(hp<=0){
+            if(
+              stage>=4 &&
+              !stageChanging
+            ){
 
-                hp=0;
-
-                updateHUD();
-
-                gameOver();
-
-                return;
+              shouldChangeStage=true;
             }
 
-            continue;
+            dead=true;
+          }
+
         }
 
+        /* ZOMBIE NORMAL */
 
-        /* خارج صفحه */
+        else{
 
-        if(
-            z.y>
-            H+100
-        ){
+          zombies.splice(
+            i,
+            1
+          );
 
-            zombies.splice(
-                i,
-                1
-            );
+          kills++;
+          stageKills++;
+
+          coins+=5;
+
+          burst(
+            z.x,
+            z.y
+          );
+
+          updateHUD();
+
+          /*
+            فقط علامت می‌زنیم.
+            هنوز nextStage را صدا نمی‌زنیم.
+          */
+
+          if(
+            stageKills>=
+            requiredKills()
+            &&
+            stage<4
+            &&
+            !stageChanging
+          ){
+
+            shouldChangeStage=true;
+          }
+
+          dead=true;
         }
+
+        break;
+      }
     }
 
 
-    /* DRAW */
-
-    drawRoad();
-
-    zombies.forEach(
-        drawZombie
-    );
-
-    drawCar();
-
-    drawBullets();
-
-    drawParticles();
+    if(dead)continue;
 
 
-    requestAnimationFrame(
-        loop
-    );
+    /* برخورد با ماشین */
+
+    if(
+      hit(
+        {
+          x:carX,
+          y:H-145,
+          w:55,
+          h:95
+        },
+        z
+      )
+    ){
+
+      zombies.splice(
+        i,
+        1
+      );
+
+      hp-=
+        z.boss
+        ? 35
+        : 20;
+
+      burst(
+        z.x,
+        z.y
+      );
+
+      updateHUD();
+
+      if(hp<=0){
+
+        hp=0;
+
+        updateHUD();
+
+        gameOver();
+
+        return;
+      }
+
+      continue;
+    }
+
+
+    /* خارج شدن زامبی */
+
+    if(z.y>H+100){
+
+      zombies.splice(
+        i,
+        1
+      );
+    }
+  }
+
+
+  /*
+    خیلی مهم:
+    انتقال مرحله بعد از تمام شدن حلقه
+    برخوردها انجام می‌شود.
+  */
+
+  if(
+    shouldChangeStage &&
+    !stageChanging &&
+    running
+  ){
+
+    nextStage();
+  }
+
+
+  /* DRAW */
+
+  drawRoad();
+
+  zombies.forEach(
+    drawZombie
+  );
+
+  drawCar();
+
+  drawBullets();
+
+  drawParticles();
+
+
+  requestAnimationFrame(
+    loop
+  );
 }
 
 
