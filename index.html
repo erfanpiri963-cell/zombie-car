@@ -1,132 +1,25 @@
 <!DOCTYPE html>
-<html lang="fa" dir="rtl">
+<html>
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Zombie Car</title>
-
-<style>
-* {
-    box-sizing: border-box;
-}
-
-body {
-    margin: 0;
-    background: #111;
-    color: white;
-    font-family: Arial, sans-serif;
-    overflow: hidden;
-}
-
-.screen {
-    width: 100vw;
-    height: 100vh;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    flex-direction: column;
-}
-
-.hidden {
-    display: none !important;
-}
-
-#menuScreen {
-    background: linear-gradient(#111, #292929);
-}
-
-h1 {
-    font-size: 42px;
-    margin-bottom: 40px;
-}
-
-#startBtn {
-    border: none;
-    border-radius: 15px;
-    padding: 18px 50px;
-    font-size: 24px;
-    font-weight: bold;
-    background: #e53935;
-    color: white;
-    cursor: pointer;
-}
-
-#startBtn:active {
-    transform: scale(.95);
-}
-
-#gameScreen {
-    position: relative;
-}
-
-#game {
-    position: absolute;
-    inset: 0;
-    width: 100%;
-    height: 100%;
-    display: block;
-}
-</style>
+    <meta charset="UTF-8">
+    <title>Zombie Car Test</title>
 </head>
 
 <body>
 
-<div id="menuScreen" class="screen">
+    <h1>Zombie Car</h1>
 
-    <h1>🚗 Zombie Car 🧟</h1>
+    <button id="start">شروع بازی</button>
 
-    <button id="startBtn">
-        ▶ شروع بازی
-    </button>
+    <div id="game" style="display:none;">
+        <h2>🎮 بازی اجرا شد!</h2>
+    </div>
 
-</div>
-
-<div id="gameScreen" class="screen hidden">
-
-    <canvas id="game"></canvas>
-
-</div>
-
-<script>
-
-const startBtn = document.getElementById("startBtn");
-const menuScreen = document.getElementById("menuScreen");
-const gameScreen = document.getElementById("gameScreen");
-const canvas = document.getElementById("game");
-const ctx = canvas.getContext("2d");
-
-function resizeCanvas() {
-    canvas.width = window.innerWidth;
-    canvas.height = window.innerHeight;
-}
-
-window.addEventListener("resize", resizeCanvas);
-
-startBtn.addEventListener("click", function () {
-
-    console.log("START CLICKED");
-
-    menuScreen.classList.add("hidden");
-    gameScreen.classList.remove("hidden");
-
-    resizeCanvas();
-
-    ctx.fillStyle = "#222";
-    ctx.fillRect(0, 0, canvas.width, canvas.height);
-
-    ctx.fillStyle = "#fff";
-    ctx.font = "bold 30px Arial";
-    ctx.textAlign = "center";
-
-    ctx.fillText(
-        "بازی شروع شد!",
-        canvas.width / 2,
-        canvas.height / 2
-    );
-
-});
-
-</script>
+    <script>
+        document.getElementById("start").onclick = function() {
+            document.getElementById("game").style.display = "block";
+        };
+    </script>
 
 </body>
 </html>
