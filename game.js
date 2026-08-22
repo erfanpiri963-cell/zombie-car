@@ -7,37 +7,21 @@ if (tg) {
 const canvas = document.getElementById("game");
 const ctx = canvas.getContext("2d");
 
-let W = 0;
-let H = 0;
-let dpr = 1;
-
+let W, H, dpr;
 let player;
 let bullets = [];
 let zombies = [];
 let particles = [];
-
-let coins = 0;
+let coins = [];
+let keys = {};
 let kills = 0;
-let score = 0;
-let distance = 0;
+let coinCount = 0;
 let hp = 100;
-
+let score = 0;
 let gameOver = false;
-let keys = {
-  left: false,
-  right: false,
-  fire: false
-};
-
 let spawnTimer = 0;
-let lastTime = performance.now();
+let last = performance.now();
 let roadOffset = 0;
-let shake = 0;
-let damageFlash = 0;
-
-// -------------------------
-// RESIZE
-// -------------------------
 
 function resize() {
   dpr = Math.min(window.devicePixelRatio || 1, 2);
@@ -47,7 +31,6 @@ function resize() {
 
   canvas.width = W * dpr;
   canvas.height = H * dpr;
-
   canvas.style.width = W + "px";
   canvas.style.height = H + "px";
 
@@ -57,1959 +40,634 @@ function resize() {
 window.addEventListener("resize", resize);
 resize();
 
-// -------------------------
-// HUD
-// -------------------------
-
-function updateHUD() {
-  const hpElement = document.getElementById("hp");
-  const coinsElement = document.getElementById("coins");
-  const killsElement = document.getElementById("kills");
-
-  if (hpElement) hpElement.textContent = Math.max(0, Math.round(hp));
-  if (coinsElement) coinsElement.textContent = coins;
-  if (killsElement) killsElement.textContent = kills;
-}
-
-// -------------------------
-// RESET
-// -------------------------
-
 function reset() {
   player = {
     x: W / 2,
-    y: H - 150,
-    w: 54,
-    h: 88,
+    y: H - 180,
+    w: 58,
+    h: 92,
     speed: 6,
-    cooldown: 0
+    fire: 0
   };
 
   bullets = [];
   zombies = [];
   particles = [];
+  coins = [];
 
-  coins = 0;
   kills = 0;
-  score = 0;
-  distance = 0;
+  coinCount = 0;
   hp = 100;
-
+  score = 0;
   gameOver = false;
   spawnTimer = 20;
   roadOffset = 0;
-  shake = 0;
-  damageFlash = 0;
 
-  lastTime = performance.now();
-
-  const gameOverScreen = document.getElementById("gameover");
-  if (gameOverScreen) {
-    gameOverScreen.classList.add("hidden");
-  }
-
-  updateHUD();
-}
-
-// -------------------------
-// CONTROLS
-// -------------------------
-
-function bindButton(id, key) {
-  const button = document.getElementById(id);
-
-  if (!button) return;
-
-  button.addEventListener("pointerdown", e => {
-    e.preventDefault();
-    keys[key] = true;
-  });
-
-  button.addEventListener("pointerup", e => {
-    e.preventDefault();
-    keys[key] = false;
-  });
-
-  button.addEventListener("pointercancel", () => {
-    keys[key] = false;
-  });
-
-  button.addEventListener("pointerleave", () => {
-    keys[key] = false;
-  });
-}
-
-bindButton("left", "left");
-bindButton("right", "right");
-bindButton("fire", "fire");
-
-window.addEventListener("keydown", e => {
-  if (e.key === "ArrowLeft" || e.key.toLowerCase() === "a") {
-    keys.left = true;
-  }
-
-  if (e.key === "ArrowRight" || e.key.toLowerCase() === "d") {
-    keys.right = true;
-  }
-
-  if (e.code === "Space") {
-    keys.fire = true;
-  }
-});
-
-window.addEventListener("keyup", e => {
-  if (e.key === "ArrowLeft" || e.key.toLowerCase() === "a") {
-    keys.left = false;
-  }
-
-  if (e.key === "ArrowRight" || e.key.toLowerCase() === "d") {
-    keys.right = false;
-  }
-
-  if (e.code === "Space") {
-    keys.fire = false;
-  }
-});
-
-const restartButton = document.getElementById("restart");
-
-if (restartButton) {
-  restartButton.onclick = reset;
-}
-
-// -------------------------
-// HELPERS
-// -------------------------
-
-function rand(min, max) {
-  return Math.random() * (max - min) + min;
-}
-
-function roundedRect(x, y, w, h, r) {
-  ctx.beginPath();
-  ctx.roundRect(x, y, w, h, r);
-  ctx.fill();
-}
-
-// -------------------------
-// ROAD
-// -------------------------
-
-function drawRoad() {
-  // dark background
-  const background = ctx.createLinearGradient(0, 0, 0, H);
-
-  background.addColorStop(0, "#050809");
-  background.addColorStop(0.5, "#172023");
-  background.addColorStop(1, "#050708");
-
-  ctx.fillStyle = background;
-  ctx.fillRect(0, 0, W, H);
-
-  const roadWidth = Math.min(W * 0.92, 560);
-  const roadX = (W - roadWidth) / 2;
-
-  // road
-  const road = ctx.createLinearGradient(0, 0, 0, H);
-
-  road.addColorStop(0, "#4a4f51");
-  road.addColorStop(0.5, "#292e30");
-  road.addColorStop(1, "#15191a");
-
-  ctx.fillStyle = road;
-  ctx.fillRect(roadX, 0, roadWidth, H);
-
-  // road edge
-  ctx.fillStyle = "#8b8d8d";
-
-  ctx.fillRect(roadX, 0, 5, H);
-  ctx.fillRect(roadX + roadWidth - 5, 0, 5, H);
-
-  // lane lines
-  ctx.strokeStyle = "#eeeeee";
-  ctx.lineWidth = 4;
-  ctx.setLineDash([40, 35]);
-  ctx.lineDashOffset = -roadOffset;
-
-  ctx.beginPath();
-  ctx.moveTo(W / 2, 0);
-  ctx.lineTo(W / 2, H);
-  ctx.stroke();
-
-  ctx.setLineDash([]);
-
-  // road cracks
-  ctx.globalAlpha = 0.22;
-  ctx.strokeStyle = "#090909";
-  ctx.lineWidth = 2;
-
-  for (let i = 0; i < 12; i++) {
-    const y = ((i * 180 + roadOffset * 1.2) % (H + 180)) - 90;
-    const x = roadX + rand(30, roadWidth - 30);
-
-    ctx.beginPath();
-    ctx.moveTo(x, y);
-    ctx.lineTo(x + rand(-15, 15), y + 30);
-    ctx.lineTo(x + rand(-20, 20), y + 55);
-    ctx.stroke();
-  }
-
-  ctx.globalAlpha = 1;
-
-  drawRoadside(roadX, roadWidth);
-}
-
-// -------------------------
-// ROADSIDE
-// -------------------------
-
-function drawRoadside(roadX, roadWidth) {
-  for (let i = 0; i < 9; i++) {
-    const y =
-      ((i * 170 + roadOffset * 1.3) % (H + 220)) - 110;
-
-    // left tree
-    ctx.fillStyle = "#080c0d";
-
-    ctx.beginPath();
-    ctx.arc(roadX - 40, y, 20, 0, Math.PI * 2);
-    ctx.fill();
-
-    ctx.fillRect(
-      roadX - 44,
-      y + 10,
-      7,
-      50
-    );
-
-    // right tree
-    ctx.beginPath();
-    ctx.arc(
-      roadX + roadWidth + 40,
-      y + 50,
-      22,
-      0,
-      Math.PI * 2
-    );
-
-    ctx.fill();
-
-    ctx.fillRect(
-      roadX + roadWidth + 36,
-      y + 60,
-      7,
-      55
-    );
-  }
-}
-
-// -------------------------
-// CAR
-// -------------------------
-
-function drawCar() {
-  ctx.save();
-
-  const sx = shake > 0 ? rand(-shake, shake) : 0;
-  const sy = shake > 0 ? rand(-shake, shake) : 0;
-
-  ctx.translate(
-    player.x + sx,
-    player.y + sy
-  );
-
-  // shadow
-  ctx.fillStyle = "rgba(0,0,0,.55)";
-
-  ctx.beginPath();
-
-  ctx.ellipse(
-    0,
-    35,
-    36,
-    12,
-    0,
-    0,
-    Math.PI * 2
-  );
-
-  ctx.fill();
-
-  // wheels
-  ctx.fillStyle = "#070707";
-
-  roundedRect(-32, -30, 10, 26, 4);
-  roundedRect(22, -30, 10, 26, 4);
-  roundedRect(-32, 12, 10, 26, 4);
-  roundedRect(22, 12, 10, 26, 4);
-
-  // body
-  const body = ctx.createLinearGradient(
-    -30,
-    0,
-    30,
-    0
-  );
-
-  body.addColorStop(0, "#650914");
-  body.addColorStop(0.5, "#e32132");
-  body.addColorStop(1, "#750b15");
-
-  ctx.fillStyle = body;
-
-  roundedRect(
-    -26,
-    -45,
-    52,
-    92,
-    12
-  );
-
-  // hood
-  ctx.fillStyle = "#b91526";
-
-  roundedRect(
-    -21,
-    -42,
-    42,
-    25,
-    8
-  );
-
-  // windshield
-  const glass = ctx.createLinearGradient(
-    0,
-    -32,
-    0,
-    -5
-  );
-
-  glass.addColorStop(0, "#bde5f0");
-  glass.addColorStop(1, "#17272c");
-
-  ctx.fillStyle = glass;
-
-  roundedRect(
-    -19,
-    -30,
-    38,
-    27,
-    7
-  );
-
-  // windshield divider
-  ctx.strokeStyle = "rgba(255,255,255,.35)";
-  ctx.lineWidth = 2;
-
-  ctx.beginPath();
-  ctx.moveTo(0, -29);
-  ctx.lineTo(0, -5);
-  ctx.stroke();
-
-  // rear window
-  ctx.fillStyle = "#172326";
-
-  roundedRect(
-    -18,
-    7,
-    36,
-    20,
-    5
-  );
-
-  // headlights
-  ctx.fillStyle = "#fff3bd";
-
-  roundedRect(-18, -42, 10, 7, 3);
-  roundedRect(8, -42, 10, 7, 3);
-
-  // rear lights
-  ctx.fillStyle = "#ff1825";
-
-  roundedRect(-18, 38, 10, 6, 2);
-  roundedRect(8, 38, 10, 6, 2);
-
-  // bumper
-  ctx.fillStyle = "#222";
-
-  roundedRect(
-    -23,
-    44,
-    46,
-    6,
-    3
-  );
-
-  ctx.restore();
-}
-
-// -------------------------
-// ZOMBIE SPAWN
-// -------------------------
-
-function spawnZombie() {
-  const roadWidth = Math.min(W * 0.92, 560);
-  const roadX =
-    (W - roadWidth) / 2 + 40;
-
-  const laneWidth =
-    (roadWidth - 80) / 3;
-
-  const lane =
-    Math.floor(Math.random() * 3);
-
-  const x =
-    roadX +
-    laneWidth * lane +
-    laneWidth / 2;
-
-  zombies.push({
-    x,
-    y: -70,
-    w: 42,
-    h: 60,
-    speed: rand(1.8, 3.2),
-    hp: 2,
-    maxHp: 2,
-    walk: Math.random() * 10
-  });
-}
-
-// -------------------------
-// ZOMBIE
-// -------------------------
-
-function drawZombie(z) {
-  ctx.save();
-
-  ctx.translate(z.x, z.y);
-
-  const movement =
-    Math.sin(z.walk) * 5;
-
-  // shadow
-  ctx.fillStyle = "rgba(0,0,0,.45)";
-
-  ctx.beginPath();
-
-  ctx.ellipse(
-    0,
-    30,
-    25,
-    8,
-    0,
-    0,
-    Math.PI * 2
-  );
-
-  ctx.fill();
-
-  // legs
-  ctx.strokeStyle = "#26352a";
-  ctx.lineWidth = 9;
-  ctx.lineCap = "round";
-
-  ctx.beginPath();
-  ctx.moveTo(-7, 12);
-  ctx.lineTo(-13, 35 + movement);
-  ctx.stroke();
-
-  ctx.beginPath();
-  ctx.moveTo(7, 12);
-  ctx.lineTo(13, 35 - movement);
-  ctx.stroke();
-
-  // arms
-  ctx.strokeStyle = "#6f9158";
-
-  ctx.beginPath();
-  ctx.moveTo(-14, -4);
-  ctx.lineTo(-28, 10 + movement);
-  ctx.stroke();
-
-  ctx.beginPath();
-  ctx.moveTo(14, -4);
-  ctx.lineTo(28, 5 - movement);
-  ctx.stroke();
-
-  // body
-  ctx.fillStyle = "#344936";
-
-  roundedRect(
-    -17,
-    -11,
-    34,
-    34,
-    8
-  );
-
-  // neck
-  ctx.fillStyle = "#79975e";
-
-  ctx.fillRect(
-    -6,
-    -21,
-    12,
-    12
-  );
-
-  // head
-  ctx.beginPath();
-
-  ctx.arc(
-    0,
-    -29,
-    18,
-    0,
-    Math.PI * 2
-  );
-
-  ctx.fill();
-
-  // hair
-  ctx.fillStyle = "#1c211c";
-
-  ctx.beginPath();
-
-  ctx.arc(
-    0,
-    -36,
-    14,
-    Math.PI,
-    Math.PI * 2
-  );
-
-  ctx.fill();
-
-  // eyes
-  ctx.fillStyle = "#d9ff92";
-
-  ctx.beginPath();
-
-  ctx.arc(-6, -31, 3, 0, Math.PI * 2);
-  ctx.arc(6, -31, 3, 0, Math.PI * 2);
-
-  ctx.fill();
-
-  // mouth
-  ctx.fillStyle = "#211516";
-
-  ctx.fillRect(
-    -9,
-    -20,
-    18,
-    6
-  );
-
-  // teeth
-  ctx.fillStyle = "#f2f2e5";
-
-  ctx.fillRect(-5, -20, 3, 3);
-  ctx.fillRect(2, -20, 3, 3);
-
-  // HP bar
-  const barWidth = 48;
-
-  ctx.fillStyle = "#111";
-
-  ctx.fillRect(
-    -barWidth / 2,
-    -55,
-    barWidth,
-    6
-  );
-
-  ctx.fillStyle = "#28e15d";
-
-  ctx.fillRect(
-    -barWidth / 2,
-    -55,
-    barWidth * (z.hp / z.maxHp),
-    6
-  );
-
-  ctx.restore();
-}
-
-// -------------------------
-// FIRE
-// -------------------------
-
-function fire() {
-  bullets.push({
-    x: player.x,
-    y: player.y - 50,
-    speed: 13,
-    radius: 4
-  });
-
-  // muzzle flash
-  for (let i = 0; i < 8; i++) {
-    particles.push({
-      x: player.x + rand(-5, 5),
-      y: player.y - 53,
-      vx: rand(-2, 2),
-      vy: rand(-5, -1),
-      life: 12,
-      color: "#ffd54f"
-    });
-  }
-}
-
-// -------------------------
-// BLOOD EFFECT
-// -------------------------
-
-function bloodBurst(x, y) {
-  for (let i = 0; i < 20; i++) {
-    particles.push({
-      x,
-      y,
-      vx: rand(-5, 5),
-      vy: rand(-5, 5),
-      life: rand(15, 32),
-      color:
-        Math.random() > 0.25
-          ? "#c62828"
-          : "#ff5252"
-    });
-  }
-
-  damageFlash = 0.25;
-  shake = 5;
-}
-
-// -------------------------
-// COLLISION
-// -------------------------
-
-function collision(a, b) {
-  return (
-    Math.abs(a.x - b.x) <
-      (a.w + b.w) / 2 &&
-    Math.abs(a.y - b.y) <
-      (a.h + b.h) / 2
-  );
-}
-
-// -------------------------
-// GAME OVER
-// -------------------------
-
-function endGame() {
-  gameOver = true;
-
-  const finalKills =
-    document.getElementById("finalKills");
-
-  if (finalKills) {
-    finalKills.textContent = kills;
-  }
-
-  const screen =
-    document.getElementById("gameover");
-
-  if (screen) {
-    screen.classList.remove("hidden");
-  }
-}
-
-// -------------------------
-// UPDATE
-// -------------------------
-
-function update(dt) {
-  roadOffset += 7 * dt;
-
-  distance += 0.15 * dt;
-
-  // movement
-  if (keys.left) {
-    player.x -= player.speed * dt;
-  }
-
-  if (keys.right) {
-    player.x += player.speed * dt;
-  }
-
-  // boundaries
-  const roadWidth =
-    Math.min(W * 0.92, 560);
-
-  const minX =
-    (W - roadWidth) / 2 + 35;
-
-  const maxX =
-    (W + roadWidth) / 2 - 35;
-
-  player.x =
-    Math.max(
-      minX,
-      Math.min(maxX, player.x)
-    );
-
-  // shooting
-  player.cooldown -= dt;
-
-  if (
-    keys.fire &&
-    player.cooldown <= 0
-  ) {
-    fire();
-
-    player.cooldown = 8;
-  }
-
-  // spawn
-  spawnTimer -= dt;
-
-  if (spawnTimer <= 0) {
-    spawnZombie();
-
-    spawnTimer =
-      Math.max(
-        14,
-        42 - kills * 0.15
-      );
-  }
-
-  // bullets
-  bullets.forEach(b => {
-    b.y -= b.speed * dt;
-  });
-
-  // zombies
-  zombies.forEach(z => {
-    z.y += z.speed * dt;
-    z.walk += 0.15 * dt;
-  });
-
-  // collisions
-  for (
-    let i = zombies.length - 1;
-    i >= 0;
-    i--
-  ) {
-    const z = zombies[i];
-
-    if (z.y > H + 80) {
-      zombies.splice(i, 1);
-      continue;
-    }
-
-    // zombie hits car
-    if (
-      collision(
-        {
-          x: player.x,
-          y: player.y,
-          w: player.w,
-          h: player.h
-        },
-        z
-      )
-    ) {
-      zombies.splice(i, 1);
-
-      hp -= 18;
-
-      bloodBurst(z.x, z.y);
-
-      updateHUD();
-
-      if (hp <= 0) {
-        endGame();
-      }
-
-      continue;
-    }
-
-    // bullet hits zombie
-    for (
-      let j = bullets.length - 1;
-      j >= 0;
-      j--
-    ) {
-      const b = bullets[j];
-
-      if (
-        Math.abs(b.x - z.x) < 28 &&
-        Math.abs(b.y - z.y) < 35
-      ) {
-        bullets.splice(j, 1);
-
-        z.hp--;
-
-        bloodBurst(
-          b.x,
-          b.y
-        );
-
-        if (z.hp <= 0) {
-          zombies.splice(i, 1);
-
-          kills++;
-          coins += 5;
-          score += 10;
-
-          updateHUD();
-        }
-
-        break;
-      }
-    }
-  }
-
-  bullets =
-    bullets.filter(
-      b => b.y > -30
-    );
-
-  // particles
-  particles.forEach(p => {
-    p.x += p.vx * dt;
-    p.y += p.vy * dt;
-
-    p.vy += 0.08 * dt;
-
-    p.life -= dt;
-  });
-
-  particles =
-    particles.filter(
-      p => p.life > 0
-    );
-
-  if (damageFlash > 0) {
-    damageFlash -= 0.02 * dt;
-  }
-
-  if (shake > 0) {
-    shake -= 0.4 * dt;
-  }
-}
-
-// -------------------------
-// DRAW
-// -------------------------
-
-function draw() {
-  drawRoad();
-
-  zombies.forEach(drawZombie);
-
-  drawCar();
-
-  // bullets
-  bullets.forEach(b => {
-    ctx.shadowBlur = 15;
-    ctx.shadowColor = "#ffd54f";
-
-    ctx.fillStyle = "#fff6a0";
-
-    ctx.beginPath();
-
-    ctx.arc(
-      b.x,
-      b.y,
-      b.radius,
-      0,
-      Math.PI * 2
-    );
-
-    ctx.fill();
-
-    ctx.shadowBlur = 0;
-  });
-
-  // particles
-  particles.forEach(p => {
-    ctx.globalAlpha =
-      Math.max(0, p.life / 32);
-
-    ctx.fillStyle =
-      p.color || "#ff7043";
-
-    ctx.beginPath();
-
-    ctx.arc(
-      p.x,
-      p.y,
-      rand(2, 5),
-      0,
-      Math.PI * 2
-    );
-
-    ctx.fill();
-  });
-
-  ctx.globalAlpha = 1;
-
-  // damage flash
-  if (damageFlash > 0) {
-    const red =
-      ctx.createRadialGradient(
-        W / 2,
-        H / 2,
-        H * 0.2,
-        W / 2,
-        H / 2,
-        H * 0.8
-      );
-
-    red.addColorStop(
-      0,
-      "rgba(255,0,0,0)"
-    );
-
-    red.addColorStop(
-      1,
-      `rgba(220,0,0,${damageFlash})`
-    );
-
-    ctx.fillStyle = red;
-    ctx.fillRect(0, 0, W, H);
-  }
-
-  // vignette
-  const vignette =
-    ctx.createRadialGradient(
-      W / 2,
-      H / 2,
-      H * 0.2,
-      W / 2,
-      H / 2,
-      H * 0.85
-    );
-
-  vignette.addColorStop(
-    0,
-    "rgba(0,0,0,0)"
-  );
-
-  vignette.addColorStop(
-    1,
-    "rgba(0,0,0,.6)"
-  );
-
-  ctx.fillStyle = vignette;
-  ctx.fillRect(0, 0, W, H);
-}
-
-// -------------------------
-// LOOP
-// -------------------------
-
-function loop(time) {
-  const dt =
-    Math.min(
-      (time - lastTime) / 16.67,
-      2
-    );
-
-  lastTime = time;
-
-  if (!gameOver) {
-    update(dt);
-  }
-
-  draw();
-
-  requestAnimationFrame(loop);
-}
-
-// -------------------------
-// START
-// -------------------------
-
-reset();
-requestAnimationFrame(loop);
-// -------------------------
-// RESIZE
-// -------------------------
-
-function resize() {
-  dpr = Math.min(window.devicePixelRatio || 1, 2);
-
-  W = window.innerWidth;
-  H = window.innerHeight;
-
-  canvas.width = W * dpr;
-  canvas.height = H * dpr;
-
-  canvas.style.width = W + "px";
-  canvas.style.height = H + "px";
-
-  ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
-}
-
-window.addEventListener("resize", resize);
-resize();
-
-// -------------------------
-// HUD
-// -------------------------
-
-function updateHUD() {
-  const hpElement = document.getElementById("hp");
-  const coinsElement = document.getElementById("coins");
-  const killsElement = document.getElementById("kills");
-
-  if (hpElement) hpElement.textContent = Math.max(0, Math.round(hp));
-  if (coinsElement) coinsElement.textContent = coins;
-  if (killsElement) killsElement.textContent = kills;
-}
-
-// -------------------------
-// RESET
-// -------------------------
-
-function reset() {
-  player = {
-    x: W / 2,
-    y: H - 150,
-    w: 54,
-    h: 88,
-    speed: 6,
-    cooldown: 0
+  keys = {
+    l: false,
+    r: false,
+    f: false
   };
 
-  bullets = [];
-  zombies = [];
-  particles = [];
+  const gameover = document.getElementById("gameover");
+  if (gameover) gameover.classList.add("hidden");
 
-  coins = 0;
-  kills = 0;
-  score = 0;
-  distance = 0;
-  hp = 100;
-
-  gameOver = false;
-  spawnTimer = 20;
-  roadOffset = 0;
-  shake = 0;
-  damageFlash = 0;
-
-  lastTime = performance.now();
-
-  const gameOverScreen = document.getElementById("gameover");
-  if (gameOverScreen) {
-    gameOverScreen.classList.add("hidden");
-  }
-
-  updateHUD();
+  updateHud();
 }
 
-// -------------------------
-// CONTROLS
-// -------------------------
+function updateHud() {
+  hp = Math.max(0, Math.round(hp));
 
-function bindButton(id, key) {
-  const button = document.getElementById(id);
+  const hpEl = document.getElementById("hp");
+  const coinsEl = document.getElementById("coins");
+  const killsEl = document.getElementById("kills");
 
-  if (!button) return;
+  if (hpEl) hpEl.textContent = hp;
+  if (coinsEl) coinsEl.textContent = coinCount;
+  if (killsEl) killsEl.textContent = kills;
+}
 
-  button.addEventListener("pointerdown", e => {
+function bind(id, key) {
+  const b = document.getElementById(id);
+  if (!b) return;
+
+  b.addEventListener("pointerdown", e => {
     e.preventDefault();
     keys[key] = true;
   });
 
-  button.addEventListener("pointerup", e => {
-    e.preventDefault();
-    keys[key] = false;
-  });
-
-  button.addEventListener("pointercancel", () => {
-    keys[key] = false;
-  });
-
-  button.addEventListener("pointerleave", () => {
-    keys[key] = false;
+  ["pointerup", "pointercancel", "pointerleave"].forEach(event => {
+    b.addEventListener(event, () => {
+      keys[key] = false;
+    });
   });
 }
 
-bindButton("left", "left");
-bindButton("right", "right");
-bindButton("fire", "fire");
+bind("left", "l");
+bind("right", "r");
+bind("fire", "f");
 
 window.addEventListener("keydown", e => {
-  if (e.key === "ArrowLeft" || e.key.toLowerCase() === "a") {
-    keys.left = true;
-  }
-
-  if (e.key === "ArrowRight" || e.key.toLowerCase() === "d") {
-    keys.right = true;
-  }
-
-  if (e.code === "Space") {
-    keys.fire = true;
-  }
+  if (e.key === "ArrowLeft") keys.l = true;
+  if (e.key === "ArrowRight") keys.r = true;
+  if (e.code === "Space") keys.f = true;
 });
 
 window.addEventListener("keyup", e => {
-  if (e.key === "ArrowLeft" || e.key.toLowerCase() === "a") {
-    keys.left = false;
-  }
-
-  if (e.key === "ArrowRight" || e.key.toLowerCase() === "d") {
-    keys.right = false;
-  }
-
-  if (e.code === "Space") {
-    keys.fire = false;
-  }
+  if (e.key === "ArrowLeft") keys.l = false;
+  if (e.key === "ArrowRight") keys.r = false;
+  if (e.code === "Space") keys.f = false;
 });
 
-const restartButton = document.getElementById("restart");
+const restart = document.getElementById("restart");
+if (restart) restart.onclick = reset;
 
-if (restartButton) {
-  restartButton.onclick = reset;
-}
-
-// -------------------------
-// HELPERS
-// -------------------------
-
-function rand(min, max) {
-  return Math.random() * (max - min) + min;
-}
-
-function roundedRect(x, y, w, h, r) {
+function roundRect(x, y, w, h, r = 8) {
   ctx.beginPath();
   ctx.roundRect(x, y, w, h, r);
   ctx.fill();
 }
 
-// -------------------------
-// ROAD
-// -------------------------
+/* =========================
+   ROAD
+========================= */
 
 function drawRoad() {
-  // dark background
-  const background = ctx.createLinearGradient(0, 0, 0, H);
+  // محیط اطراف جاده
+  const bg = ctx.createLinearGradient(0, 0, 0, H);
+  bg.addColorStop(0, "#10151a");
+  bg.addColorStop(1, "#05080a");
 
-  background.addColorStop(0, "#050809");
-  background.addColorStop(0.5, "#172023");
-  background.addColorStop(1, "#050708");
-
-  ctx.fillStyle = background;
+  ctx.fillStyle = bg;
   ctx.fillRect(0, 0, W, H);
 
-  const roadWidth = Math.min(W * 0.92, 560);
-  const roadX = (W - roadWidth) / 2;
+  const rw = Math.min(W * 0.92, 560);
+  const rx = (W - rw) / 2;
 
-  // road
+  // جاده
   const road = ctx.createLinearGradient(0, 0, 0, H);
-
-  road.addColorStop(0, "#4a4f51");
-  road.addColorStop(0.5, "#292e30");
-  road.addColorStop(1, "#15191a");
+  road.addColorStop(0, "#596066");
+  road.addColorStop(0.5, "#30363b");
+  road.addColorStop(1, "#171c20");
 
   ctx.fillStyle = road;
-  ctx.fillRect(roadX, 0, roadWidth, H);
+  ctx.fillRect(rx, 0, rw, H);
 
-  // road edge
-  ctx.fillStyle = "#8b8d8d";
+  // حاشیه جاده
+  ctx.fillStyle = "#b7b7b7";
+  ctx.fillRect(rx, 0, 5, H);
+  ctx.fillRect(rx + rw - 5, 0, 5, H);
 
-  ctx.fillRect(roadX, 0, 5, H);
-  ctx.fillRect(roadX + roadWidth - 5, 0, 5, H);
+  // سایه کناره‌ها
+  const shade = ctx.createLinearGradient(rx, 0, rx + rw, 0);
+  shade.addColorStop(0, "rgba(0,0,0,.45)");
+  shade.addColorStop(.15, "rgba(0,0,0,0)");
+  shade.addColorStop(.85, "rgba(0,0,0,0)");
+  shade.addColorStop(1, "rgba(0,0,0,.45)");
 
-  // lane lines
-  ctx.strokeStyle = "#eeeeee";
-  ctx.lineWidth = 4;
-  ctx.setLineDash([40, 35]);
-  ctx.lineDashOffset = -roadOffset;
+  ctx.fillStyle = shade;
+  ctx.fillRect(rx, 0, rw, H);
+
+  // خط وسط متحرک
+  ctx.strokeStyle = "#f5f5f5";
+  ctx.lineWidth = 6;
+  ctx.setLineDash([55, 45]);
+  ctx.lineDashOffset = roadOffset;
 
   ctx.beginPath();
-  ctx.moveTo(W / 2, 0);
-  ctx.lineTo(W / 2, H);
+  ctx.moveTo(W / 2, -100);
+  ctx.lineTo(W / 2, H + 100);
   ctx.stroke();
 
   ctx.setLineDash([]);
 
-  // road cracks
-  ctx.globalAlpha = 0.22;
-  ctx.strokeStyle = "#090909";
-  ctx.lineWidth = 2;
+  // ترک‌های جاده
+  ctx.strokeStyle = "rgba(0,0,0,.25)";
+  ctx.lineWidth = 3;
 
-  for (let i = 0; i < 12; i++) {
-    const y = ((i * 180 + roadOffset * 1.2) % (H + 180)) - 90;
-    const x = roadX + rand(30, roadWidth - 30);
+  for (let i = 0; i < 7; i++) {
+    const y = ((i * 190 + roadOffset * 1.5) % (H + 220)) - 100;
 
     ctx.beginPath();
-    ctx.moveTo(x, y);
-    ctx.lineTo(x + rand(-15, 15), y + 30);
-    ctx.lineTo(x + rand(-20, 20), y + 55);
+    ctx.moveTo(rx + 25, y);
+    ctx.lineTo(rx + 65, y + 40);
+    ctx.lineTo(rx + 45, y + 80);
+    ctx.stroke();
+
+    ctx.beginPath();
+    ctx.moveTo(rx + rw - 30, y + 60);
+    ctx.lineTo(rx + rw - 70, y + 100);
     ctx.stroke();
   }
-
-  ctx.globalAlpha = 1;
-
-  drawRoadside(roadX, roadWidth);
 }
 
-// -------------------------
-// ROADSIDE
-// -------------------------
-
-function drawRoadside(roadX, roadWidth) {
-  for (let i = 0; i < 9; i++) {
-    const y =
-      ((i * 170 + roadOffset * 1.3) % (H + 220)) - 110;
-
-    // left tree
-    ctx.fillStyle = "#080c0d";
-
-    ctx.beginPath();
-    ctx.arc(roadX - 40, y, 20, 0, Math.PI * 2);
-    ctx.fill();
-
-    ctx.fillRect(
-      roadX - 44,
-      y + 10,
-      7,
-      50
-    );
-
-    // right tree
-    ctx.beginPath();
-    ctx.arc(
-      roadX + roadWidth + 40,
-      y + 50,
-      22,
-      0,
-      Math.PI * 2
-    );
-
-    ctx.fill();
-
-    ctx.fillRect(
-      roadX + roadWidth + 36,
-      y + 60,
-      7,
-      55
-    );
-  }
-}
-
-// -------------------------
-// CAR
-// -------------------------
+/* =========================
+   PLAYER CAR
+========================= */
 
 function drawCar() {
   ctx.save();
+  ctx.translate(player.x, player.y);
 
-  const sx = shake > 0 ? rand(-shake, shake) : 0;
-  const sy = shake > 0 ? rand(-shake, shake) : 0;
-
-  ctx.translate(
-    player.x + sx,
-    player.y + sy
-  );
-
-  // shadow
+  // سایه
   ctx.fillStyle = "rgba(0,0,0,.55)";
-
   ctx.beginPath();
-
-  ctx.ellipse(
-    0,
-    35,
-    36,
-    12,
-    0,
-    0,
-    Math.PI * 2
-  );
-
+  ctx.ellipse(0, 45, 34, 13, 0, 0, Math.PI * 2);
   ctx.fill();
 
-  // wheels
-  ctx.fillStyle = "#070707";
+  // چراغ‌ها
+  ctx.fillStyle = "#fff4b0";
+  roundRect(-20, -45, 14, 8, 3);
+  roundRect(6, -45, 14, 8, 3);
 
-  roundedRect(-32, -30, 10, 26, 4);
-  roundedRect(22, -30, 10, 26, 4);
-  roundedRect(-32, 12, 10, 26, 4);
-  roundedRect(22, 12, 10, 26, 4);
+  // بدنه
+  const carGradient = ctx.createLinearGradient(-30, 0, 30, 0);
+  carGradient.addColorStop(0, "#8b0014");
+  carGradient.addColorStop(.5, "#f02038");
+  carGradient.addColorStop(1, "#870014");
 
-  // body
-  const body = ctx.createLinearGradient(
-    -30,
-    0,
-    30,
-    0
-  );
+  ctx.fillStyle = carGradient;
+  roundRect(-29, -42, 58, 88, 13);
 
-  body.addColorStop(0, "#650914");
-  body.addColorStop(0.5, "#e32132");
-  body.addColorStop(1, "#750b15");
-
-  ctx.fillStyle = body;
-
-  roundedRect(
-    -26,
-    -45,
-    52,
-    92,
-    12
-  );
-
-  // hood
-  ctx.fillStyle = "#b91526";
-
-  roundedRect(
-    -21,
-    -42,
-    42,
-    25,
-    8
-  );
-
-  // windshield
-  const glass = ctx.createLinearGradient(
-    0,
-    -32,
-    0,
-    -5
-  );
-
-  glass.addColorStop(0, "#bde5f0");
-  glass.addColorStop(1, "#17272c");
+  // شیشه جلو
+  const glass = ctx.createLinearGradient(0, -38, 0, -5);
+  glass.addColorStop(0, "#bfe7f2");
+  glass.addColorStop(1, "#263a45");
 
   ctx.fillStyle = glass;
+  roundRect(-21, -32, 42, 31, 8);
 
-  roundedRect(
-    -19,
-    -30,
-    38,
-    27,
-    7
-  );
+  // خط وسط شیشه
+  ctx.fillStyle = "rgba(255,255,255,.45)";
+  ctx.fillRect(-2, -31, 4, 29);
 
-  // windshield divider
-  ctx.strokeStyle = "rgba(255,255,255,.35)";
-  ctx.lineWidth = 2;
+  // شیشه عقب
+  ctx.fillStyle = "#14252d";
+  roundRect(-20, 7, 40, 22, 6);
 
-  ctx.beginPath();
-  ctx.moveTo(0, -29);
-  ctx.lineTo(0, -5);
-  ctx.stroke();
+  // چرخ‌ها
+  ctx.fillStyle = "#090909";
+  roundRect(-34, -24, 9, 25, 4);
+  roundRect(25, -24, 9, 25, 4);
+  roundRect(-34, 18, 9, 25, 4);
+  roundRect(25, 18, 9, 25, 4);
 
-  // rear window
-  ctx.fillStyle = "#172326";
-
-  roundedRect(
-    -18,
-    7,
-    36,
-    20,
-    5
-  );
-
-  // headlights
-  ctx.fillStyle = "#fff3bd";
-
-  roundedRect(-18, -42, 10, 7, 3);
-  roundedRect(8, -42, 10, 7, 3);
-
-  // rear lights
-  ctx.fillStyle = "#ff1825";
-
-  roundedRect(-18, 38, 10, 6, 2);
-  roundedRect(8, 38, 10, 6, 2);
-
-  // bumper
-  ctx.fillStyle = "#222";
-
-  roundedRect(
-    -23,
-    44,
-    46,
-    6,
-    3
-  );
+  // چراغ عقب
+  ctx.fillStyle = "#ff2638";
+  roundRect(-20, 35, 12, 6, 3);
+  roundRect(8, 35, 12, 6, 3);
 
   ctx.restore();
 }
 
-// -------------------------
-// ZOMBIE SPAWN
-// -------------------------
+/* =========================
+   ZOMBIES
+========================= */
 
-function spawnZombie() {
-  const roadWidth = Math.min(W * 0.92, 560);
-  const roadX =
-    (W - roadWidth) / 2 + 40;
+function spawn() {
+  const rw = Math.min(W * 0.92, 560);
+  const rx = (W - rw) / 2 + 55;
+  const maxX = rx + rw - 55;
 
-  const laneWidth =
-    (roadWidth - 80) / 3;
+  let x;
+  let tries = 0;
 
-  const lane =
-    Math.floor(Math.random() * 3);
-
-  const x =
-    roadX +
-    laneWidth * lane +
-    laneWidth / 2;
+  do {
+    x = rx + Math.random() * (maxX - rx);
+    tries++;
+  } while (
+    zombies.some(z => Math.abs(z.x - x) < 65 && z.y < 180) &&
+    tries < 20
+  );
 
   zombies.push({
     x,
     y: -70,
-    w: 42,
-    h: 60,
-    speed: rand(1.8, 3.2),
-    hp: 2,
-    maxHp: 2,
-    walk: Math.random() * 10
+    w: 45,
+    h: 65,
+    spd: 2.0 + Math.random() * 1.5,
+    phase: Math.random() * Math.PI * 2,
+    health: 1
   });
 }
-
-// -------------------------
-// ZOMBIE
-// -------------------------
 
 function drawZombie(z) {
   ctx.save();
 
-  ctx.translate(z.x, z.y);
+  const wobble = Math.sin(performance.now() / 220 + z.phase) * 3;
+  ctx.translate(z.x + wobble, z.y);
 
-  const movement =
-    Math.sin(z.walk) * 5;
-
-  // shadow
+  // سایه
   ctx.fillStyle = "rgba(0,0,0,.45)";
-
   ctx.beginPath();
-
-  ctx.ellipse(
-    0,
-    30,
-    25,
-    8,
-    0,
-    0,
-    Math.PI * 2
-  );
-
+  ctx.ellipse(0, 31, 25, 9, 0, 0, Math.PI * 2);
   ctx.fill();
 
-  // legs
-  ctx.strokeStyle = "#26352a";
-  ctx.lineWidth = 9;
+  // پاها
+  ctx.fillStyle = "#17281b";
+  roundRect(-16, 18, 12, 31, 7);
+  roundRect(4, 18, 12, 31, 7);
+
+  // بدن
+  const body = ctx.createLinearGradient(-20, -10, 20, 30);
+  body.addColorStop(0, "#527b4d");
+  body.addColorStop(1, "#243d29");
+
+  ctx.fillStyle = body;
+  roundRect(-20, -4, 40, 43, 10);
+
+  // دست‌ها
+  ctx.strokeStyle = "#6f9b58";
+  ctx.lineWidth = 13;
   ctx.lineCap = "round";
 
   ctx.beginPath();
-  ctx.moveTo(-7, 12);
-  ctx.lineTo(-13, 35 + movement);
+  ctx.moveTo(-17, 5);
+  ctx.lineTo(-32, 23);
   ctx.stroke();
 
   ctx.beginPath();
-  ctx.moveTo(7, 12);
-  ctx.lineTo(13, 35 - movement);
+  ctx.moveTo(17, 5);
+  ctx.lineTo(32, 18);
   ctx.stroke();
 
-  // arms
-  ctx.strokeStyle = "#6f9158";
-
+  // سر
+  ctx.fillStyle = "#6d9655";
   ctx.beginPath();
-  ctx.moveTo(-14, -4);
-  ctx.lineTo(-28, 10 + movement);
-  ctx.stroke();
-
-  ctx.beginPath();
-  ctx.moveTo(14, -4);
-  ctx.lineTo(28, 5 - movement);
-  ctx.stroke();
-
-  // body
-  ctx.fillStyle = "#344936";
-
-  roundedRect(
-    -17,
-    -11,
-    34,
-    34,
-    8
-  );
-
-  // neck
-  ctx.fillStyle = "#79975e";
-
-  ctx.fillRect(
-    -6,
-    -21,
-    12,
-    12
-  );
-
-  // head
-  ctx.beginPath();
-
-  ctx.arc(
-    0,
-    -29,
-    18,
-    0,
-    Math.PI * 2
-  );
-
+  ctx.arc(0, -18, 20, 0, Math.PI * 2);
   ctx.fill();
 
-  // hair
-  ctx.fillStyle = "#1c211c";
-
+  // چشم‌ها
+  ctx.fillStyle = "#d7ff71";
   ctx.beginPath();
-
-  ctx.arc(
-    0,
-    -36,
-    14,
-    Math.PI,
-    Math.PI * 2
-  );
-
+  ctx.arc(-7, -20, 4, 0, Math.PI * 2);
+  ctx.arc(7, -20, 4, 0, Math.PI * 2);
   ctx.fill();
 
-  // eyes
-  ctx.fillStyle = "#d9ff92";
+  // دهان
+  ctx.fillStyle = "#151515";
+  roundRect(-11, -7, 22, 9, 3);
 
-  ctx.beginPath();
-
-  ctx.arc(-6, -31, 3, 0, Math.PI * 2);
-  ctx.arc(6, -31, 3, 0, Math.PI * 2);
-
-  ctx.fill();
-
-  // mouth
-  ctx.fillStyle = "#211516";
-
-  ctx.fillRect(
-    -9,
-    -20,
-    18,
-    6
-  );
-
-  // teeth
-  ctx.fillStyle = "#f2f2e5";
-
-  ctx.fillRect(-5, -20, 3, 3);
-  ctx.fillRect(2, -20, 3, 3);
-
-  // HP bar
-  const barWidth = 48;
-
-  ctx.fillStyle = "#111";
-
-  ctx.fillRect(
-    -barWidth / 2,
-    -55,
-    barWidth,
-    6
-  );
-
-  ctx.fillStyle = "#28e15d";
-
-  ctx.fillRect(
-    -barWidth / 2,
-    -55,
-    barWidth * (z.hp / z.maxHp),
-    6
-  );
+  ctx.fillStyle = "#eee";
+  ctx.fillRect(-7, -7, 5, 5);
+  ctx.fillRect(3, -7, 5, 5);
 
   ctx.restore();
 }
 
-// -------------------------
-// FIRE
-// -------------------------
+/* =========================
+   BULLETS
+========================= */
 
 function fire() {
   bullets.push({
     x: player.x,
-    y: player.y - 50,
-    speed: 13,
-    radius: 4
+    y: player.y - 48,
+    spd: 14,
+    r: 5,
+    life: 100
   });
 
-  // muzzle flash
-  for (let i = 0; i < 8; i++) {
+  // نور شلیک
+  for (let i = 0; i < 5; i++) {
     particles.push({
-      x: player.x + rand(-5, 5),
-      y: player.y - 53,
-      vx: rand(-2, 2),
-      vy: rand(-5, -1),
-      life: 12,
-      color: "#ffd54f"
+      x: player.x + (Math.random() - .5) * 8,
+      y: player.y - 50,
+      vx: (Math.random() - .5) * 3,
+      vy: -Math.random() * 3,
+      life: 15,
+      size: 3,
+      type: "muzzle"
     });
   }
 }
 
-// -------------------------
-// BLOOD EFFECT
-// -------------------------
+function drawBullet(b) {
+  const glow = ctx.createRadialGradient(
+    b.x, b.y, 1,
+    b.x, b.y, 14
+  );
 
-function bloodBurst(x, y) {
-  for (let i = 0; i < 20; i++) {
+  glow.addColorStop(0, "#fff");
+  glow.addColorStop(.3, "#ffe45c");
+  glow.addColorStop(1, "rgba(255,120,0,0)");
+
+  ctx.fillStyle = glow;
+  ctx.beginPath();
+  ctx.arc(b.x, b.y, 14, 0, Math.PI * 2);
+  ctx.fill();
+
+  ctx.fillStyle = "#ffd740";
+  ctx.beginPath();
+  ctx.arc(b.x, b.y, b.r, 0, Math.PI * 2);
+  ctx.fill();
+}
+
+/* =========================
+   EFFECTS
+========================= */
+
+function burst(x, y) {
+  for (let i = 0; i < 22; i++) {
     particles.push({
       x,
       y,
-      vx: rand(-5, 5),
-      vy: rand(-5, 5),
-      life: rand(15, 32),
-      color:
-        Math.random() > 0.25
-          ? "#c62828"
-          : "#ff5252"
+      vx: (Math.random() - .5) * 8,
+      vy: (Math.random() - .5) * 8,
+      life: 30 + Math.random() * 20,
+      size: 3 + Math.random() * 5,
+      type: Math.random() > .35 ? "blood" : "spark"
     });
   }
-
-  damageFlash = 0.25;
-  shake = 5;
 }
 
-// -------------------------
-// COLLISION
-// -------------------------
+function updateParticles(dt) {
+  particles.forEach(p => {
+    p.x += p.vx * dt;
+    p.y += p.vy * dt;
 
-function collision(a, b) {
+    p.vy += .08 * dt;
+    p.life -= dt;
+  });
+
+  particles = particles.filter(p => p.life > 0);
+}
+
+function drawParticles() {
+  particles.forEach(p => {
+    ctx.globalAlpha = Math.max(0, p.life / 45);
+
+    if (p.type === "blood") {
+      ctx.fillStyle = "#b30018";
+    } else if (p.type === "spark") {
+      ctx.fillStyle = "#ffca28";
+    } else {
+      ctx.fillStyle = "#fff59d";
+    }
+
+    ctx.fillRect(p.x, p.y, p.size, p.size);
+  });
+
+  ctx.globalAlpha = 1;
+}
+
+function createCoin(x, y) {
+  coins.push({
+    x,
+    y,
+    r: 10,
+    spin: Math.random() * 6
+  });
+}
+
+function drawCoins() {
+  coins.forEach(c => {
+    const scale = Math.abs(Math.cos(c.spin));
+
+    ctx.save();
+    ctx.translate(c.x, c.y);
+    ctx.scale(Math.max(.15, scale), 1);
+
+    ctx.fillStyle = "#ffd54f";
+    ctx.beginPath();
+    ctx.arc(0, 0, c.r, 0, Math.PI * 2);
+    ctx.fill();
+
+    ctx.strokeStyle = "#fff1a8";
+    ctx.lineWidth = 2;
+    ctx.stroke();
+
+    ctx.fillStyle = "#a66b00";
+    ctx.font = "bold 12px sans-serif";
+    ctx.textAlign = "center";
+    ctx.fillText("$", 0, 4);
+
+    ctx.restore();
+
+    c.spin += .12;
+    c.y += 2;
+  });
+
+  coins = coins.filter(c => c.y < H + 30);
+}
+
+/* =========================
+   COLLISION
+========================= */
+
+function hit(a, b) {
   return (
     Math.abs(a.x - b.x) <
-      (a.w + b.w) / 2 &&
+    (a.w + b.w) / 2
+    &&
     Math.abs(a.y - b.y) <
-      (a.h + b.h) / 2
+    (a.h + b.h) / 2
   );
 }
 
-// -------------------------
-// GAME OVER
-// -------------------------
+/* =========================
+   GAME OVER
+========================= */
 
 function endGame() {
   gameOver = true;
 
-  const finalKills =
-    document.getElementById("finalKills");
+  const finalKills = document.getElementById("finalKills");
 
   if (finalKills) {
     finalKills.textContent = kills;
   }
 
-  const screen =
-    document.getElementById("gameover");
+  const gameover = document.getElementById("gameover");
 
-  if (screen) {
-    screen.classList.remove("hidden");
+  if (gameover) {
+    gameover.classList.remove("hidden");
   }
 }
 
-// -------------------------
-// UPDATE
-// -------------------------
+/* =========================
+   MAIN LOOP
+========================= */
 
-function update(dt) {
-  roadOffset += 7 * dt;
+function loop(t) {
+  const dt = Math.min((t - last) / 16.67, 2);
+  last = t;
 
-  distance += 0.15 * dt;
+  if (!gameOver) {
 
-  // movement
-  if (keys.left) {
-    player.x -= player.speed * dt;
-  }
+    // حرکت جاده
+    roadOffset += 7 * dt;
 
-  if (keys.right) {
-    player.x += player.speed * dt;
-  }
+    // حرکت ماشین
+    if (keys.l) player.x -= player.speed * dt;
+    if (keys.r) player.x += player.speed * dt;
 
-  // boundaries
-  const roadWidth =
-    Math.min(W * 0.92, 560);
+    const rw = Math.min(W * .92, 560);
+    const minX = (W - rw) / 2 + 40;
+    const maxX = (W + rw) / 2 - 40;
 
-  const minX =
-    (W - roadWidth) / 2 + 35;
-
-  const maxX =
-    (W + roadWidth) / 2 - 35;
-
-  player.x =
-    Math.max(
+    player.x = Math.max(
       minX,
       Math.min(maxX, player.x)
     );
 
-  // shooting
-  player.cooldown -= dt;
+    // شلیک
+    player.fire -= dt;
 
-  if (
-    keys.fire &&
-    player.cooldown <= 0
-  ) {
-    fire();
-
-    player.cooldown = 8;
-  }
-
-  // spawn
-  spawnTimer -= dt;
-
-  if (spawnTimer <= 0) {
-    spawnZombie();
-
-    spawnTimer =
-      Math.max(
-        14,
-        42 - kills * 0.15
-      );
-  }
-
-  // bullets
-  bullets.forEach(b => {
-    b.y -= b.speed * dt;
-  });
-
-  // zombies
-  zombies.forEach(z => {
-    z.y += z.speed * dt;
-    z.walk += 0.15 * dt;
-  });
-
-  // collisions
-  for (
-    let i = zombies.length - 1;
-    i >= 0;
-    i--
-  ) {
-    const z = zombies[i];
-
-    if (z.y > H + 80) {
-      zombies.splice(i, 1);
-      continue;
+    if (keys.f && player.fire <= 0) {
+      fire();
+      player.fire = 8;
     }
 
-    // zombie hits car
-    if (
-      collision(
-        {
-          x: player.x,
-          y: player.y,
-          w: player.w,
-          h: player.h
-        },
-        z
-      )
-    ) {
-      zombies.splice(i, 1);
+    // تولید زامبی
+    spawnTimer -= dt;
 
-      hp -= 18;
+    if (spawnTimer <= 0) {
+      spawn();
 
-      bloodBurst(z.x, z.y);
+      spawnTimer = Math.max(
+        22,
+        55 - kills * .35
+      );
+    }
 
-      updateHUD();
+    // گلوله‌ها
+    bullets.forEach(b => {
+      b.y -= b.spd * dt;
+      b.life -= dt;
+    });
 
-      if (hp <= 0) {
-        endGame();
+    // زامبی‌ها
+    zombies.forEach(z => {
+      z.y += z.spd * dt;
+    });
+
+    // برخوردها
+    for (let i = zombies.length - 1; i >= 0; i--) {
+
+      const z = zombies[i];
+
+      // خروج از صفحه
+      if (z.y > H + 80) {
+        zombies.splice(i, 1);
+        continue;
       }
 
-      continue;
-    }
-
-    // bullet hits zombie
-    for (
-      let j = bullets.length - 1;
-      j >= 0;
-      j--
-    ) {
-      const b = bullets[j];
-
+      // برخورد با ماشین
       if (
-        Math.abs(b.x - z.x) < 28 &&
-        Math.abs(b.y - z.y) < 35
+        hit(
+          {
+            x: player.x,
+            y: player.y,
+            w: player.w,
+            h: player.h
+          },
+          z
+        )
       ) {
-        bullets.splice(j, 1);
+        zombies.splice(i, 1);
 
-        z.hp--;
+        hp -= 18;
 
-        bloodBurst(
-          b.x,
-          b.y
-        );
+        burst(z.x, z.y);
+        updateHud();
 
-        if (z.hp <= 0) {
+        if (hp <= 0) {
+          endGame();
+        }
+
+        continue;
+      }
+
+      // برخورد گلوله
+      for (let j = bullets.length - 1; j >= 0; j--) {
+
+        const b = bullets[j];
+
+        if (
+          Math.abs(b.x - z.x) < 30 &&
+          Math.abs(b.y - z.y) < 40
+        ) {
+          bullets.splice(j, 1);
           zombies.splice(i, 1);
 
           kills++;
-          coins += 5;
+          coinCount += 5;
           score += 10;
 
-          updateHUD();
-        }
+          burst(z.x, z.y);
+          createCoin(z.x, z.y);
 
-        break;
+          updateHud();
+
+          break;
+        }
       }
     }
-  }
 
-  bullets =
-    bullets.filter(
-      b => b.y > -30
+    bullets = bullets.filter(
+      b => b.y > -30 && b.life > 0
     );
 
-  // particles
-  particles.forEach(p => {
-    p.x += p.vx * dt;
-    p.y += p.vy * dt;
-
-    p.vy += 0.08 * dt;
-
-    p.life -= dt;
-  });
-
-  particles =
-    particles.filter(
-      p => p.life > 0
-    );
-
-  if (damageFlash > 0) {
-    damageFlash -= 0.02 * dt;
+    updateParticles(dt);
+    drawCoins();
   }
 
-  if (shake > 0) {
-    shake -= 0.4 * dt;
-  }
-}
-
-// -------------------------
-// DRAW
-// -------------------------
-
-function draw() {
+  // رسم
   drawRoad();
 
   zombies.forEach(drawZombie);
 
+  drawCoins();
+
+  bullets.forEach(drawBullet);
+
   drawCar();
 
-  // bullets
-  bullets.forEach(b => {
-    ctx.shadowBlur = 15;
-    ctx.shadowColor = "#ffd54f";
-
-    ctx.fillStyle = "#fff6a0";
-
-    ctx.beginPath();
-
-    ctx.arc(
-      b.x,
-      b.y,
-      b.radius,
-      0,
-      Math.PI * 2
-    );
-
-    ctx.fill();
-
-    ctx.shadowBlur = 0;
-  });
-
-  // particles
-  particles.forEach(p => {
-    ctx.globalAlpha =
-      Math.max(0, p.life / 32);
-
-    ctx.fillStyle =
-      p.color || "#ff7043";
-
-    ctx.beginPath();
-
-    ctx.arc(
-      p.x,
-      p.y,
-      rand(2, 5),
-      0,
-      Math.PI * 2
-    );
-
-    ctx.fill();
-  });
-
-  ctx.globalAlpha = 1;
-
-  // damage flash
-  if (damageFlash > 0) {
-    const red =
-      ctx.createRadialGradient(
-        W / 2,
-        H / 2,
-        H * 0.2,
-        W / 2,
-        H / 2,
-        H * 0.8
-      );
-
-    red.addColorStop(
-      0,
-      "rgba(255,0,0,0)"
-    );
-
-    red.addColorStop(
-      1,
-      `rgba(220,0,0,${damageFlash})`
-    );
-
-    ctx.fillStyle = red;
-    ctx.fillRect(0, 0, W, H);
-  }
-
-  // vignette
-  const vignette =
-    ctx.createRadialGradient(
-      W / 2,
-      H / 2,
-      H * 0.2,
-      W / 2,
-      H / 2,
-      H * 0.85
-    );
-
-  vignette.addColorStop(
-    0,
-    "rgba(0,0,0,0)"
-  );
-
-  vignette.addColorStop(
-    1,
-    "rgba(0,0,0,.6)"
-  );
-
-  ctx.fillStyle = vignette;
-  ctx.fillRect(0, 0, W, H);
-}
-
-// -------------------------
-// LOOP
-// -------------------------
-
-function loop(time) {
-  const dt =
-    Math.min(
-      (time - lastTime) / 16.67,
-      2
-    );
-
-  lastTime = time;
-
-  if (!gameOver) {
-    update(dt);
-  }
-
-  draw();
+  drawParticles();
 
   requestAnimationFrame(loop);
 }
-
-// -------------------------
-// START
-// -------------------------
 
 reset();
 requestAnimationFrame(loop);
