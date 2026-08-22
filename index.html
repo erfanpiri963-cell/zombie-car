@@ -23,11 +23,10 @@ html,body{
     touch-action:none;
 }
 
-.hidden{
-    display:none!important;
-}
+.hidden{display:none!important}
 
 /* MENU */
+
 #menuScreen{
     position:fixed;
     inset:0;
@@ -35,8 +34,7 @@ html,body{
     flex-direction:column;
     align-items:center;
     justify-content:center;
-    background:
-        radial-gradient(circle at 50% 35%,#454d54 0%,#1b2025 45%,#080a0c 100%);
+    background:radial-gradient(circle at 50% 35%,#454d54,#1b2025 45%,#080a0c);
     color:white;
 }
 
@@ -65,11 +63,10 @@ html,body{
     box-shadow:0 8px 25px rgba(0,0,0,.55);
 }
 
-#startBtn:active{
-    transform:scale(.94);
-}
+#startBtn:active{transform:scale(.94)}
 
 /* GAME */
+
 #gameScreen{
     position:fixed;
     inset:0;
@@ -86,6 +83,7 @@ html,body{
 }
 
 /* HUD */
+
 #hud{
     position:absolute;
     top:15px;
@@ -111,6 +109,7 @@ html,body{
 }
 
 /* CONTROLS */
+
 #controls{
     position:absolute;
     left:0;
@@ -138,13 +137,8 @@ html,body{
     touch-action:none;
 }
 
-#leftBtn{
-    justify-self:start;
-}
-
-#rightBtn{
-    justify-self:end;
-}
+#leftBtn{justify-self:start}
+#rightBtn{justify-self:end}
 
 #fireBtn{
     justify-self:center;
@@ -165,6 +159,7 @@ html,body{
 }
 
 /* GAME OVER */
+
 #gameOver{
     position:absolute;
     inset:0;
@@ -203,7 +198,6 @@ html,body{
 
 <body>
 
-<!-- MENU -->
 <div id="menuScreen">
 
     <div class="logo">
@@ -221,7 +215,6 @@ html,body{
 </div>
 
 
-<!-- GAME -->
 <div id="gameScreen" class="hidden">
 
     <canvas id="game"></canvas>
@@ -243,12 +236,6 @@ html,body{
     </div>
 
 
-    <!--
-        LTR عمداً استفاده شده:
-        چپ = سمت چپ
-        آتش = وسط
-        راست = سمت راست
-    -->
     <div id="controls">
 
         <button id="leftBtn" class="controlBtn">
@@ -310,10 +297,13 @@ let movingRight=false;
 let firing=false;
 
 let bullets=[];
+let zombies=[];
+let particles=[];
 
 let running=false;
 let lastTime=0;
 let fireCooldown=0;
+let spawnTimer=0;
 
 let hp=100;
 let coins=0;
@@ -342,7 +332,7 @@ window.addEventListener("resize",resize);
 
 function updateHUD(){
 
-    document.getElementById("hp").textContent=hp;
+    document.getElementById("hp").textContent=Math.max(0,hp);
     document.getElementById("coins").textContent=coins;
     document.getElementById("kills").textContent=kills;
 }
@@ -356,6 +346,7 @@ function startGame(){
 
     menuScreen.classList.add("hidden");
     gameScreen.classList.remove("hidden");
+    document.getElementById("gameOver").classList.add("hidden");
 
     resize();
 
@@ -366,8 +357,12 @@ function startGame(){
     kills=0;
 
     bullets=[];
+    zombies=[];
+    particles=[];
 
     roadOffset=0;
+    spawnTimer=0;
+    fireCooldown=0;
 
     running=true;
 
@@ -382,10 +377,6 @@ function startGame(){
 /* RESTART */
 
 restartBtn.addEventListener("click",function(){
-
-    document.getElementById("gameOver")
-        .classList.add("hidden");
-
     startGame();
 });
 
@@ -395,23 +386,18 @@ restartBtn.addEventListener("click",function(){
 function holdButton(button,start,end){
 
     button.addEventListener("pointerdown",function(e){
-
         e.preventDefault();
         start();
-
     });
 
     button.addEventListener("pointerup",function(e){
-
         e.preventDefault();
         end();
-
     });
 
     button.addEventListener("pointercancel",end);
     button.addEventListener("pointerleave",end);
 }
-
 
 holdButton(
     leftBtn,
@@ -436,32 +422,16 @@ holdButton(
 
 window.addEventListener("keydown",function(e){
 
-    if(e.key==="ArrowLeft"){
-        movingLeft=true;
-    }
-
-    if(e.key==="ArrowRight"){
-        movingRight=true;
-    }
-
-    if(e.code==="Space"){
-        firing=true;
-    }
+    if(e.key==="ArrowLeft") movingLeft=true;
+    if(e.key==="ArrowRight") movingRight=true;
+    if(e.code==="Space") firing=true;
 });
 
 window.addEventListener("keyup",function(e){
 
-    if(e.key==="ArrowLeft"){
-        movingLeft=false;
-    }
-
-    if(e.key==="ArrowRight"){
-        movingRight=false;
-    }
-
-    if(e.code==="Space"){
-        firing=false;
-    }
+    if(e.key==="ArrowLeft") movingLeft=false;
+    if(e.key==="ArrowRight") movingRight=false;
+    if(e.code==="Space") firing=false;
 });
 
 
@@ -480,12 +450,7 @@ function drawRoad(){
 
     ctx.fillStyle="#aeb4b8";
 
-    ctx.fillRect(
-        roadX,
-        0,
-        5,
-        H
-    );
+    ctx.fillRect(roadX,0,5,H);
 
     ctx.fillRect(
         roadX+roadWidth-5,
@@ -501,19 +466,15 @@ function drawRoad(){
     ctx.lineDashOffset=roadOffset;
 
     ctx.beginPath();
-
     ctx.moveTo(W/2,0);
     ctx.lineTo(W/2,H);
-
     ctx.stroke();
 
     ctx.setLineDash([]);
 
     roadOffset+=4;
 
-    if(roadOffset>80){
-        roadOffset=0;
-    }
+    if(roadOffset>80) roadOffset=0;
 }
 
 
@@ -522,8 +483,6 @@ function drawRoad(){
 function drawCar(){
 
     const y=H-150;
-
-    /* shadow */
 
     ctx.fillStyle="rgba(0,0,0,.45)";
 
@@ -542,8 +501,6 @@ function drawCar(){
     ctx.fill();
 
 
-    /* body */
-
     ctx.fillStyle="#e53935";
 
     ctx.beginPath();
@@ -558,8 +515,6 @@ function drawCar(){
 
     ctx.fill();
 
-
-    /* roof */
 
     ctx.fillStyle="#b71c1c";
 
@@ -576,8 +531,6 @@ function drawCar(){
     ctx.fill();
 
 
-    /* windshield */
-
     ctx.fillStyle="#81d4fa";
 
     ctx.beginPath();
@@ -592,8 +545,6 @@ function drawCar(){
 
     ctx.fill();
 
-
-    /* hood */
 
     ctx.fillStyle="#ef5350";
 
@@ -610,56 +561,151 @@ function drawCar(){
     ctx.fill();
 
 
-    /* lights */
-
     ctx.fillStyle="#fff59d";
 
-    ctx.fillRect(
-        carX-20,
-        y+32,
-        12,
-        7
-    );
+    ctx.fillRect(carX-20,y+32,12,7);
+    ctx.fillRect(carX+8,y+32,12,7);
 
-    ctx.fillRect(
-        carX+8,
-        y+32,
-        12,
-        7
-    );
-
-
-    /* wheels */
 
     ctx.fillStyle="#070707";
 
-    ctx.fillRect(
-        carX-38,
-        y-32,
-        10,
-        28
+    ctx.fillRect(carX-38,y-32,10,28);
+    ctx.fillRect(carX+28,y-32,10,28);
+    ctx.fillRect(carX-38,y+18,10,28);
+    ctx.fillRect(carX+28,y+18,10,28);
+}
+
+
+/* ZOMBIE */
+
+function spawnZombie(){
+
+    const roadWidth=Math.min(W*.88,520);
+    const roadX=(W-roadWidth)/2;
+
+    const x=
+        roadX+
+        35+
+        Math.random()*
+        (roadWidth-70);
+
+    const speed=
+        1.4+
+        Math.random()*1.5+
+        Math.min(kills*.015,1.5);
+
+    zombies.push({
+        x:x,
+        y:-60,
+        w:42,
+        h:58,
+        speed:speed,
+        type:Math.random()
+    });
+}
+
+
+function drawZombie(z){
+
+    ctx.save();
+
+    ctx.translate(z.x,z.y);
+
+
+    /* shadow */
+
+    ctx.fillStyle="rgba(0,0,0,.35)";
+
+    ctx.beginPath();
+
+    ctx.ellipse(
+        0,
+        28,
+        22,
+        7,
+        0,
+        0,
+        Math.PI*2
     );
 
-    ctx.fillRect(
-        carX+28,
-        y-32,
-        10,
-        28
+    ctx.fill();
+
+
+    /* body */
+
+    ctx.fillStyle=
+        z.type>.5
+        ? "#4caf50"
+        : "#388e3c";
+
+    ctx.beginPath();
+
+    ctx.roundRect(
+        -19,
+        -5,
+        38,
+        40,
+        8
     );
 
-    ctx.fillRect(
-        carX-38,
-        y+18,
-        10,
-        28
+    ctx.fill();
+
+
+    /* head */
+
+    ctx.fillStyle="#72b95b";
+
+    ctx.beginPath();
+
+    ctx.arc(
+        0,
+        -22,
+        19,
+        0,
+        Math.PI*2
     );
 
+    ctx.fill();
+
+
+    /* eyes */
+
+    ctx.fillStyle="#111";
+
+    ctx.fillRect(-9,-26,5,6);
+    ctx.fillRect(4,-26,5,6);
+
+
+    /* mouth */
+
+    ctx.fillStyle="#eee";
+
     ctx.fillRect(
-        carX+28,
-        y+18,
-        10,
-        28
+        -9,
+        -12,
+        18,
+        5
     );
+
+
+    /* arms */
+
+    ctx.strokeStyle="#72b95b";
+    ctx.lineWidth=7;
+    ctx.lineCap="round";
+
+    ctx.beginPath();
+
+    ctx.moveTo(-17,3);
+    ctx.lineTo(-29,16);
+
+    ctx.moveTo(17,3);
+    ctx.lineTo(29,16);
+
+    ctx.stroke();
+
+
+    ctx.restore();
 }
 
 
@@ -670,8 +716,10 @@ function shoot(){
     bullets.push({
 
         x:carX,
+
         y:H-210,
-        speed:12
+
+        speed:13
 
     });
 }
@@ -679,11 +727,27 @@ function shoot(){
 
 /* BULLETS */
 
-function drawBullets(){
-
-    ctx.fillStyle="#ffd54f";
+function updateBullets(dt){
 
     bullets.forEach(function(b){
+        b.y-=b.speed*dt;
+    });
+
+    bullets=
+        bullets.filter(
+            b=>b.y>-30
+        );
+}
+
+
+function drawBullets(){
+
+    bullets.forEach(function(b){
+
+        ctx.shadowBlur=12;
+        ctx.shadowColor="#ffd54f";
+
+        ctx.fillStyle="#ffd54f";
 
         ctx.beginPath();
 
@@ -697,7 +761,92 @@ function drawBullets(){
 
         ctx.fill();
 
+        ctx.shadowBlur=0;
     });
+}
+
+
+/* PARTICLES */
+
+function burst(x,y){
+
+    for(let i=0;i<10;i++){
+
+        particles.push({
+
+            x:x,
+            y:y,
+
+            vx:(Math.random()-.5)*6,
+            vy:(Math.random()-.5)*6,
+
+            life:25
+
+        });
+    }
+}
+
+
+function updateParticles(dt){
+
+    particles.forEach(function(p){
+
+        p.x+=p.vx*dt;
+        p.y+=p.vy*dt;
+        p.life-=dt;
+
+    });
+
+    particles=
+        particles.filter(
+            p=>p.life>0
+        );
+}
+
+
+function drawParticles(){
+
+    particles.forEach(function(p){
+
+        ctx.globalAlpha=p.life/25;
+
+        ctx.fillStyle="#ff7043";
+
+        ctx.fillRect(
+            p.x,
+            p.y,
+            5,
+            5
+        );
+
+    });
+
+    ctx.globalAlpha=1;
+}
+
+
+/* COLLISION */
+
+function collision(a,b){
+
+    return Math.abs(a.x-b.x)<(a.w+b.w)/2 &&
+           Math.abs(a.y-b.y)<(a.h+b.h)/2;
+}
+
+
+/* GAME OVER */
+
+function endGame(){
+
+    running=false;
+
+    document.getElementById(
+        "finalKills"
+    ).textContent=kills;
+
+    document.getElementById(
+        "gameOver"
+    ).classList.remove("hidden");
 }
 
 
@@ -707,10 +856,11 @@ function gameLoop(time){
 
     if(!running)return;
 
-    const dt=Math.min(
-        (time-lastTime)/16.67,
-        2
-    );
+    const dt=
+        Math.min(
+            (time-lastTime)/16.67,
+            2
+        );
 
     lastTime=time;
 
@@ -744,32 +894,144 @@ function gameLoop(time){
 
     fireCooldown-=dt;
 
-    if(firing && fireCooldown<=0){
+    if(
+        firing &&
+        fireCooldown<=0
+    ){
 
         shoot();
 
-        fireCooldown=10;
+        fireCooldown=9;
     }
 
 
-    /* bullets */
+    /* zombies */
 
-    bullets.forEach(function(b){
+    spawnTimer-=dt;
 
-        b.y-=b.speed*dt;
+    if(spawnTimer<=0){
+
+        spawnZombie();
+
+        spawnTimer=
+            Math.max(
+                22,
+                55-kills*.25
+            );
+    }
+
+
+    zombies.forEach(function(z){
+
+        z.y+=z.speed*dt;
 
     });
 
-    bullets=bullets.filter(
-        b=>b.y>-20
-    );
+
+    updateBullets(dt);
+    updateParticles(dt);
 
 
-    /* render */
+    /* bullet vs zombie */
+
+    for(
+        let i=zombies.length-1;
+        i>=0;
+        i--
+    ){
+
+        const z=zombies[i];
+
+        let killed=false;
+
+        for(
+            let j=bullets.length-1;
+            j>=0;
+            j--
+        ){
+
+            const b=bullets[j];
+
+            if(
+                Math.abs(b.x-z.x)<25 &&
+                Math.abs(b.y-z.y)<35
+            ){
+
+                bullets.splice(j,1);
+                zombies.splice(i,1);
+
+                kills++;
+                coins+=5;
+
+                burst(z.x,z.y);
+
+                updateHUD();
+
+                killed=true;
+
+                break;
+            }
+        }
+
+        if(killed) continue;
+
+
+        /* zombie hits car */
+
+        if(
+            collision(
+                {
+                    x:carX,
+                    y:H-150,
+                    w:55,
+                    h:95
+                },
+                z
+            )
+        ){
+
+            zombies.splice(i,1);
+
+            hp-=20;
+
+            burst(z.x,z.y);
+
+            updateHUD();
+
+            if(hp<=0){
+
+                hp=0;
+
+                updateHUD();
+
+                endGame();
+
+                return;
+            }
+        }
+
+
+        /* zombie leaves screen */
+
+        else if(z.y>H+70){
+
+            zombies.splice(i,1);
+
+        }
+    }
+
+
+    /* DRAW */
 
     drawRoad();
+
+    zombies.forEach(drawZombie);
+
     drawCar();
+
     drawBullets();
+
+    drawParticles();
 
 
     requestAnimationFrame(gameLoop);
