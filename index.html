@@ -1,25 +1,489 @@
 <!DOCTYPE html>
-<html>
+<html lang="fa" dir="rtl">
 <head>
-    <meta charset="UTF-8">
-    <title>Zombie Car Test</title>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+
+<title>Zombie Car</title>
+
+<style>
+* {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+}
+
+html,
+body {
+    width: 100%;
+    height: 100%;
+    overflow: hidden;
+    background: #101318;
+    font-family: Arial, sans-serif;
+}
+
+.screen {
+    width: 100vw;
+    height: 100vh;
+}
+
+.hidden {
+    display: none !important;
+}
+
+/* صفحه شروع */
+#menuScreen {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+
+    background:
+        radial-gradient(circle at center, #343b44 0%, #101318 65%);
+}
+
+.logo {
+    font-size: 42px;
+    font-weight: 900;
+    color: white;
+    text-shadow: 0 4px 15px #000;
+    margin-bottom: 12px;
+}
+
+.subtitle {
+    color: #aaa;
+    margin-bottom: 45px;
+    font-size: 17px;
+}
+
+#startBtn {
+    border: 0;
+    padding: 18px 55px;
+    border-radius: 16px;
+
+    background: #e53935;
+    color: white;
+
+    font-size: 22px;
+    font-weight: bold;
+
+    box-shadow: 0 8px 25px rgba(0,0,0,.45);
+}
+
+#startBtn:active {
+    transform: scale(.94);
+}
+
+/* بازی */
+#gameScreen {
+    position: relative;
+    background: #111;
+}
+
+#game {
+    position: absolute;
+    inset: 0;
+
+    width: 100%;
+    height: 100%;
+
+    display: block;
+}
+
+/* HUD */
+#hud {
+    position: absolute;
+    top: 15px;
+    left: 15px;
+    right: 15px;
+
+    display: flex;
+    justify-content: space-between;
+
+    z-index: 10;
+
+    color: white;
+    font-size: 18px;
+    font-weight: bold;
+}
+
+.hudBox {
+    background: rgba(0,0,0,.55);
+    padding: 10px 14px;
+    border-radius: 12px;
+    backdrop-filter: blur(5px);
+}
+</style>
 </head>
 
 <body>
 
-    <h1>Zombie Car</h1>
+<!-- صفحه شروع -->
 
-    <button id="start">شروع بازی</button>
+<div id="menuScreen" class="screen">
 
-    <div id="game" style="display:none;">
-        <h2>🎮 بازی اجرا شد!</h2>
+    <div class="logo">
+        🚗 ZOMBIE CAR 🧟
     </div>
 
-    <script>
-        document.getElementById("start").onclick = function() {
-            document.getElementById("game").style.display = "block";
-        };
-    </script>
+    <div class="subtitle">
+        جاده پر از زامبی شده...
+    </div>
+
+    <button id="startBtn">
+        ▶ شروع بازی
+    </button>
+
+</div>
+
+
+<!-- صفحه بازی -->
+
+<div id="gameScreen" class="screen hidden">
+
+    <canvas id="game"></canvas>
+
+    <div id="hud">
+
+        <div class="hudBox">
+            ❤️ <span id="hp">100</span>
+        </div>
+
+        <div class="hudBox">
+            🪙 <span id="coins">0</span>
+        </div>
+
+        <div class="hudBox">
+            ☠️ <span id="kills">0</span>
+        </div>
+
+    </div>
+
+</div>
+
+
+<script>
+
+const startBtn = document.getElementById("startBtn");
+const menuScreen = document.getElementById("menuScreen");
+const gameScreen = document.getElementById("gameScreen");
+
+const canvas = document.getElementById("game");
+const ctx = canvas.getContext("2d");
+
+let W;
+let H;
+
+let roadOffset = 0;
+
+
+function resize() {
+
+    W = window.innerWidth;
+    H = window.innerHeight;
+
+    canvas.width = W;
+    canvas.height = H;
+}
+
+
+window.addEventListener("resize", resize);
+
+
+startBtn.addEventListener("click", function () {
+
+    menuScreen.classList.add("hidden");
+
+    gameScreen.classList.remove("hidden");
+
+    resize();
+
+    requestAnimationFrame(gameLoop);
+
+});
+
+
+function drawRoad() {
+
+    /*
+       پس زمینه
+    */
+
+    ctx.fillStyle = "#151a1f";
+
+    ctx.fillRect(
+        0,
+        0,
+        W,
+        H
+    );
+
+
+    /*
+       اندازه جاده
+    */
+
+    const roadWidth = Math.min(
+        W * 0.88,
+        520
+    );
+
+    const roadX =
+        (W - roadWidth) / 2;
+
+
+    /*
+       آسفالت
+    */
+
+    ctx.fillStyle = "#343a40";
+
+    ctx.fillRect(
+        roadX,
+        0,
+        roadWidth,
+        H
+    );
+
+
+    /*
+       حاشیه جاده
+    */
+
+    ctx.fillStyle = "#bdbdbd";
+
+    ctx.fillRect(
+        roadX,
+        0,
+        5,
+        H
+    );
+
+    ctx.fillRect(
+        roadX + roadWidth - 5,
+        0,
+        5,
+        H
+    );
+
+
+    /*
+       خط وسط متحرک
+    */
+
+    ctx.strokeStyle = "#eeeeee";
+
+    ctx.lineWidth = 5;
+
+    ctx.setLineDash([
+        45,
+        35
+    ]);
+
+    ctx.lineDashOffset =
+        roadOffset;
+
+    ctx.beginPath();
+
+    ctx.moveTo(
+        W / 2,
+        0
+    );
+
+    ctx.lineTo(
+        W / 2,
+        H
+    );
+
+    ctx.stroke();
+
+    ctx.setLineDash([]);
+
+
+    roadOffset += 3;
+
+    if (roadOffset > 80) {
+        roadOffset = 0;
+    }
+}
+
+
+function drawCar() {
+
+    const x = W / 2;
+
+    const y = H - 150;
+
+
+    /*
+       سایه ماشین
+    */
+
+    ctx.fillStyle =
+        "rgba(0,0,0,.45)";
+
+    ctx.beginPath();
+
+    ctx.ellipse(
+        x,
+        y + 45,
+        38,
+        12,
+        0,
+        0,
+        Math.PI * 2
+    );
+
+    ctx.fill();
+
+
+    /*
+       بدنه
+    */
+
+    ctx.fillStyle = "#e53935";
+
+    ctx.beginPath();
+
+    ctx.roundRect(
+        x - 30,
+        y - 55,
+        60,
+        110,
+        12
+    );
+
+    ctx.fill();
+
+
+    /*
+       سقف
+    */
+
+    ctx.fillStyle =
+        "#b71c1c";
+
+    ctx.beginPath();
+
+    ctx.roundRect(
+        x - 23,
+        y - 38,
+        46,
+        48,
+        10
+    );
+
+    ctx.fill();
+
+
+    /*
+       شیشه جلو
+    */
+
+    ctx.fillStyle =
+        "#81d4fa";
+
+    ctx.beginPath();
+
+    ctx.roundRect(
+        x - 18,
+        y - 32,
+        36,
+        27,
+        6
+    );
+
+    ctx.fill();
+
+
+    /*
+       کاپوت
+    */
+
+    ctx.fillStyle =
+        "#ef5350";
+
+    ctx.beginPath();
+
+    ctx.roundRect(
+        x - 24,
+        y + 8,
+        48,
+        28,
+        7
+    );
+
+    ctx.fill();
+
+
+    /*
+       چراغ‌ها
+    */
+
+    ctx.fillStyle =
+        "#fff59d";
+
+    ctx.fillRect(
+        x - 20,
+        y + 32,
+        12,
+        7
+    );
+
+    ctx.fillRect(
+        x + 8,
+        y + 32,
+        12,
+        7
+    );
+
+
+    /*
+       چرخ‌ها
+    */
+
+    ctx.fillStyle = "#080808";
+
+    ctx.fillRect(
+        x - 38,
+        y - 32,
+        10,
+        28
+    );
+
+    ctx.fillRect(
+        x + 28,
+        y - 32,
+        10,
+        28
+    );
+
+    ctx.fillRect(
+        x - 38,
+        y + 18,
+        10,
+        28
+    );
+
+    ctx.fillRect(
+        x + 28,
+        y + 18,
+        10,
+        28
+    );
+}
+
+
+function gameLoop() {
+
+    drawRoad();
+
+    drawCar();
+
+    requestAnimationFrame(gameLoop);
+}
+
+</script>
 
 </body>
 </html>
