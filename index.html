@@ -1,29 +1,522 @@
 <!doctype html>
 <html lang="fa" dir="rtl">
+
 <head>
-<meta charset="utf-8">
-<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
-<title>Zombie Car</title>
-<link rel="stylesheet" href="style.css">
+  <meta charset="utf-8">
+
+  <meta
+    name="viewport"
+    content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no"
+  >
+
+  <title>Zombie Car</title>
+
+  <link rel="stylesheet" href="style.css">
 </head>
+
 <body>
-<div id="hud">
-  <div>❤️ <span id="hp">100</span></div>
-  <div>🪙 <span id="coins">0</span></div>
-  <div>☠️ <span id="kills">0</span></div>
+
+<!-- =========================
+     MAIN MENU
+========================= -->
+
+<div id="mainMenu" class="menu-screen">
+
+  <div class="menu-content">
+
+    <div class="game-logo">
+      <div class="logo-zombie">ZOMBIE</div>
+      <div class="logo-car">CAR</div>
+    </div>
+
+    <div class="menu-car">
+      🚗
+    </div>
+
+    <div class="menu-coins">
+      🪙 <span id="menuCoins">0</span>
+    </div>
+
+    <button id="startGame" class="menu-button start-button">
+      ▶️ شروع بازی
+    </button>
+
+    <button id="openGarage" class="menu-button garage-button">
+      🚗 گاراژ
+    </button>
+
+  </div>
+
 </div>
-<canvas id="game"></canvas>
-<div id="controls">
-  <button id="left">◀</button>
-  <button id="fire">🔫</button>
-  <button id="right">▶</button>
+
+
+<!-- =========================
+     GARAGE
+========================= -->
+
+<div id="garage" class="menu-screen hidden">
+
+  <div class="garage-content">
+
+    <h1>🚗 گاراژ</h1>
+
+    <div class="garage-car">
+      🚘
+    </div>
+
+    <div class="garage-coins">
+      🪙 <span id="garageCoins">0</span>
+    </div>
+
+
+    <!-- سرعت -->
+
+    <div class="upgrade">
+
+      <div class="upgrade-title">
+        ⚡ سرعت ماشین
+      </div>
+
+      <div class="upgrade-info">
+        سطح <span id="speedLevel">1</span>
+      </div>
+
+      <button
+        id="upgradeSpeed"
+        class="upgrade-button"
+      >
+        ارتقا 🪙 <span id="speedCost">50</span>
+      </button>
+
+    </div>
+
+
+    <!-- جان -->
+
+    <div class="upgrade">
+
+      <div class="upgrade-title">
+        ❤️ مقاومت ماشین
+      </div>
+
+      <div class="upgrade-info">
+        سطح <span id="healthLevel">1</span>
+      </div>
+
+      <button
+        id="upgradeHealth"
+        class="upgrade-button"
+      >
+        ارتقا 🪙 <span id="healthCost">75</span>
+      </button>
+
+    </div>
+
+
+    <!-- قدرت اسلحه -->
+
+    <div class="upgrade">
+
+      <div class="upgrade-title">
+        🔫 قدرت اسلحه
+      </div>
+
+      <div class="upgrade-info">
+        سطح <span id="weaponLevel">1</span>
+      </div>
+
+      <button
+        id="upgradeWeapon"
+        class="upgrade-button"
+      >
+        ارتقا 🪙 <span id="weaponCost">100</span>
+      </button>
+
+    </div>
+
+
+    <button
+      id="closeGarage"
+      class="menu-button back-button"
+    >
+      ↩️ برگشت
+    </button>
+
+  </div>
+
 </div>
-<div id="gameover" class="hidden">
-  <h1>💀 باختی!</h1>
-  <p>زامبی‌های کشته‌شده: <b id="finalKills">0</b></p>
-  <button id="restart">دوباره بازی کن</button>
+
+
+<!-- =========================
+     GAME
+========================= -->
+
+<div id="gameScreen" class="hidden">
+
+  <div id="hud">
+
+    <div class="hud-box hp-box">
+
+      <span class="hud-label">
+        جان
+      </span>
+
+      <span class="hud-value">
+        ❤️ <span id="hp">100</span>
+      </span>
+
+      <div class="hp-bar">
+        <div
+          id="hpFill"
+          class="hp-fill"
+        ></div>
+      </div>
+
+    </div>
+
+
+    <div class="hud-box">
+
+      <span class="hud-label">
+        سکه
+      </span>
+
+      <span class="hud-value">
+        🪙 <span id="coins">0</span>
+      </span>
+
+    </div>
+
+
+    <div class="hud-box">
+
+      <span class="hud-label">
+        کشتار
+      </span>
+
+      <span class="hud-value">
+        ☠️ <span id="kills">0</span>
+      </span>
+
+    </div>
+
+  </div>
+
+
+  <canvas id="game"></canvas>
+
+
+  <div id="controls">
+
+    <button
+      id="left"
+      class="control-btn"
+    >
+      ◀
+    </button>
+
+    <button
+      id="fire"
+      class="control-btn"
+    >
+      🔫
+    </button>
+
+    <button
+      id="right"
+      class="control-btn"
+    >
+      ▶
+    </button>
+
+  </div>
+
+
+  <!-- GAME OVER -->
+
+  <div id="gameover" class="hidden">
+
+    <div class="gameover-box">
+
+      <h1 class="gameover-title">
+        💀 باختی!
+      </h1>
+
+      <p class="gameover-score">
+        زامبی‌های کشته‌شده:
+        <b id="finalKills">0</b>
+      </p>
+
+      <button id="restart">
+        دوباره بازی کن
+      </button>
+
+    </div>
+
+  </div>
+
 </div>
+
+
+<!-- =========================
+     TELEGRAM
+========================= -->
+
 <script src="https://telegram.org/js/telegram-web-app.js"></script>
+
 <script src="game.js"></script>
+
+
+<!-- =========================
+     MENU SCRIPT
+========================= -->
+
+<script>
+
+let totalCoins =
+  Number(localStorage.getItem("zombieCoins") || 0);
+
+let speedLevel =
+  Number(localStorage.getItem("speedLevel") || 1);
+
+let healthLevel =
+  Number(localStorage.getItem("healthLevel") || 1);
+
+let weaponLevel =
+  Number(localStorage.getItem("weaponLevel") || 1);
+
+
+// -------------------------
+// عناصر
+// -------------------------
+
+const mainMenu =
+  document.getElementById("mainMenu");
+
+const garage =
+  document.getElementById("garage");
+
+const gameScreen =
+  document.getElementById("gameScreen");
+
+const menuCoins =
+  document.getElementById("menuCoins");
+
+const garageCoins =
+  document.getElementById("garageCoins");
+
+
+// -------------------------
+// نمایش سکه
+// -------------------------
+
+function updateMenuCoins() {
+
+  menuCoins.textContent =
+    totalCoins;
+
+  garageCoins.textContent =
+    totalCoins;
+
+}
+
+
+// -------------------------
+// شروع بازی
+// -------------------------
+
+document
+  .getElementById("startGame")
+  .onclick = function () {
+
+    mainMenu.classList.add("hidden");
+
+    garage.classList.add("hidden");
+
+    gameScreen.classList.remove("hidden");
+
+    if (typeof reset === "function") {
+      reset();
+    }
+
+  };
+
+
+// -------------------------
+// گاراژ
+// -------------------------
+
+document
+  .getElementById("openGarage")
+  .onclick = function () {
+
+    mainMenu.classList.add("hidden");
+
+    garage.classList.remove("hidden");
+
+    updateGarage();
+
+  };
+
+
+// -------------------------
+// برگشت
+// -------------------------
+
+document
+  .getElementById("closeGarage")
+  .onclick = function () {
+
+    garage.classList.add("hidden");
+
+    mainMenu.classList.remove("hidden");
+
+    updateMenuCoins();
+
+  };
+
+
+// -------------------------
+// گاراژ
+// -------------------------
+
+function updateGarage() {
+
+  document.getElementById("speedLevel")
+    .textContent = speedLevel;
+
+  document.getElementById("healthLevel")
+    .textContent = healthLevel;
+
+  document.getElementById("weaponLevel")
+    .textContent = weaponLevel;
+
+
+  document.getElementById("speedCost")
+    .textContent = 50 * speedLevel;
+
+  document.getElementById("healthCost")
+    .textContent = 75 * healthLevel;
+
+  document.getElementById("weaponCost")
+    .textContent = 100 * weaponLevel;
+
+
+  updateMenuCoins();
+
+}
+
+
+// -------------------------
+// ارتقای سرعت
+// -------------------------
+
+document
+  .getElementById("upgradeSpeed")
+  .onclick = function () {
+
+    const cost =
+      50 * speedLevel;
+
+    if (totalCoins >= cost) {
+
+      totalCoins -= cost;
+
+      speedLevel++;
+
+      localStorage.setItem(
+        "zombieCoins",
+        totalCoins
+      );
+
+      localStorage.setItem(
+        "speedLevel",
+        speedLevel
+      );
+
+      updateGarage();
+
+    }
+
+  };
+
+
+// -------------------------
+// ارتقای جان
+// -------------------------
+
+document
+  .getElementById("upgradeHealth")
+  .onclick = function () {
+
+    const cost =
+      75 * healthLevel;
+
+    if (totalCoins >= cost) {
+
+      totalCoins -= cost;
+
+      healthLevel++;
+
+      localStorage.setItem(
+        "zombieCoins",
+        totalCoins
+      );
+
+      localStorage.setItem(
+        "healthLevel",
+        healthLevel
+      );
+
+      updateGarage();
+
+    }
+
+  };
+
+
+// -------------------------
+// ارتقای اسلحه
+// -------------------------
+
+document
+  .getElementById("upgradeWeapon")
+  .onclick = function () {
+
+    const cost =
+      100 * weaponLevel;
+
+    if (totalCoins >= cost) {
+
+      totalCoins -= cost;
+
+      weaponLevel++;
+
+      localStorage.setItem(
+        "zombieCoins",
+        totalCoins
+      );
+
+      localStorage.setItem(
+        "weaponLevel",
+        weaponLevel
+      );
+
+      updateGarage();
+
+    }
+
+  };
+
+
+// -------------------------
+// شروع
+// -------------------------
+
+updateMenuCoins();
+updateGarage();
+
+</script>
+
 </body>
 </html>
