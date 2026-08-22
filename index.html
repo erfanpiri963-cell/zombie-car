@@ -1,16 +1,24 @@
 <!DOCTYPE html>
 <html lang="fa" dir="rtl">
+
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+
+<meta name="viewport"
+      content="width=device-width,
+               initial-scale=1.0,
+               maximum-scale=1.0,
+               user-scalable=no">
 
 <title>Zombie Car</title>
 
 <style>
+
 * {
     box-sizing: border-box;
     margin: 0;
     padding: 0;
+    -webkit-tap-highlight-color: transparent;
 }
 
 html,
@@ -18,70 +26,118 @@ body {
     width: 100%;
     height: 100%;
     overflow: hidden;
-    background: #101318;
+    background: #0d1115;
     font-family: Arial, sans-serif;
-}
-
-.screen {
-    width: 100vw;
-    height: 100vh;
+    touch-action: none;
 }
 
 .hidden {
     display: none !important;
 }
 
-/* صفحه شروع */
+
+/* =========================
+   MENU
+========================= */
+
 #menuScreen {
+
+    position: fixed;
+    inset: 0;
+
     display: flex;
     flex-direction: column;
     align-items: center;
     justify-content: center;
 
     background:
-        radial-gradient(circle at center, #343b44 0%, #101318 65%);
+        radial-gradient(
+            circle at 50% 35%,
+            #3d464d 0%,
+            #181d21 45%,
+            #090b0d 100%
+        );
+
+    color: white;
 }
 
 .logo {
-    font-size: 42px;
+
+    font-size: clamp(34px, 10vw, 58px);
+
     font-weight: 900;
-    color: white;
-    text-shadow: 0 4px 15px #000;
+
+    text-align: center;
+
+    text-shadow:
+        0 4px 0 #000,
+        0 8px 25px rgba(0,0,0,.8);
+
     margin-bottom: 12px;
 }
 
 .subtitle {
-    color: #aaa;
-    margin-bottom: 45px;
-    font-size: 17px;
+
+    color: #b9c0c5;
+
+    font-size: 16px;
+
+    margin-bottom: 42px;
+
+    text-align: center;
 }
 
 #startBtn {
-    border: 0;
-    padding: 18px 55px;
-    border-radius: 16px;
 
-    background: #e53935;
+    border: none;
+
+    padding: 18px 55px;
+
+    border-radius: 18px;
+
+    background:
+        linear-gradient(
+            #f44336,
+            #c62828
+        );
+
     color: white;
 
     font-size: 22px;
+
     font-weight: bold;
 
-    box-shadow: 0 8px 25px rgba(0,0,0,.45);
+    box-shadow:
+        0 8px 25px rgba(0,0,0,.55),
+        inset 0 1px rgba(255,255,255,.25);
+
+    cursor: pointer;
 }
 
 #startBtn:active {
     transform: scale(.94);
 }
 
-/* بازی */
+
+/* =========================
+   GAME
+========================= */
+
 #gameScreen {
-    position: relative;
+
+    position: fixed;
+
+    inset: 0;
+
     background: #111;
+
+    overflow: hidden;
 }
 
 #game {
+
     position: absolute;
+
     inset: 0;
 
     width: 100%;
@@ -90,37 +146,230 @@ body {
     display: block;
 }
 
-/* HUD */
+
+/* =========================
+   HUD
+========================= */
+
 #hud {
+
     position: absolute;
+
     top: 15px;
-    left: 15px;
-    right: 15px;
+
+    left: 12px;
+    right: 12px;
 
     display: flex;
+
     justify-content: space-between;
 
-    z-index: 10;
+    z-index: 20;
 
-    color: white;
-    font-size: 18px;
-    font-weight: bold;
+    pointer-events: none;
 }
 
 .hudBox {
-    background: rgba(0,0,0,.55);
-    padding: 10px 14px;
-    border-radius: 12px;
-    backdrop-filter: blur(5px);
+
+    min-width: 75px;
+
+    padding: 9px 13px;
+
+    border-radius: 13px;
+
+    background:
+        rgba(0,0,0,.62);
+
+    border:
+        1px solid rgba(255,255,255,.12);
+
+    color: white;
+
+    font-size: 17px;
+
+    font-weight: bold;
+
+    text-align: center;
+
+    backdrop-filter: blur(6px);
+
+    box-shadow:
+        0 5px 15px rgba(0,0,0,.3);
 }
+
+
+/* =========================
+   CONTROLS
+========================= */
+
+#controls {
+
+    position: absolute;
+
+    left: 0;
+    right: 0;
+    bottom: 25px;
+
+    display: flex;
+
+    justify-content: space-between;
+
+    padding: 0 22px;
+
+    z-index: 30;
+
+    pointer-events: none;
+}
+
+.controlBtn {
+
+    width: 78px;
+    height: 78px;
+
+    border-radius: 50%;
+
+    border:
+        2px solid rgba(255,255,255,.2);
+
+    background:
+        rgba(0,0,0,.45);
+
+    color: white;
+
+    font-size: 30px;
+
+    font-weight: bold;
+
+    backdrop-filter: blur(7px);
+
+    box-shadow:
+        0 6px 20px rgba(0,0,0,.4);
+
+    pointer-events: auto;
+
+    touch-action: none;
+}
+
+.controlBtn:active {
+
+    transform: scale(.9);
+
+    background:
+        rgba(255,255,255,.25);
+}
+
+
+/* =========================
+   FIRE BUTTON
+========================= */
+
+#fireBtn {
+
+    width: 88px;
+    height: 88px;
+
+    border-radius: 50%;
+
+    border:
+        2px solid rgba(255,255,255,.2);
+
+    background:
+        linear-gradient(
+            #ff7043,
+            #d84315
+        );
+
+    color: white;
+
+    font-size: 36px;
+
+    box-shadow:
+        0 7px 22px rgba(0,0,0,.5);
+
+    pointer-events: auto;
+
+    touch-action: none;
+}
+
+#fireBtn:active {
+
+    transform: scale(.9);
+}
+
+
+/* =========================
+   GAME OVER
+========================= */
+
+#gameOver {
+
+    position: absolute;
+
+    inset: 0;
+
+    z-index: 100;
+
+    display: flex;
+
+    flex-direction: column;
+
+    align-items: center;
+
+    justify-content: center;
+
+    background:
+        rgba(0,0,0,.82);
+
+    color: white;
+
+    text-align: center;
+}
+
+#gameOver h1 {
+
+    font-size: 42px;
+
+    margin-bottom: 15px;
+}
+
+#gameOver p {
+
+    color: #ccc;
+
+    margin-bottom: 25px;
+
+    font-size: 18px;
+}
+
+#restartBtn {
+
+    border: none;
+
+    border-radius: 14px;
+
+    padding: 15px 35px;
+
+    background: #e53935;
+
+    color: white;
+
+    font-size: 19px;
+
+    font-weight: bold;
+}
+
 </style>
 </head>
 
+
 <body>
 
-<!-- صفحه شروع -->
 
-<div id="menuScreen" class="screen">
+<!-- =========================
+     MENU
+========================= -->
+
+<div id="menuScreen">
 
     <div class="logo">
         🚗 ZOMBIE CAR 🧟
@@ -137,11 +386,15 @@ body {
 </div>
 
 
-<!-- صفحه بازی -->
 
-<div id="gameScreen" class="screen hidden">
+<!-- =========================
+     GAME
+========================= -->
+
+<div id="gameScreen" class="hidden">
 
     <canvas id="game"></canvas>
+
 
     <div id="hud">
 
@@ -159,57 +412,361 @@ body {
 
     </div>
 
+
+    <div id="controls">
+
+        <button
+            id="leftBtn"
+            class="controlBtn">
+            ◀
+        </button>
+
+
+        <button
+            id="fireBtn">
+            🔫
+        </button>
+
+
+        <button
+            id="rightBtn"
+            class="controlBtn">
+            ▶
+        </button>
+
+    </div>
+
+
+    <div id="gameOver" class="hidden">
+
+        <h1>
+            💀 باختی!
+        </h1>
+
+        <p>
+            زامبی‌های کشته‌شده:
+            <b id="finalKills">0</b>
+        </p>
+
+        <button id="restartBtn">
+            🔄 دوباره بازی کن
+        </button>
+
+    </div>
+
 </div>
+
 
 
 <script>
 
-const startBtn = document.getElementById("startBtn");
-const menuScreen = document.getElementById("menuScreen");
-const gameScreen = document.getElementById("gameScreen");
 
-const canvas = document.getElementById("game");
-const ctx = canvas.getContext("2d");
+// =========================
+// ELEMENTS
+// =========================
 
-let W;
-let H;
+const startBtn =
+    document.getElementById("startBtn");
+
+const restartBtn =
+    document.getElementById("restartBtn");
+
+const menuScreen =
+    document.getElementById("menuScreen");
+
+const gameScreen =
+    document.getElementById("gameScreen");
+
+const canvas =
+    document.getElementById("game");
+
+const ctx =
+    canvas.getContext("2d");
+
+const leftBtn =
+    document.getElementById("leftBtn");
+
+const rightBtn =
+    document.getElementById("rightBtn");
+
+const fireBtn =
+    document.getElementById("fireBtn");
+
+
+// =========================
+// GAME VARIABLES
+// =========================
+
+let W = 0;
+let H = 0;
+
+let carX = 0;
 
 let roadOffset = 0;
 
+let movingLeft = false;
+let movingRight = false;
+let firing = false;
+
+let bullets = [];
+
+let running = false;
+
+let lastTime = 0;
+
+
+// =========================
+// HUD
+// =========================
+
+let hp = 100;
+let coins = 0;
+let kills = 0;
+
+
+// =========================
+// RESIZE
+// =========================
 
 function resize() {
 
     W = window.innerWidth;
+
     H = window.innerHeight;
 
     canvas.width = W;
+
     canvas.height = H;
+
+    if (!carX) {
+
+        carX = W / 2;
+
+    }
+
 }
 
+window.addEventListener(
+    "resize",
+    resize
+);
 
-window.addEventListener("resize", resize);
+
+// =========================
+// START
+// =========================
+
+startBtn.addEventListener(
+    "click",
+    startGame
+);
 
 
-startBtn.addEventListener("click", function () {
+function startGame() {
 
-    menuScreen.classList.add("hidden");
+    menuScreen.classList.add(
+        "hidden"
+    );
 
-    gameScreen.classList.remove("hidden");
+    gameScreen.classList.remove(
+        "hidden"
+    );
 
     resize();
 
-    requestAnimationFrame(gameLoop);
+    carX = W / 2;
 
-});
+    hp = 100;
 
+    coins = 0;
+
+    kills = 0;
+
+    bullets = [];
+
+    roadOffset = 0;
+
+    running = true;
+
+    updateHUD();
+
+    lastTime =
+        performance.now();
+
+    requestAnimationFrame(
+        gameLoop
+    );
+}
+
+
+// =========================
+// RESTART
+// =========================
+
+restartBtn.addEventListener(
+    "click",
+    function () {
+
+        document
+            .getElementById("gameOver")
+            .classList.add("hidden");
+
+        startGame();
+
+    }
+);
+
+
+// =========================
+// BUTTON CONTROL
+// =========================
+
+function holdButton(
+    button,
+    start,
+    end
+) {
+
+    button.addEventListener(
+        "pointerdown",
+        function(e) {
+
+            e.preventDefault();
+
+            start();
+
+        }
+    );
+
+    button.addEventListener(
+        "pointerup",
+        function(e) {
+
+            e.preventDefault();
+
+            end();
+
+        }
+    );
+
+    button.addEventListener(
+        "pointercancel",
+        end
+    );
+
+    button.addEventListener(
+        "pointerleave",
+        end
+    );
+}
+
+
+holdButton(
+    leftBtn,
+    () => movingLeft = true,
+    () => movingLeft = false
+);
+
+
+holdButton(
+    rightBtn,
+    () => movingRight = true,
+    () => movingRight = false
+);
+
+
+holdButton(
+    fireBtn,
+    () => firing = true,
+    () => firing = false
+);
+
+
+// =========================
+// KEYBOARD
+// =========================
+
+window.addEventListener(
+    "keydown",
+    function(e) {
+
+        if (e.key === "ArrowLeft") {
+
+            movingLeft = true;
+
+        }
+
+        if (e.key === "ArrowRight") {
+
+            movingRight = true;
+
+        }
+
+        if (e.code === "Space") {
+
+            firing = true;
+
+        }
+
+    }
+);
+
+
+window.addEventListener(
+    "keyup",
+    function(e) {
+
+        if (e.key === "ArrowLeft") {
+
+            movingLeft = false;
+
+        }
+
+        if (e.key === "ArrowRight") {
+
+            movingRight = false;
+
+        }
+
+        if (e.code === "Space") {
+
+            firing = false;
+
+        }
+
+    }
+);
+
+
+// =========================
+// HUD
+// =========================
+
+function updateHUD() {
+
+    document.getElementById(
+        "hp"
+    ).textContent = hp;
+
+    document.getElementById(
+        "coins"
+    ).textContent = coins;
+
+    document.getElementById(
+        "kills"
+    ).textContent = kills;
+
+}
+
+
+// =========================
+// ROAD
+// =========================
 
 function drawRoad() {
 
-    /*
-       پس زمینه
-    */
-
-    ctx.fillStyle = "#151a1f";
+    ctx.fillStyle =
+        "#10151a";
 
     ctx.fillRect(
         0,
@@ -219,24 +776,21 @@ function drawRoad() {
     );
 
 
-    /*
-       اندازه جاده
-    */
+    const roadWidth =
+        Math.min(
+            W * .88,
+            520
+        );
 
-    const roadWidth = Math.min(
-        W * 0.88,
-        520
-    );
 
     const roadX =
         (W - roadWidth) / 2;
 
 
-    /*
-       آسفالت
-    */
+    // asphalt
 
-    ctx.fillStyle = "#343a40";
+    ctx.fillStyle =
+        "#363b40";
 
     ctx.fillRect(
         roadX,
@@ -246,11 +800,10 @@ function drawRoad() {
     );
 
 
-    /*
-       حاشیه جاده
-    */
+    // road edge
 
-    ctx.fillStyle = "#bdbdbd";
+    ctx.fillStyle =
+        "#aeb4b8";
 
     ctx.fillRect(
         roadX,
@@ -260,18 +813,19 @@ function drawRoad() {
     );
 
     ctx.fillRect(
-        roadX + roadWidth - 5,
+        roadX +
+        roadWidth -
+        5,
         0,
         5,
         H
     );
 
 
-    /*
-       خط وسط متحرک
-    */
+    // center line
 
-    ctx.strokeStyle = "#eeeeee";
+    ctx.strokeStyle =
+        "#eeeeee";
 
     ctx.lineWidth = 5;
 
@@ -300,24 +854,28 @@ function drawRoad() {
     ctx.setLineDash([]);
 
 
-    roadOffset += 3;
+    roadOffset += 4;
 
     if (roadOffset > 80) {
+
         roadOffset = 0;
+
     }
+
 }
 
 
+// =========================
+// CAR
+// =========================
+
 function drawCar() {
 
-    const x = W / 2;
+    const y =
+        H - 150;
 
-    const y = H - 150;
 
-
-    /*
-       سایه ماشین
-    */
+    // shadow
 
     ctx.fillStyle =
         "rgba(0,0,0,.45)";
@@ -325,9 +883,9 @@ function drawCar() {
     ctx.beginPath();
 
     ctx.ellipse(
-        x,
-        y + 45,
-        38,
+        carX,
+        y + 47,
+        39,
         12,
         0,
         0,
@@ -337,16 +895,15 @@ function drawCar() {
     ctx.fill();
 
 
-    /*
-       بدنه
-    */
+    // body
 
-    ctx.fillStyle = "#e53935";
+    ctx.fillStyle =
+        "#e53935";
 
     ctx.beginPath();
 
     ctx.roundRect(
-        x - 30,
+        carX - 30,
         y - 55,
         60,
         110,
@@ -356,9 +913,7 @@ function drawCar() {
     ctx.fill();
 
 
-    /*
-       سقف
-    */
+    // roof
 
     ctx.fillStyle =
         "#b71c1c";
@@ -366,19 +921,17 @@ function drawCar() {
     ctx.beginPath();
 
     ctx.roundRect(
-        x - 23,
+        carX - 23,
         y - 38,
         46,
         48,
-        10
+        9
     );
 
     ctx.fill();
 
 
-    /*
-       شیشه جلو
-    */
+    // windshield
 
     ctx.fillStyle =
         "#81d4fa";
@@ -386,7 +939,7 @@ function drawCar() {
     ctx.beginPath();
 
     ctx.roundRect(
-        x - 18,
+        carX - 18,
         y - 32,
         36,
         27,
@@ -396,9 +949,7 @@ function drawCar() {
     ctx.fill();
 
 
-    /*
-       کاپوت
-    */
+    // hood
 
     ctx.fillStyle =
         "#ef5350";
@@ -406,7 +957,7 @@ function drawCar() {
     ctx.beginPath();
 
     ctx.roundRect(
-        x - 24,
+        carX - 24,
         y + 8,
         48,
         28,
@@ -416,72 +967,224 @@ function drawCar() {
     ctx.fill();
 
 
-    /*
-       چراغ‌ها
-    */
+    // headlights
 
     ctx.fillStyle =
         "#fff59d";
 
     ctx.fillRect(
-        x - 20,
+        carX - 20,
         y + 32,
         12,
         7
     );
 
     ctx.fillRect(
-        x + 8,
+        carX + 8,
         y + 32,
         12,
         7
     );
 
 
-    /*
-       چرخ‌ها
-    */
+    // wheels
 
-    ctx.fillStyle = "#080808";
+    ctx.fillStyle =
+        "#070707";
 
     ctx.fillRect(
-        x - 38,
+        carX - 38,
         y - 32,
         10,
         28
     );
 
     ctx.fillRect(
-        x + 28,
+        carX + 28,
         y - 32,
         10,
         28
     );
 
     ctx.fillRect(
-        x - 38,
+        carX - 38,
         y + 18,
         10,
         28
     );
 
     ctx.fillRect(
-        x + 28,
+        carX + 28,
         y + 18,
         10,
         28
     );
+
 }
 
 
-function gameLoop() {
+// =========================
+// BULLET
+// =========================
+
+function shoot() {
+
+    bullets.push({
+
+        x: carX,
+
+        y: H - 210,
+
+        speed: 12
+
+    });
+
+}
+
+
+// =========================
+// DRAW BULLETS
+// =========================
+
+function drawBullets() {
+
+    ctx.fillStyle =
+        "#ffd54f";
+
+    bullets.forEach(
+        function(b) {
+
+            ctx.beginPath();
+
+            ctx.arc(
+                b.x,
+                b.y,
+                5,
+                0,
+                Math.PI * 2
+            );
+
+            ctx.fill();
+
+        }
+    );
+
+}
+
+
+// =========================
+// GAME LOOP
+// =========================
+
+let fireCooldown = 0;
+
+function gameLoop(time) {
+
+    if (!running) return;
+
+
+    const dt =
+        Math.min(
+            (time - lastTime) / 16.67,
+            2
+        );
+
+    lastTime = time;
+
+
+    // movement
+
+    if (movingLeft) {
+
+        carX -=
+            7 * dt;
+
+    }
+
+    if (movingRight) {
+
+        carX +=
+            7 * dt;
+
+    }
+
+
+    // road limits
+
+    const roadWidth =
+        Math.min(
+            W * .88,
+            520
+        );
+
+    const roadX =
+        (W - roadWidth) / 2;
+
+
+    carX =
+        Math.max(
+            roadX + 45,
+            Math.min(
+                roadX +
+                roadWidth -
+                45,
+                carX
+            )
+        );
+
+
+    // shooting
+
+    fireCooldown -= dt;
+
+    if (
+        firing &&
+        fireCooldown <= 0
+    ) {
+
+        shoot();
+
+        fireCooldown = 10;
+
+    }
+
+
+    // bullets
+
+    bullets.forEach(
+        function(b) {
+
+            b.y -=
+                b.speed * dt;
+
+        }
+    );
+
+
+    bullets =
+        bullets.filter(
+            function(b) {
+
+                return b.y > -20;
+
+            }
+        );
+
+
+    // draw
 
     drawRoad();
 
     drawCar();
 
-    requestAnimationFrame(gameLoop);
+    drawBullets();
+
+
+    requestAnimationFrame(
+        gameLoop
+    );
 }
+
 
 </script>
 
