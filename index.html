@@ -1,0 +1,29 @@
+<!doctype html>
+<html lang="fa" dir="rtl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
+<title>Zombie Car</title>
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+<div id="hud">
+  <div>❤️ <span id="hp">100</span></div>
+  <div>🪙 <span id="coins">0</span></div>
+  <div>☠️ <span id="kills">0</span></div>
+</div>
+<canvas id="game"></canvas>
+<div id="controls">
+  <button id="left">◀</button>
+  <button id="fire">🔫</button>
+  <button id="right">▶</button>
+</div>
+<div id="gameover" class="hidden">
+  <h1>💀 باختی!</h1>
+  <p>زامبی‌های کشته‌شده: <b id="finalKills">0</b></p>
+  <button id="restart">دوباره بازی کن</button>
+</div>
+<script src="https://telegram.org/js/telegram-web-app.js"></script>
+<script src="game.js"></script>
+</body>
+</html>
