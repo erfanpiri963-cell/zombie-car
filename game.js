@@ -158,7 +158,6 @@ function updateBossHud(cur,max){
 }
 
 function finishBoss(){
-  if(!bossActive)return;
   bossActive=false;
   bossDefeated=true;
   document.getElementById("bossBar").classList.add("hidden");
@@ -170,7 +169,7 @@ function finishBoss(){
     stageKills=0;
     stageTimer=0;
     bossDefeated=false;
-    spawnTimer=3;
+    spawnTimer=2;
     zombies=[];
     bullets=[];
     stageChanging=false;
