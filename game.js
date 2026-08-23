@@ -167,6 +167,9 @@ function finishBoss(){
     stage++;
     stageKills=0;
     bossDefeated=false;
+    spawnTimer=5;
+    zombies=[];
+    bullets=[];
     updateHud();
   },900);
 }
