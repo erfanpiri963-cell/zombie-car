@@ -4,7 +4,7 @@ if(tg){tg.ready();tg.expand();}
 const canvas=document.getElementById("game"),ctx=canvas.getContext("2d");
 let W,H,dpr,player,bullets=[],zombies=[],particles=[];
 let coins=0,kills=0,hp=100,maxHp=100,score=0,gameOver=false,keys={},spawnTimer=0,last=performance.now(),roadOffset=0;
-let stage=1,stageKills=0,stageChanging=false,bossActive=false,bossDefeated=false;
+let stage=1,stageKills=0,stageChanging=false,bossActive=false,bossDefeated=false,stageTimer=0;
 
 const upgrades={hp:0,speed:0,fire:0,damage:0,armor:0};
 const baseCost={hp:30,speed:40,fire:45,damage:60,armor:70};
@@ -76,7 +76,7 @@ function clearProgress(){
 function reset(){
  player={x:W/2,y:H-180,w:58,h:95,speed:7,fire:0};
  bullets=[];zombies=[];particles=[];coins=0;kills=0;hp=100;maxHp=100;score=0;gameOver=false;
- stage=1;stageKills=0;stageChanging=false;bossActive=false;bossDefeated=false;
+ stage=1;stageKills=0;stageChanging=false;bossActive=false;bossDefeated=false;stageTimer=0;
  keys={l:false,r:false,f:false};
  loadProgress();spawnTimer=0;roadOffset=0;last=performance.now();
  document.getElementById("gameover").classList.add("hidden");document.getElementById("shop").classList.add("hidden");updateHud();
@@ -158,18 +158,22 @@ function updateBossHud(cur,max){
 }
 
 function finishBoss(){
+  if(!bossActive)return;
   bossActive=false;
   bossDefeated=true;
   document.getElementById("bossBar").classList.add("hidden");
   coins+=100+stage*10;
   updateHud();
   setTimeout(()=>{
+    if(gameOver)return;
     stage++;
     stageKills=0;
+    stageTimer=0;
     bossDefeated=false;
-    spawnTimer=5;
+    spawnTimer=3;
     zombies=[];
     bullets=[];
+    stageChanging=false;
     updateHud();
   },900);
 }
@@ -219,8 +223,19 @@ function burst(x,y,color="#ff7043",amount=12){for(let i=0;i<amount;i++)particles
 function endGame(){gameOver=true;document.getElementById("finalKills").textContent=kills;document.getElementById("finalStage").textContent=stage;document.getElementById("gameover").classList.remove("hidden")}
 
 function nextStage(){
- if(stageChanging)return;stageChanging=true;stage++;stageKills=0;zombies=[];bullets=[];bossActive=false;bossDefeated=false;document.getElementById("bossBar").classList.add("hidden");updateHud();
- setTimeout(()=>{stageChanging=false},1000);
+ if(stageChanging || gameOver)return;
+ stageChanging=true;
+ stage++;
+ stageKills=0;
+ stageTimer=0;
+ zombies=[];
+ bullets=[];
+ bossActive=false;
+ bossDefeated=false;
+ document.getElementById("bossBar").classList.add("hidden");
+ spawnTimer=3;
+ updateHud();
+ setTimeout(()=>{stageChanging=false;spawnTimer=2;},1000);
 }
 
 function update(dt){
@@ -253,7 +268,7 @@ function update(dt){
         burst(z.x,z.y,"#ff1744",45);updateHud();finishBoss();
       }
     }else if(z.hp<=0){
-      zombies.splice(i,1);kills++;stageKills++;coins+=z.reward;score+=10;saveProgress();burst(z.x,z.y,"#ff7043",20);updateHud();if(stageKills>=8+(stage-1)*7)nextStage()
+      zombies.splice(i,1);kills++;stageKills++;coins+=z.reward;score+=10;saveProgress();burst(z.x,z.y,"#ff7043",20);updateHud();if(stageKills>=8+Math.max(0,stage-1)*7)nextStage()
     }
     break;
    }
