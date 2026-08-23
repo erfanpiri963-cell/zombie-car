@@ -39,12 +39,46 @@ function updateShop(){
  }
 }
 
+
+const SAVE_KEY="zombieCarSave_v2";
+
+function saveProgress(){
+  try{
+    localStorage.setItem(SAVE_KEY, JSON.stringify({
+      coins,
+      upgrades
+    }));
+  }catch(e){}
+}
+
+function loadProgress(){
+  try{
+    const raw=localStorage.getItem(SAVE_KEY);
+    if(!raw)return;
+    const data=JSON.parse(raw);
+    if(Number.isFinite(data.coins)) coins=Math.max(0,Math.floor(data.coins));
+    if(data.upgrades){
+      for(const k of Object.keys(upgrades)){
+        if(Number.isFinite(data.upgrades[k])){
+          upgrades[k]=Math.max(0,Math.floor(data.upgrades[k]));
+        }
+      }
+    }
+    maxHp=100+upgrades.hp*25;
+    hp=maxHp;
+  }catch(e){}
+}
+
+function clearProgress(){
+  try{localStorage.removeItem(SAVE_KEY)}catch(e){}
+}
+
 function reset(){
  player={x:W/2,y:H-180,w:58,h:95,speed:7,fire:0};
  bullets=[];zombies=[];particles=[];coins=0;kills=0;hp=100;maxHp=100;score=0;gameOver=false;
  stage=1;stageKills=0;stageChanging=false;
- for(const k of Object.keys(upgrades))upgrades[k]=0;
- keys={l:false,r:false,f:false};spawnTimer=0;roadOffset=0;last=performance.now();
+ keys={l:false,r:false,f:false};
+ loadProgress();spawnTimer=0;roadOffset=0;last=performance.now();
  document.getElementById("gameover").classList.add("hidden");document.getElementById("shop").classList.add("hidden");updateHud();
 }
 
@@ -67,6 +101,7 @@ document.querySelectorAll(".buy").forEach(btn=>{
   const type=btn.dataset.upgrade,c=cost(type);if(coins<c)return;
   coins-=c;upgrades[type]++;
   if(type==="hp"){maxHp+=25;hp=Math.min(maxHp,hp+25)}
+  saveProgress();
   updateHud();
  };
 });
@@ -149,7 +184,7 @@ function update(dt){
    const b=bullets[j];
    if(Math.abs(b.x-z.x)<32&&Math.abs(b.y-z.y)<42){
     bullets.splice(j,1);z.hp-=b.damage;burst(z.x,z.y,"#ff7043",8);
-    if(z.hp<=0){zombies.splice(i,1);kills++;stageKills++;coins+=z.reward;score+=10;burst(z.x,z.y,"#ff7043",20);updateHud();if(stageKills>=8+(stage-1)*7&&stage<20)nextStage()}
+    if(z.hp<=0){zombies.splice(i,1);kills++;stageKills++;coins+=z.reward;score+=10;saveProgress();burst(z.x,z.y,"#ff7043",20);updateHud();if(stageKills>=8+(stage-1)*7&&stage<20)nextStage()}
     break;
    }
   }
@@ -167,3 +202,17 @@ function draw(){
 
 function loop(t){const dt=Math.min((t-last)/16.67,2);last=t;if(!gameOver)update(dt);draw();requestAnimationFrame(loop)}
 reset();requestAnimationFrame(loop);
+
+
+const resetSaveBtn=document.getElementById("resetSave");
+if(resetSaveBtn){
+  resetSaveBtn.onclick=()=>{
+    if(confirm("پیشرفت ذخیره‌شده پاک شود؟")){
+      clearProgress();
+      coins=0;
+      for(const k of Object.keys(upgrades))upgrades[k]=0;
+      maxHp=100; hp=100;
+      updateHud();
+    }
+  };
+}

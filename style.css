@@ -21,3 +21,5 @@ body{color:#fff}
 .buy{border:0;border-radius:11px;padding:10px 11px;background:#2e7d32;color:#fff;font-weight:800}.buy:disabled{background:#444;color:#888}
 #gameover{flex-direction:column;text-align:center}.gameover h1{font-size:44px}
 #restart{border:0;border-radius:15px;padding:15px 28px;background:#c62828;color:#fff;font-size:19px;font-weight:800;margin-top:12px}
+
+.reset-save{width:100%;margin:4px 0 12px;border:0;border-radius:12px;padding:10px;background:#5d1f24;color:#fff;font-weight:800}.reset-save:active{transform:scale(.98)}
