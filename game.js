@@ -250,7 +250,7 @@ function update(dt){
         burst(z.x,z.y,"#ff1744",45);updateHud();finishBoss();
       }
     }else if(z.hp<=0){
-      zombies.splice(i,1);kills++;stageKills++;coins+=z.reward;score+=10;saveProgress();burst(z.x,z.y,"#ff7043",20);updateHud();if(stageKills>=8+(stage-1)*7&&stage<20)nextStage()
+      zombies.splice(i,1);kills++;stageKills++;coins+=z.reward;score+=10;saveProgress();burst(z.x,z.y,"#ff7043",20);updateHud();if(stageKills>=8+(stage-1)*7)nextStage()
     }
     break;
    }
