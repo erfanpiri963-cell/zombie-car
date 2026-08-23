@@ -23,3 +23,9 @@ body{color:#fff}
 #restart{border:0;border-radius:15px;padding:15px 28px;background:#c62828;color:#fff;font-size:19px;font-weight:800;margin-top:12px}
 
 .reset-save{width:100%;margin:4px 0 12px;border:0;border-radius:12px;padding:10px;background:#5d1f24;color:#fff;font-weight:800}.reset-save:active{transform:scale(.98)}
+
+#bossBar{position:fixed;top:96px;left:50%;transform:translateX(-50%);z-index:25;width:min(430px,78vw);text-align:center;background:#090b0dcc;border:1px solid #ffffff22;border-radius:14px;padding:7px 10px;box-shadow:0 5px 20px #0009}
+#bossName{font-weight:900;margin-bottom:5px}
+.boss-track{height:13px;background:#3a1111;border-radius:10px;overflow:hidden;border:1px solid #ffffff18}
+#bossHpBar{height:100%;width:100%;background:linear-gradient(90deg,#ff1744,#ff8a00);transition:width .12s}
+#bossHpText{font-size:11px;color:#ddd}

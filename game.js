@@ -4,7 +4,7 @@ if(tg){tg.ready();tg.expand();}
 const canvas=document.getElementById("game"),ctx=canvas.getContext("2d");
 let W,H,dpr,player,bullets=[],zombies=[],particles=[];
 let coins=0,kills=0,hp=100,maxHp=100,score=0,gameOver=false,keys={},spawnTimer=0,last=performance.now(),roadOffset=0;
-let stage=1,stageKills=0,stageChanging=false;
+let stage=1,stageKills=0,stageChanging=false,bossActive=false,bossDefeated=false;
 
 const upgrades={hp:0,speed:0,fire:0,damage:0,armor:0};
 const baseCost={hp:30,speed:40,fire:45,damage:60,armor:70};
@@ -76,7 +76,7 @@ function clearProgress(){
 function reset(){
  player={x:W/2,y:H-180,w:58,h:95,speed:7,fire:0};
  bullets=[];zombies=[];particles=[];coins=0;kills=0;hp=100;maxHp=100;score=0;gameOver=false;
- stage=1;stageKills=0;stageChanging=false;
+ stage=1;stageKills=0;stageChanging=false;bossActive=false;bossDefeated=false;
  keys={l:false,r:false,f:false};
  loadProgress();spawnTimer=0;roadOffset=0;last=performance.now();
  document.getElementById("gameover").classList.add("hidden");document.getElementById("shop").classList.add("hidden");updateHud();
@@ -129,7 +129,53 @@ function drawCar(){
  ctx.fillStyle="#fff3a0";rr(-20,-46,13,7,3);rr(7,-46,13,7,3);ctx.fillStyle="#ff182e";rr(-20,38,13,6,3);rr(7,38,13,6,3);ctx.restore();
 }
 
+
+function isBossStage(){ return stage>0 && stage%5===0; }
+
+function startBoss(){
+  if(bossActive || bossDefeated)return;
+  bossActive=true;
+  const rw=Math.min(W*.92,560),rx=(W-rw)/2+70;
+  const max=80+stage*18;
+  zombies.push({
+    type:"boss",
+    x:W/2,y:-115,w:105,h:125,
+    spd:0.55+stage*.025,
+    hp:max,maxHp:max,reward:100+stage*10,
+    wobble:0,boss:true
+  });
+  document.getElementById("bossBar").classList.remove("hidden");
+  updateBossHud(max,max);
+}
+
+function updateBossHud(cur,max){
+  const bar=document.getElementById("bossHpBar");
+  const txt=document.getElementById("bossHpText");
+  if(!bar||!txt)return;
+  const pct=Math.max(0,Math.min(100,cur/max*100));
+  bar.style.width=pct+"%";
+  txt.textContent=Math.max(0,Math.ceil(cur))+" / "+max;
+}
+
+function finishBoss(){
+  bossActive=false;
+  bossDefeated=true;
+  document.getElementById("bossBar").classList.add("hidden");
+  coins+=100+stage*10;
+  updateHud();
+  setTimeout(()=>{
+    stage++;
+    stageKills=0;
+    bossDefeated=false;
+    updateHud();
+  },900);
+}
+
 function spawnZombie(){
+ if(isBossStage()){
+   if(!bossActive && !bossDefeated) startBoss();
+   return;
+ }
  const rw=Math.min(W*.92,560),rx=(W-rw)/2+45;
  let type="normal",r=Math.random();
  if(stage>=2&&r>.68)type="fast";
@@ -143,6 +189,16 @@ function spawnZombie(){
 
 function drawZombie(z){
  ctx.save();ctx.translate(z.x+Math.sin(z.wobble)*3,z.y);
+ if(z.type==="boss"){
+   ctx.fillStyle="rgba(0,0,0,.65)";ctx.beginPath();ctx.ellipse(0,63,58,15,0,0,Math.PI*2);ctx.fill();
+   ctx.fillStyle="#5b1018";rr(-52,-25,104,92,20);
+   ctx.fillStyle="#7f1d1d";ctx.beginPath();ctx.arc(0,-45,43,0,Math.PI*2);ctx.fill();
+   ctx.fillStyle="#ff1744";ctx.beginPath();ctx.arc(-16,-51,8,0,Math.PI*2);ctx.fill();ctx.beginPath();ctx.arc(16,-51,8,0,Math.PI*2);ctx.fill();
+   ctx.fillStyle="#111";rr(-25,-28,50,13,4);
+   ctx.fillStyle="#ffca28";ctx.beginPath();ctx.moveTo(-30,-87);ctx.lineTo(-17,-112);ctx.lineTo(-5,-90);ctx.lineTo(8,-114);ctx.lineTo(20,-88);ctx.lineTo(34,-106);ctx.lineTo(38,-76);ctx.closePath();ctx.fill();
+   ctx.fillStyle="#111";rr(-53,-105,106,7,4);ctx.fillStyle="#ff1744";ctx.fillRect(-52,-104,104*(z.hp/z.maxHp),5);
+   ctx.restore();return;
+ }
  const c=z.type==="fast"?"#8e44ad":z.type==="strong"?"#795548":"#75a653";
  ctx.fillStyle="rgba(0,0,0,.5)";ctx.beginPath();ctx.ellipse(0,38,z.type==="strong"?34:30,10,0,0,Math.PI*2);ctx.fill();
  ctx.fillStyle=c;rr(-22,-12,44,45,12);ctx.beginPath();ctx.arc(0,-30,z.type==="strong"?25:22,0,Math.PI*2);ctx.fill();
@@ -160,7 +216,7 @@ function burst(x,y,color="#ff7043",amount=12){for(let i=0;i<amount;i++)particles
 function endGame(){gameOver=true;document.getElementById("finalKills").textContent=kills;document.getElementById("finalStage").textContent=stage;document.getElementById("gameover").classList.remove("hidden")}
 
 function nextStage(){
- if(stageChanging)return;stageChanging=true;stage++;stageKills=0;zombies=[];bullets=[];updateHud();
+ if(stageChanging)return;stageChanging=true;stage++;stageKills=0;zombies=[];bullets=[];bossActive=false;bossDefeated=false;document.getElementById("bossBar").classList.add("hidden");updateHud();
  setTimeout(()=>{stageChanging=false},1000);
 }
 
@@ -171,20 +227,31 @@ function update(dt){
  player.fire-=dt;if(keys.f&&player.fire<=0&&!shop.classList.contains("hidden"))keys.f=false;
  if(keys.f&&player.fire<=0){fire();player.fire=fireDelay()}
  spawnTimer-=dt;
- if(spawnTimer<=0&&!stageChanging){spawnZombie();spawnTimer=Math.max(13,43-stage*4-kills*.1)}
+ if(spawnTimer<=0&&!stageChanging){
+  spawnZombie();
+  spawnTimer=isBossStage()?9999:Math.max(13,43-stage*4-kills*.1);
+}
  bullets.forEach(b=>b.y-=b.spd*dt);zombies.forEach(z=>{z.y+=z.spd*dt;z.wobble+=.08*dt});
  for(let i=zombies.length-1;i>=0;i--){
   const z=zombies[i];
   if(z.y>H+100){zombies.splice(i,1);continue}
   if(hit({x:player.x,y:player.y,w:player.w,h:player.h},z)){
-   zombies.splice(i,1);const damage=(z.type==="strong"?30:z.type==="fast"?15:20)*armorFactor();hp-=damage;burst(z.x,z.y,"#ff1744",18);updateHud();
+   zombies.splice(i,1);const damage=(z.type==="boss"?45:z.type==="strong"?30:z.type==="fast"?15:20)*armorFactor();hp-=damage;burst(z.x,z.y,"#ff1744",18);updateHud();
    if(hp<=0){hp=0;updateHud();endGame()}continue;
   }
   for(let j=bullets.length-1;j>=0;j--){
    const b=bullets[j];
-   if(Math.abs(b.x-z.x)<32&&Math.abs(b.y-z.y)<42){
-    bullets.splice(j,1);z.hp-=b.damage;burst(z.x,z.y,"#ff7043",8);
-    if(z.hp<=0){zombies.splice(i,1);kills++;stageKills++;coins+=z.reward;score+=10;saveProgress();burst(z.x,z.y,"#ff7043",20);updateHud();if(stageKills>=8+(stage-1)*7&&stage<20)nextStage()}
+   if(Math.abs(b.x-z.x)<(z.type==="boss"?65:32)&&Math.abs(b.y-z.y)<(z.type==="boss"?72:42)){
+    bullets.splice(j,1);z.hp-=b.damage;burst(z.x,z.y,z.type==="boss"?"#ff1744":"#ff7043",z.type==="boss"?3:8);
+    if(z.type==="boss"){
+      updateBossHud(z.hp,z.maxHp);
+      if(z.hp<=0){
+        zombies.splice(i,1);kills++;coins+=z.reward;score+=100;saveProgress();
+        burst(z.x,z.y,"#ff1744",45);updateHud();finishBoss();
+      }
+    }else if(z.hp<=0){
+      zombies.splice(i,1);kills++;stageKills++;coins+=z.reward;score+=10;saveProgress();burst(z.x,z.y,"#ff7043",20);updateHud();if(stageKills>=8+(stage-1)*7&&stage<20)nextStage()
+    }
     break;
    }
   }
