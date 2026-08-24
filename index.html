@@ -1,17 +1,11 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="fa" dir="rtl">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport"
-      content="width=device-width,
-               initial-scale=1,
-               maximum-scale=1,
-               user-scalable=no">
-
-<title>Zombie Car</title>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
+<title>Zombie Road: Nitro</title>
 
 <style>
-
 *{
     box-sizing:border-box;
     -webkit-tap-highlight-color:transparent;
@@ -22,687 +16,383 @@ html,body{
     width:100%;
     height:100%;
     overflow:hidden;
-    background:#050608;
-    color:#fff;
-    font-family:
-        Tahoma,
-        Arial,
-        sans-serif;
-}
-
-button{
-    font-family:inherit;
-    cursor:pointer;
-}
-
-#app{
-    position:relative;
-    width:100%;
-    height:100%;
-    overflow:hidden;
-    background:#090b0d;
-}
-
-
-/* =========================================
-   BACKGROUND
-========================================= */
-
-#background{
-    position:absolute;
-    inset:0;
-
-    background:
-        linear-gradient(
-            rgba(0,0,0,.20),
-            rgba(0,0,0,.72)
-        ),
-        radial-gradient(
-            circle at 50% 65%,
-            #51504a 0%,
-            #242628 32%,
-            #111416 70%,
-            #060708 100%
-        );
-}
-
-.city{
-    position:absolute;
-    bottom:0;
-    width:100%;
-    height:58%;
-
-    background:
-        linear-gradient(
-            90deg,
-            transparent 0 5%,
-            #15191b 5% 10%,
-            transparent 10% 14%,
-            #101416 14% 20%,
-            transparent 20% 25%,
-            #171b1d 25% 31%,
-            transparent 31% 37%,
-            #111416 37% 45%,
-            transparent 45% 51%,
-            #171b1c 51% 58%,
-            transparent 58% 64%,
-            #101315 64% 72%,
-            transparent 72% 78%,
-            #181b1d 78% 85%,
-            transparent 85% 90%,
-            #101315 90% 100%
-        );
-
-    opacity:.9;
-}
-
-.smoke{
-    position:absolute;
-    border-radius:50%;
-    filter:blur(18px);
-    background:#050505;
-    opacity:.6;
-}
-
-.smoke.one{
-    width:190px;
-    height:250px;
-    left:23%;
-    top:5%;
-}
-
-.smoke.two{
-    width:240px;
-    height:280px;
-    right:8%;
-    top:8%;
-}
-
-.fire{
-    position:absolute;
-    width:30px;
-    height:70px;
-    bottom:28%;
-    background:
-        radial-gradient(
-            ellipse,
-            #fff 0 8%,
-            #ffd13c 18%,
-            #ff681d 42%,
-            transparent 72%
-        );
-    filter:blur(2px);
-    animation:fire 0.5s infinite alternate;
-}
-
-.fire.one{
-    left:28%;
-}
-
-.fire.two{
-    right:27%;
-}
-
-@keyframes fire{
-    from{
-        transform:scaleY(.85) rotate(-3deg);
-    }
-
-    to{
-        transform:scaleY(1.15) rotate(4deg);
-    }
-}
-
-
-/* =========================================
-   TOP BAR
-========================================= */
-
-#topbar{
-    position:absolute;
-    top:10px;
-    left:15px;
-    right:15px;
-
-    display:flex;
-    justify-content:space-between;
-    align-items:flex-start;
-
-    z-index:30;
-}
-
-.player{
-    display:flex;
-    gap:10px;
-    align-items:center;
-}
-
-.avatar{
-    width:58px;
-    height:58px;
-    border:1px solid #888;
-    border-radius:4px;
-
-    background:
-        radial-gradient(
-            circle at 50% 35%,
-            #a98a69 0 15%,
-            #3b3028 16% 35%,
-            #111 36%
-        );
-
-    box-shadow:
-        0 0 0 2px #111,
-        0 4px 20px #000;
-}
-
-.playerInfo{
-    min-width:220px;
-}
-
-.playerName{
-    font-weight:900;
-    font-size:18px;
-    letter-spacing:1px;
-}
-
-.level{
-    font-size:14px;
-    color:#ddd;
-}
-
-.xpbar{
-    height:7px;
-    width:220px;
-    background:#17191a;
-    border:1px solid #555;
-    margin-top:4px;
-}
-
-.xpfill{
-    height:100%;
-    width:56%;
-    background:#dba91d;
-}
-
-.xptext{
-    font-size:11px;
-    color:#ffc928;
-    text-align:center;
-}
-
-.resources{
-    display:flex;
-    gap:10px;
-}
-
-.resource{
-    min-width:140px;
-    height:44px;
-
-    padding:0 12px;
-
-    display:flex;
-    align-items:center;
-    justify-content:center;
-    gap:10px;
-
-    background:#07090be8;
-    border:1px solid #292d31;
-    border-radius:4px;
-
-    box-shadow:
-        0 5px 15px #0008;
-}
-
-.resource b{
-    font-size:18px;
-}
-
-.plus{
-    color:#39d54c;
-    font-size:25px;
-    font-weight:900;
-}
-
-
-/* =========================================
-   MAIN MENU
-========================================= */
-
-#menu{
-    position:absolute;
-
-    top:105px;
-    left:18px;
-
-    width:290px;
-
-    z-index:20;
-}
-
-.menuBtn{
-    width:100%;
-    height:65px;
-
-    margin-bottom:5px;
-
-    border:1px solid #3a3d3f;
-
-    background:
-        linear-gradient(
-            90deg,
-            #08090aee,
-            #17191ae8
-        );
-
-    color:#fff;
-
-    display:flex;
-    align-items:center;
-
-    text-align:left;
-
-    padding:5px 14px;
-
-    box-shadow:
-        0 5px 14px #0009;
-
-    position:relative;
-}
-
-.menuBtn:hover,
-.menuBtn.active{
-    border-color:#e3af20;
-
-    background:
-        linear-gradient(
-            90deg,
-            #5b4308,
-            #171717
-        );
-}
-
-.menuIcon{
-    width:50px;
-    font-size:30px;
-    text-align:center;
-}
-
-.menuText{
-    flex:1;
-}
-
-.menuEnglish{
-    display:block;
-    font-size:22px;
-    font-weight:900;
-}
-
-.menuPersian{
-    display:block;
-    font-size:14px;
-    color:#ddd;
-}
-
-.notification{
-    position:absolute;
-    right:-5px;
-    top:-6px;
-
-    width:25px;
-    height:25px;
-
-    display:grid;
-    place-items:center;
-
-    background:#e50000;
-    color:#fff;
-
-    font-weight:900;
-}
-
-
-/* =========================================
-   PLAY CARD
-========================================= */
-
-#playCard{
-    position:absolute;
-
-    left:18px;
-    top:105px;
-
-    width:290px;
-    height:85px;
-
-    z-index:21;
-
-    border:2px solid #d9a818;
-
-    background:
-        linear-gradient(
-            90deg,
-            #241b05dd,
-            #151515e8
-        );
-
-    box-shadow:
-        0 0 25px #000;
-}
-
-#playCard .big{
-    font-size:29px;
-    font-weight:900;
-    color:#eab82a;
-    text-align:center;
-}
-
-#playCard .small{
-    text-align:center;
-    font-size:16px;
-}
-
-
-/* =========================================
-   DAILY MISSION
-========================================= */
-
-#dailyMission{
-    position:absolute;
-
-    top:90px;
-    right:18px;
-
-    width:270px;
-
-    padding:15px;
-
-    z-index:25;
-
-    background:
-        linear-gradient(
-            135deg,
-            #101315f4,
-            #070808f4
-        );
-
-    border:1px solid #3c3f40;
-
-    box-shadow:
-        0 8px 30px #000b;
-}
-
-.dailyTitle{
-    font-size:19px;
-    font-weight:900;
-    margin-bottom:12px;
-}
-
-.dailyTask{
-    font-size:15px;
-    margin-bottom:8px;
-}
-
-.progress{
-    height:12px;
-    background:#17191a;
-    border:1px solid #4a4a4a;
-    overflow:hidden;
-}
-
-.progressFill{
-    height:100%;
-    width:64%;
-    background:
-        linear-gradient(
-            90deg,
-            #dca916,
-            #ffc83e
-        );
-}
-
-.rewards{
-    display:flex;
-    justify-content:space-between;
-    margin-top:12px;
-    color:#ddd;
-}
-
-
-/* =========================================
-   STAGE CARD
-========================================= */
-
-#stageCard{
-    position:absolute;
-
-    right:18px;
-    bottom:18px;
-
-    width:270px;
-
-    z-index:25;
-
-    background:#090b0deF;
-    border:1px solid #373b3e;
-
-    box-shadow:
-        0 8px 25px #000;
-}
-
-.stageImage{
-    height:125px;
-
-    background:
-        linear-gradient(#0004,#0008),
-        radial-gradient(
-            circle at 50% 70%,
-            #a24b1f,
-            #20272a 35%,
-            #101316 70%
-        );
-
-    display:flex;
-    align-items:flex-start;
-    justify-content:center;
-
-    padding-top:10px;
-
-    font-size:18px;
-    font-weight:900;
-    color:#e21b1b;
-}
-
-.stageTitle{
-    text-align:center;
-    font-size:26px;
-    font-weight:900;
-    margin-top:-2px;
-}
-
-.playRed{
-    width:100%;
-    height:58px;
-
-    border:1px solid #8d0000;
-
-    background:
-        linear-gradient(
-            #f22920,
-            #7d0000
-        );
-
-    color:white;
-
-    font-size:27px;
-    font-weight:900;
-}
-
-
-/* =========================================
-   BOTTOM BUTTONS
-========================================= */
-
-#bottomButtons{
-    position:absolute;
-
-    left:18px;
-    bottom:20px;
-
-    z-index:30;
-
-    display:flex;
-    gap:10px;
-}
-
-.bottomBtn{
-    width:100px;
-    height:75px;
-
-    border:1px solid #d6a617;
-
-    background:#0a0c0df0;
-
-    color:#fff;
-
-    font-size:15px;
-
-    box-shadow:
-        0 6px 20px #000;
-}
-
-.bottomIcon{
-    display:block;
-    font-size:30px;
-    margin-bottom:4px;
-}
-
-
-/* =========================================
-   GAME SCREEN
-========================================= */
-
-#gameScreen{
-    position:absolute;
-    inset:0;
-
-    display:none;
-
     background:#080a0b;
-
-    z-index:100;
+    font-family:Tahoma,Arial,sans-serif;
+    color:white;
 }
 
-#gameCanvas{
+#game{
+    position:relative;
     width:100%;
     height:100%;
-    display:block;
+    overflow:hidden;
+    background:linear-gradient(
+        #26343b 0%,
+        #718078 45%,
+        #25292a 46%,
+        #090a0b 100%
+    );
 }
 
-#gameHUD{
+/* آسمان */
+.sky{
     position:absolute;
+    inset:0;
+    background:linear-gradient(
+        #17232999,
+        #858d8744 45%,
+        transparent 65%
+    );
+}
+
+/* کنار جاده */
+.edge{
+    position:absolute;
+    top:0;
+    bottom:0;
+    width:18%;
+    background:linear-gradient(
+        #394244,
+        #202525 55%,
+        #111
+    );
+}
+
+.edge.l{left:0}
+.edge.r{right:0}
+
+/* جاده */
+.road{
+    position:absolute;
+    left:18%;
+    right:18%;
+    top:0;
+    bottom:0;
+    background:#303436;
+    border-left:7px solid #161819;
+    border-right:7px solid #161819;
+}
+
+/* خط وسط جاده */
+.road:before{
+    content:"";
+    position:absolute;
+    left:50%;
+    top:0;
+    bottom:0;
+    width:8px;
+    transform:translateX(-50%);
+    background:repeating-linear-gradient(
+        to bottom,
+        #ddd 0 45px,
+        transparent 45px 90px
+    );
+    opacity:.7;
+}
+
+/* درخت‌ها */
+.tree{
+    position:absolute;
+    bottom:42%;
+    font-size:70px;
+    filter:drop-shadow(0 12px 8px #0009);
+}
+
+.t1{left:5%}
+.t2{right:5%}
+.t3{
+    left:12%;
+    bottom:54%;
+    font-size:48px;
+}
+.t4{
+    right:12%;
+    bottom:52%;
+    font-size:52px;
+}
+
+/* ماشین */
+#car{
+    position:absolute;
+    width:112px;
+    height:185px;
+    left:50%;
+    bottom:9%;
+    transform:translateX(-50%);
+    z-index:10;
+}
+
+.body{
+    position:absolute;
+    left:12px;
+    right:12px;
+    top:8px;
+    bottom:8px;
+
+    border-radius:30px 30px 20px 20px;
+
+    background:linear-gradient(
+        90deg,
+        #111,
+        #687075 25%,
+        #24292c 50%,
+        #687075 75%,
+        #111
+    );
+
+    border:3px solid #a88a43;
+
+    box-shadow:
+        0 18px 25px #000b;
+}
+
+.window{
+    position:absolute;
+    left:25px;
+    right:25px;
+    top:32px;
+    height:48px;
+
+    border-radius:15px;
+
+    background:linear-gradient(
+        135deg,
+        #78909c,
+        #1b252b
+    );
+
+    border:2px solid #aeb8bd;
+}
+
+.light{
+    position:absolute;
+    top:17px;
+    width:20px;
+    height:9px;
+
+    background:#fff2a0;
+    box-shadow:0 0 18px #fff2a0;
+}
+
+.light.l{left:20px}
+.light.r{right:20px}
+
+.wheel{
+    position:absolute;
+    width:13px;
+    height:48px;
+    top:70px;
+
+    background:#080808;
+    border-radius:9px;
+}
+
+.wheel.l{left:0}
+.wheel.r{right:0}
+
+/* زامبی */
+#zombies{
+    position:absolute;
+    inset:0;
+    z-index:12;
+    pointer-events:none;
+}
+
+.z{
+    position:absolute;
+    width:58px;
+    height:80px;
+
+    font-size:54px;
+
+    filter:drop-shadow(
+        0 8px 5px #0009
+    );
+}
+
+/* HUD */
+#hud{
+    position:absolute;
+    z-index:30;
+
     top:10px;
     left:10px;
     right:10px;
 
     display:flex;
     justify-content:space-between;
+    gap:8px;
 
     pointer-events:none;
 }
 
-.gameStat{
-    background:#050708d9;
-    border:1px solid #555;
-    padding:8px 12px;
+.box{
+    display:inline-block;
+
+    background:#050708dd;
+    border:1px solid #777;
+
+    padding:7px 10px;
     margin:2px;
 
     font-weight:900;
+    border-radius:4px;
 }
 
-#gameControls{
+/*
+=================================================
+مهم:
+direction:ltr باعث می‌شود ترتیب واقعی دکمه‌ها
+از چپ به راست باشد:
+
+◀    🔥    ▶
+=================================================
+*/
+
+#controls{
     position:absolute;
 
-    bottom:20px;
-    left:20px;
-    right:20px;
+    z-index:40;
+
+    left:0;
+    right:0;
+    bottom:14px;
 
     display:flex;
+
+    align-items:end;
     justify-content:space-between;
-    align-items:center;
+
+    padding:0 18px;
+
+    direction:ltr;
 
     pointer-events:none;
 }
 
-.control{
+.ctrl{
     pointer-events:auto;
 
-    width:78px;
-    height:70px;
+    width:76px;
+    height:68px;
 
     border-radius:50%;
 
-    border:2px solid #666;
+    border:2px solid #777;
 
     background:
         radial-gradient(
-            circle,
-            #25282b,
-            #050607
+            #34383b,
+            #090a0b
         );
 
     color:white;
 
     font-size:30px;
+
+    touch-action:none;
 }
 
-.fireButton{
-    width:100px;
-    height:100px;
+.fire{
+    width:92px;
+    height:92px;
 
     background:
         radial-gradient(
-            circle at 35% 25%,
-            #ffb84d,
-            #d22216 50%,
-            #710000
+            #ffbd43,
+            #d82c1c 55%,
+            #670000
         );
 
-    border-color:#ffbd33;
+    border-color:#ffd36b;
 
-    font-size:38px;
+    font-size:36px;
 }
 
-#backGame{
-    pointer-events:auto;
+.nitro{
+    width:78px;
+    height:55px;
 
-    position:absolute;
+    border-radius:12px;
 
-    top:10px;
-    left:50%;
+    background:
+        linear-gradient(
+            #22a9ff,
+            #064a9c
+        );
 
-    transform:translateX(-50%);
+    border:2px solid #8ed7ff;
 
-    background:#080909dd;
     color:white;
 
-    border:1px solid #aaa;
+    font-size:16px;
+    font-weight:900;
 
-    padding:8px 20px;
+    touch-action:none;
 }
 
-
-/* =========================================
-   MODAL
-========================================= */
-
-.modal{
+/* صفحه شروع */
+#start{
     position:absolute;
+    z-index:80;
 
     inset:0;
 
-    z-index:200;
+    display:grid;
+    place-items:center;
+
+    background:
+        radial-gradient(
+            circle,
+            #253238,
+            #050607 70%
+        );
+}
+
+.startbox{
+    text-align:center;
+}
+
+.startbox h1{
+    font-size:40px;
+
+    text-shadow:
+        0 5px 15px #000;
+}
+
+.startbox p{
+    color:#ccc;
+}
+
+.start{
+    width:240px;
+
+    padding:18px;
+
+    border:2px solid #ffc43b;
+
+    background:
+        linear-gradient(
+            #e63c25,
+            #790900
+        );
+
+    color:white;
+
+    font-size:26px;
+
+    font-weight:900;
+
+    border-radius:6px;
+}
+
+/* صفحه پایان */
+#result{
+    position:absolute;
+
+    z-index:150;
+
+    inset:0;
 
     display:none;
 
@@ -711,544 +401,106 @@ button{
     background:#000b;
 }
 
-.modalBox{
-    width:min(850px,94vw);
-    max-height:88vh;
-    overflow:auto;
+.resultbox{
+    background:#101315;
 
-    padding:25px;
+    border:1px solid #c59a28;
 
-    background:
-        linear-gradient(
-            135deg,
-            #171a1c,
-            #070809
-        );
+    padding:28px;
 
-    border:1px solid #bd9219;
+    text-align:center;
 
-    box-shadow:
-        0 30px 100px #000;
+    width:min(420px,90vw);
 }
 
-.modalHeader{
-    display:flex;
-    justify-content:space-between;
-    align-items:center;
-
-    border-bottom:1px solid #444;
-
-    padding-bottom:12px;
-    margin-bottom:15px;
-}
-
-.modalHeader h2{
-    margin:0;
-}
-
-.close{
-    width:40px;
-    height:40px;
-
-    background:#300;
-    color:#fff;
-
-    border:1px solid #900;
-
-    font-size:22px;
-}
-
-.grid{
-    display:grid;
-
-    grid-template-columns:
-        repeat(
-            auto-fit,
-            minmax(190px,1fr)
-        );
-
-    gap:12px;
-}
-
-.card{
-    padding:14px;
-
-    border:1px solid #404448;
-
-    background:
-        linear-gradient(
-            135deg,
-            #171a1c,
-            #090a0b
-        );
-}
-
-.card h3{
-    margin-top:0;
-    color:#e4b323;
-}
-
-.cardButton{
-    width:100%;
-
-    padding:10px;
-
-    background:
-        linear-gradient(
-            #459b36,
-            #1c5a18
-        );
-
-    color:white;
-
-    border:1px solid #5ebc4d;
-
-    font-weight:900;
-}
-
-.locked{
-    opacity:.5;
-}
-
-
-/* =========================================
-   RESPONSIVE
-========================================= */
-
-@media(max-width:900px){
-
-    #menu{
-        width:220px;
-    }
-
-    .menuBtn{
-        height:55px;
-    }
-
-    .menuEnglish{
-        font-size:17px;
-    }
-
-    .menuPersian{
-        font-size:11px;
-    }
-
-    .menuIcon{
-        width:40px;
-        font-size:24px;
-    }
-
-    #dailyMission{
-        width:225px;
-    }
-
-    #stageCard{
-        width:220px;
-    }
-
-    .resources{
-        gap:4px;
-    }
-
-    .resource{
-        min-width:100px;
-    }
-
-}
-
+/* موبایل */
 @media(max-width:650px){
 
-    #topbar{
-        transform:scale(.78);
-        transform-origin:top right;
+    .road{
+        left:12%;
+        right:12%;
     }
 
-    #menu{
-        top:95px;
-        left:8px;
-        width:180px;
+    .edge{
+        width:12%;
     }
 
-    #playCard{
-        left:8px;
-        top:95px;
-        width:180px;
+    .tree{
+        font-size:50px;
     }
 
-    #dailyMission{
-        top:95px;
-        right:8px;
-        width:170px;
-        font-size:11px;
-    }
-
-    #stageCard{
-        right:8px;
-        bottom:8px;
-        width:180px;
-    }
-
-    #bottomButtons{
-        left:8px;
-        bottom:8px;
-    }
-
-    .bottomBtn{
-        width:75px;
-        height:60px;
-        font-size:11px;
-    }
-
-    .bottomIcon{
-        font-size:22px;
+    .startbox h1{
+        font-size:30px;
     }
 
 }
-
 </style>
 </head>
 
-
 <body>
 
-<div id="app">
+<div id="game">
 
-<div id="background">
-    <div class="city"></div>
-    <div class="smoke one"></div>
-    <div class="smoke two"></div>
-    <div class="fire one"></div>
-    <div class="fire two"></div>
-</div>
+    <div class="sky"></div>
 
+    <div class="edge l"></div>
+    <div class="edge r"></div>
 
-<!-- ======================================
-     TOP
-======================================= -->
+    <div class="road"></div>
 
-<div id="topbar">
+    <div class="tree t1">🌲</div>
+    <div class="tree t2">🌲</div>
+    <div class="tree t3">🌲</div>
+    <div class="tree t4">🌲</div>
 
-    <div class="player">
+    <div id="zombies"></div>
 
-        <div class="avatar"></div>
+    <div id="car">
 
-        <div class="playerInfo">
+        <div class="body">
 
-            <div class="playerName">
-                PLAYER
-            </div>
+            <div class="window"></div>
 
-            <div class="level">
-                LVL 23
-            </div>
+            <i class="light l"></i>
+            <i class="light r"></i>
 
-            <div class="xpbar">
-                <div class="xpfill"></div>
-            </div>
-
-            <div class="xptext">
-                8,450 / 15,000
-            </div>
+            <i class="wheel l"></i>
+            <i class="wheel r"></i>
 
         </div>
 
     </div>
 
 
-    <div class="resources">
+    <!-- HUD -->
 
-        <div class="resource">
-            🪙
-            <b id="coins">56,320</b>
-            <span class="plus">+</span>
-        </div>
-
-        <div class="resource">
-            💎
-            <b>1,250</b>
-            <span class="plus">+</span>
-        </div>
-
-        <div class="resource">
-            🎒
-            <b>42/50</b>
-            <span class="plus">+</span>
-        </div>
-
-        <button
-            class="resource"
-            onclick="openModal('settings')">
-            ⚙️
-        </button>
-
-    </div>
-
-</div>
-
-
-<!-- ======================================
-     MENU
-======================================= -->
-
-<div id="menu">
-
-    <button
-        class="menuBtn active"
-        onclick="startGame()">
-
-        <span class="menuIcon">▶</span>
-
-        <span class="menuText">
-
-            <span class="menuEnglish">
-                PLAY
-            </span>
-
-            <span class="menuPersian">
-                16 مرحله
-            </span>
-
-        </span>
-
-    </button>
-
-
-    <button
-        class="menuBtn"
-        onclick="openModal('weapons')">
-
-        <span class="menuIcon">🔫</span>
-
-        <span class="menuText">
-
-            <span class="menuEnglish">
-                WEAPONS
-            </span>
-
-            <span class="menuPersian">
-                اسلحه ها
-            </span>
-
-        </span>
-
-    </button>
-
-
-    <button
-        class="menuBtn"
-        onclick="openModal('garage')">
-
-        <span class="menuIcon">🚘</span>
-
-        <span class="menuText">
-
-            <span class="menuEnglish">
-                GARAGE
-            </span>
-
-            <span class="menuPersian">
-                ماشین
-            </span>
-
-        </span>
-
-    </button>
-
-
-    <button
-        class="menuBtn"
-        onclick="openModal('missions')">
-
-        <span class="menuIcon">🎯</span>
-
-        <span class="menuText">
-
-            <span class="menuEnglish">
-                MISSIONS
-            </span>
-
-            <span class="menuPersian">
-                مأموریت ها
-            </span>
-
-        </span>
-
-        <span class="notification">
-            !
-        </span>
-
-    </button>
-
-
-    <button
-        class="menuBtn"
-        onclick="openModal('shop')">
-
-        <span class="menuIcon">🛒</span>
-
-        <span class="menuText">
-
-            <span class="menuEnglish">
-                SHOP
-            </span>
-
-            <span class="menuPersian">
-                فروشگاه
-            </span>
-
-        </span>
-
-    </button>
-
-
-    <button
-        class="menuBtn"
-        onclick="openModal('settings')">
-
-        <span class="menuIcon">⚙️</span>
-
-        <span class="menuText">
-
-            <span class="menuEnglish">
-                SETTINGS
-            </span>
-
-            <span class="menuPersian">
-                تنظیمات
-            </span>
-
-        </span>
-
-    </button>
-
-</div>
-
-
-<!-- ======================================
-     DAILY
-======================================= -->
-
-<div id="dailyMission">
-
-    <div class="dailyTitle">
-        مأموریت روزانه
-    </div>
-
-    <div class="dailyTask">
-        🧟 50 زامبی را بکش
-    </div>
-
-    <div class="progress">
-        <div
-            id="dailyProgress"
-            class="progressFill">
-        </div>
-    </div>
-
-    <div class="rewards">
-
-        <span>
-            💎 10
-        </span>
-
-        <span>
-            🪙 2,000
-        </span>
-
-    </div>
-
-</div>
-
-
-<!-- ======================================
-     STAGE
-======================================= -->
-
-<div id="stageCard">
-
-    <div class="stageImage">
-        STAGE 16
-    </div>
-
-    <div class="stageTitle">
-        شهر متروکه
-    </div>
-
-    <button
-        class="playRed"
-        onclick="startGame()">
-        PLAY
-    </button>
-
-</div>
-
-
-<!-- ======================================
-     BOTTOM
-======================================= -->
-
-<div id="bottomButtons">
-
-    <button
-        class="bottomBtn"
-        onclick="claimGift()">
-
-        <span class="bottomIcon">
-            🎁
-        </span>
-
-        هدیه رایگان
-
-    </button>
-
-
-    <button
-        class="bottomBtn"
-        onclick="openModal('shop')">
-
-        <span class="bottomIcon">
-            📦
-        </span>
-
-        صندوقچه
-
-    </button>
-
-</div>
-
-
-<!-- ======================================
-     GAME
-======================================= -->
-
-<div id="gameScreen">
-
-    <canvas id="gameCanvas"></canvas>
-
-
-    <div id="gameHUD">
+    <div id="hud">
 
         <div>
 
-            <span class="gameStat">
-                ❤️ <b id="gameHP">100</b>
+            <span class="box">
+                ☠️
+                <b id="kills">0</b>
             </span>
 
-            <span class="gameStat">
-                ☠️ <b id="gameKills">0</b>
+            <span class="box">
+                ❤️
+                <b id="hp">100</b>
             </span>
 
         </div>
 
-
         <div>
 
-            <span class="gameStat">
-                STAGE <b id="gameStage">1</b>
+            <span class="box">
+                📏
+                <b id="distance">0.00</b>
+                mi
             </span>
 
-            <span class="gameStat">
-                🪙 <b id="gameCoins">0</b>
+            <span class="box">
+                ⚡
+                <b id="nitroText">100</b>
             </span>
 
         </div>
@@ -1256,63 +508,103 @@ button{
     </div>
 
 
-    <button
-        id="backGame"
-        onclick="exitGame()">
-        خروج
-    </button>
+    <!-- کنترل‌ها -->
 
+    <div id="controls">
 
-    <div id="gameControls">
-
+        <!-- چپ -->
         <button
-            class="control"
-            id="leftBtn">
+            class="ctrl"
+            id="left">
             ◀
         </button>
 
+        <!-- تیراندازی -->
         <button
-            class="control fireButton"
-            id="fireBtn">
+            class="ctrl fire"
+            id="fire">
             🔥
         </button>
 
+        <!-- راست -->
         <button
-            class="control"
-            id="rightBtn">
+            class="ctrl"
+            id="right">
             ▶
+        </button>
+
+        <!-- نیترو -->
+        <button
+            class="nitro"
+            id="nitro">
+            NITRO
         </button>
 
     </div>
 
-</div>
 
+    <!-- شروع -->
 
-<!-- ======================================
-     MODALS
-======================================= -->
+    <div id="start">
 
-<div
-    id="modal"
-    class="modal">
+        <div class="startbox">
 
-    <div class="modalBox">
+            <h1>
+                🧟 ZOMBIE ROAD
+            </h1>
 
-        <div class="modalHeader">
-
-            <h2 id="modalTitle">
-                عنوان
+            <h2>
+                NITRO
             </h2>
 
+            <p>
+                نسخه مستقل با الهام از سبک
+                Zombie Highway 2
+            </p>
+
             <button
-                class="close"
-                onclick="closeModal()">
-                ×
+                class="start"
+                onclick="begin()">
+
+                شروع بازی
+
             </button>
 
         </div>
 
-        <div id="modalContent"></div>
+    </div>
+
+
+    <!-- پایان -->
+
+    <div id="result">
+
+        <div class="resultbox">
+
+            <h1>
+                🏁 پایان ران
+            </h1>
+
+            <p>
+                کشتار:
+                <b id="finalKills">0</b>
+            </p>
+
+            <p>
+                مسافت:
+                <b id="finalDistance">0</b>
+                مایل
+            </p>
+
+            <button
+                class="start"
+                onclick="restart()">
+
+                دوباره
+
+            </button>
+
+        </div>
 
     </div>
 
@@ -1321,1099 +613,477 @@ button{
 
 <script>
 
+/* ==========================================
+   متغیرهای بازی
+========================================== */
 
-/* =====================================================
-   GAME DATA
-===================================================== */
-
-const gameData = {
-
-    coins:56320,
+let running = false;
 
-    diamonds:1250,
+let leftOn = false;
+let rightOn = false;
+let fireOn = false;
+let nitroOn = false;
 
-    xp:8450,
+let last = 0;
 
-    level:23,
+let spawnTimer = 0;
+let shotTimer = 0;
 
-    stage:16,
+let x = innerWidth / 2;
 
-    weapons:[
+let kills = 0;
+let hp = 100;
+let distance = 0;
 
-        {
-            name:"MACHINE GUN",
-            level:5,
-            damage:70,
-            fireRate:8,
-            price:7500,
-            icon:"🔫"
-        },
+let nitro = 100;
 
-        {
-            name:"SHOTGUN",
-            level:4,
-            damage:110,
-            fireRate:4,
-            price:6000,
-            icon:"🔫"
-        },
+let damage = 25;
+let armor = 1;
 
-        {
-            name:"LASER GUN",
-            level:3,
-            damage:150,
-            fireRate:10,
-            price:5000,
-            icon:"⚡"
-        },
+let zombies = [];
+let bullets = [];
 
-        {
-            name:"ROCKET LAUNCHER",
-            level:2,
-            damage:240,
-            fireRate:2,
-            price:8000,
-            icon:"🚀"
-        }
 
-    ],
+/* ==========================================
+   عناصر
+========================================== */
 
-    missions:[
+const car =
+    document.getElementById("car");
 
-        {
-            name:"Zombie Hunter",
-            description:"50 زامبی را بکش",
-            progress:32,
-            target:50,
-            rewardCoins:2000,
-            rewardDiamonds:10
-        },
+const zombieContainer =
+    document.getElementById("zombies");
 
-        {
-            name:"Road Warrior",
-            description:"۵ دقیقه زنده بمان",
-            progress:2,
-            target:5,
-            rewardCoins:3500,
-            rewardDiamonds:15
-        },
 
-        {
-            name:"Heavy Damage",
-            description:"10000 آسیب وارد کن",
-            progress:6400,
-            target:10000,
-            rewardCoins:5000,
-            rewardDiamonds:20
-        }
+/* ==========================================
+   محدود کردن ماشین
+========================================== */
 
-    ]
+function positionCar(){
 
-};
+    const minX =
+        innerWidth * 0.13 + 60;
 
+    const maxX =
+        innerWidth * 0.87 - 60;
 
-/* =====================================================
-   UI
-===================================================== */
-
-const modal =
-    document.getElementById("modal");
-
-const modalTitle =
-    document.getElementById("modalTitle");
-
-const modalContent =
-    document.getElementById("modalContent");
-
-
-function openModal(type){
-
-    modal.style.display="grid";
-
-    if(type==="weapons"){
-        showWeapons();
-    }
-
-    if(type==="garage"){
-        showGarage();
-    }
-
-    if(type==="missions"){
-        showMissions();
-    }
-
-    if(type==="shop"){
-        showShop();
-    }
-
-    if(type==="settings"){
-        showSettings();
-    }
-
-}
-
-
-function closeModal(){
-
-    modal.style.display="none";
-
-}
-
-
-/* =====================================================
-   WEAPONS
-===================================================== */
-
-function showWeapons(){
-
-    modalTitle.textContent =
-        "🔫 WEAPONS — اسلحه‌ها";
-
-    modalContent.innerHTML = `
-
-        <div class="grid">
-
-            ${gameData.weapons.map(
-                (weapon,index)=>`
-
-                <div class="card">
-
-                    <div
-                        style="
-                        font-size:55px;
-                        text-align:center;
-                        padding:15px">
-                        ${weapon.icon}
-                    </div>
-
-                    <h3>
-                        ${weapon.name}
-                    </h3>
-
-                    <p>
-                        LEVEL ${weapon.level}
-                    </p>
-
-                    <p>
-                        قدرت:
-                        ${weapon.damage}
-                    </p>
-
-                    <p>
-                        سرعت تیر:
-                        ${weapon.fireRate}
-                    </p>
-
-                    <button
-                        class="cardButton"
-                        onclick="
-                        upgradeWeapon(${index})">
-
-                        ارتقا
-                        🪙
-                        ${weapon.price.toLocaleString()}
-
-                    </button>
-
-                </div>
-
-            `).join("")}
-
-        </div>
-
-    `;
-
-}
-
-
-function upgradeWeapon(index){
-
-    const weapon =
-        gameData.weapons[index];
-
-    if(gameData.coins >= weapon.price){
-
-        gameData.coins -=
-            weapon.price;
-
-        weapon.level++;
-
-        weapon.damage += 15;
-
-        gameData.weapons[index]
-            .price =
-            Math.floor(
-                weapon.price * 1.35
-            );
-
-        updateCoins();
-
-        showWeapons();
-
-        alert(
-            "اسلحه ارتقا پیدا کرد!"
+    x =
+        Math.max(
+            minX,
+            Math.min(maxX,x)
         );
 
-    }else{
-
-        alert(
-            "سکه کافی نیست!"
-        );
-
-    }
-
-}
-
-
-/* =====================================================
-   GARAGE
-===================================================== */
-
-function showGarage(){
-
-    modalTitle.textContent =
-        "🚘 GARAGE — گاراژ";
-
-    modalContent.innerHTML = `
-
-        <div class="grid">
-
-            <div class="card">
-
-                <div
-                    style="
-                    font-size:80px;
-                    text-align:center">
-                    🚘
-                </div>
-
-                <h3>
-                    Armored Muscle
-                </h3>
-
-                <p>
-                    زره:
-                    ███████░░░
-                </p>
-
-                <p>
-                    سرعت:
-                    ██████░░░░
-                </p>
-
-                <p>
-                    قدرت:
-                    ████████░░
-                </p>
-
-                <button
-                    class="cardButton"
-                    onclick="upgradeCar()">
-
-                    ارتقای ماشین
-                    🪙 12,000
-
-                </button>
-
-            </div>
-
-
-            <div class="card">
-
-                <h3>
-                    🔧 ارتقاها
-                </h3>
-
-                <p>
-                    ❤️ جان ماشین
-                </p>
-
-                <p>
-                    🛡️ زره
-                </p>
-
-                <p>
-                    ⚡ سرعت
-                </p>
-
-                <p>
-                    🔥 قدرت شلیک
-                </p>
-
-            </div>
-
-        </div>
-
-    `;
-
-}
-
-
-function upgradeCar(){
-
-    if(gameData.coins>=12000){
-
-        gameData.coins-=12000;
-
-        updateCoins();
-
-        alert(
-            "ماشین ارتقا پیدا کرد!"
-        );
-
-    }else{
-
-        alert(
-            "سکه کافی نیست!"
-        );
-
-    }
-
-}
-
-
-/* =====================================================
-   MISSIONS
-===================================================== */
-
-function showMissions(){
-
-    modalTitle.textContent =
-        "🎯 MISSIONS — مأموریت‌ها";
-
-    modalContent.innerHTML = `
-
-        <div class="grid">
-
-            ${gameData.missions.map(
-                (m,i)=>`
-
-                <div class="card">
-
-                    <h3>
-                        ${m.name}
-                    </h3>
-
-                    <p>
-                        ${m.description}
-                    </p>
-
-                    <div class="progress">
-
-                        <div
-                            class="progressFill"
-                            style="
-                            width:
-                            ${(m.progress/m.target)*100}%">
-                        </div>
-
-                    </div>
-
-                    <p>
-                        ${m.progress}
-                        /
-                        ${m.target}
-                    </p>
-
-                    <p>
-                        پاداش:
-                        🪙 ${m.rewardCoins}
-                        <br>
-                        💎 ${m.rewardDiamonds}
-                    </p>
-
-                    <button
-                        class="cardButton"
-                        onclick="claimMission(${i})">
-
-                        دریافت پاداش
-
-                    </button>
-
-                </div>
-
-            `).join("")}
-
-        </div>
-
-    `;
-
-}
-
-
-function claimMission(index){
-
-    const m =
-        gameData.missions[index];
-
-    if(m.progress >= m.target){
-
-        gameData.coins +=
-            m.rewardCoins;
-
-        gameData.diamonds +=
-            m.rewardDiamonds;
-
-        updateCoins();
-
-        alert(
-            "پاداش مأموریت دریافت شد!"
-        );
-
-    }else{
-
-        alert(
-            "مأموریت هنوز کامل نشده."
-        );
-
-    }
-
-}
-
-
-/* =====================================================
-   SHOP
-===================================================== */
-
-function showShop(){
-
-    modalTitle.textContent =
-        "🛒 SHOP — فروشگاه";
-
-    modalContent.innerHTML = `
-
-        <div class="grid">
-
-            <div class="card">
-
-                <h3>
-                    💰 بسته سکه
-                </h3>
-
-                <p>
-                    10,000 سکه
-                </p>
-
-                <button
-                    class="cardButton"
-                    onclick="
-                    buyCoins(10000)">
-
-                    دریافت
-
-                </button>
-
-            </div>
-
-
-            <div class="card">
-
-                <h3>
-                    💎 الماس
-                </h3>
-
-                <p>
-                    100 الماس
-                </p>
-
-                <button
-                    class="cardButton"
-                    onclick="
-                    gameData.diamonds+=100">
-
-                    خرید
-
-                </button>
-
-            </div>
-
-
-            <div class="card">
-
-                <h3>
-                    ❤️ بسته جان
-                </h3>
-
-                <p>
-                    100% سلامتی
-                </p>
-
-                <button
-                    class="cardButton">
-
-                    خرید
-
-                </button>
-
-            </div>
-
-
-            <div class="card">
-
-                <h3>
-                    📦 صندوق ویژه
-                </h3>
-
-                <p>
-                    اسلحه تصادفی
-                </p>
-
-                <button
-                    class="cardButton">
-
-                    🪙 5,000
-
-                </button>
-
-            </div>
-
-        </div>
-
-    `;
-
-}
-
-
-function buyCoins(amount){
-
-    gameData.coins += amount;
-
-    updateCoins();
-
-    alert(
-        amount.toLocaleString()+
-        " سکه اضافه شد."
-    );
-
-}
-
-
-/* =====================================================
-   SETTINGS
-===================================================== */
-
-function showSettings(){
-
-    modalTitle.textContent =
-        "⚙️ SETTINGS — تنظیمات";
-
-    modalContent.innerHTML = `
-
-        <div class="grid">
-
-            <div class="card">
-
-                <h3>
-                    صدا
-                </h3>
-
-                <button
-                    class="cardButton"
-                    onclick="
-                    alert('صدا فعال/غیرفعال شد')">
-
-                    🔊 تغییر صدا
-
-                </button>
-
-            </div>
-
-
-            <div class="card">
-
-                <h3>
-                    کیفیت گرافیک
-                </h3>
-
-                <button
-                    class="cardButton"
-                    onclick="
-                    alert('کیفیت بالا فعال شد')">
-
-                    🎨 HIGH
-
-                </button>
-
-            </div>
-
-
-            <div class="card">
-
-                <h3>
-                    ذخیره بازی
-                </h3>
-
-                <button
-                    class="cardButton"
-                    onclick="saveGame()">
-
-                    💾 ذخیره
-
-                </button>
-
-            </div>
-
-
-            <div class="card">
-
-                <h3>
-                    بارگذاری
-                </h3>
-
-                <button
-                    class="cardButton"
-                    onclick="loadGame()">
-
-                    📂 بارگذاری
-
-                </button>
-
-            </div>
-
-        </div>
-
-    `;
-
-}
-
-
-/* =====================================================
-   SAVE
-===================================================== */
-
-function saveGame(){
-
-    localStorage.setItem(
-        "zombieCarSave",
-        JSON.stringify(gameData)
-    );
-
-    alert(
-        "بازی ذخیره شد."
-    );
-
-}
-
-
-function loadGame(){
-
-    const saved =
-        localStorage.getItem(
-            "zombieCarSave"
-        );
-
-    if(!saved){
-
-        alert(
-            "ذخیره‌ای وجود ندارد."
-        );
-
-        return;
-    }
-
-    Object.assign(
-        gameData,
-        JSON.parse(saved)
-    );
-
-    updateCoins();
-
-    alert(
-        "بازی بارگذاری شد."
-    );
-
-}
-
-
-/* =====================================================
-   GIFT
-===================================================== */
-
-function claimGift(){
-
-    gameData.coins += 500;
-
-    gameData.diamonds += 5;
-
-    updateCoins();
-
-    alert(
-        "🎁 هدیه دریافت شد!\n"+
-        "+500 سکه\n"+
-        "+5 الماس"
-    );
-
-}
-
-
-/* =====================================================
-   COINS UI
-===================================================== */
-
-function updateCoins(){
-
-    document.getElementById(
-        "coins"
-    ).textContent =
-        gameData.coins.toLocaleString();
-
-}
-
-
-/* =====================================================
-   GAME ENGINE
-===================================================== */
-
-const gameScreen =
-    document.getElementById(
-        "gameScreen"
-    );
-
-const canvas =
-    document.getElementById(
-        "gameCanvas"
-    );
-
-const ctx =
-    canvas.getContext("2d");
-
-
-let gameRunning=false;
-
-let gameWidth=0;
-let gameHeight=0;
-
-let player={
-    x:0,
-    y:0,
-    width:85,
-    height:120,
-    hp:100
-};
-
-let bullets=[];
-let zombies=[];
-let explosions=[];
-
-let gameKills=0;
-let gameCoins=0;
-
-let leftPressed=false;
-let rightPressed=false;
-let shooting=false;
-
-let lastGameTime=0;
-let spawnTimer=0;
-
-
-/* =====================================================
-   RESIZE
-===================================================== */
-
-function resizeGame(){
-
-    gameWidth =
-        window.innerWidth;
-
-    gameHeight =
-        window.innerHeight;
-
-    canvas.width =
-        gameWidth *
-        devicePixelRatio;
-
-    canvas.height =
-        gameHeight *
-        devicePixelRatio;
-
-    canvas.style.width =
-        gameWidth+"px";
-
-    canvas.style.height =
-        gameHeight+"px";
-
-    ctx.setTransform(
-        devicePixelRatio,
-        0,
-        0,
-        devicePixelRatio,
-        0,
-        0
-    );
-
-    player.x =
-        gameWidth/2;
-
-    player.y =
-        gameHeight-160;
-
+    car.style.left =
+        x + "px";
 }
 
 window.addEventListener(
     "resize",
-    resizeGame
+    positionCar
 );
 
 
-/* =====================================================
-   START GAME
-===================================================== */
-
-function startGame(){
-
-    gameScreen.style.display =
-        "block";
-
-    gameRunning=true;
-
-    gameKills=0;
-
-    gameCoins=0;
-
-    bullets=[];
-
-    zombies=[];
-
-    explosions=[];
-
-    player.hp=100;
-
-    resizeGame();
-
-    lastGameTime =
-        performance.now();
-
-    requestAnimationFrame(
-        gameLoop
-    );
-
-}
-
-
-/* =====================================================
-   EXIT
-===================================================== */
-
-function exitGame(){
-
-    gameRunning=false;
-
-    gameScreen.style.display =
-        "none";
-
-}
-
-
-/* =====================================================
-   CONTROLS
-===================================================== */
+/* ==========================================
+   کنترل لمسی
+========================================== */
 
 function holdButton(
-    element,
+    id,
     down,
     up
 ){
 
-    element.addEventListener(
+    const button =
+        document.getElementById(id);
+
+    button.addEventListener(
         "pointerdown",
-        e=>{
-            e.preventDefault();
+        event => {
+
+            event.preventDefault();
+
+            button.setPointerCapture?.(
+                event.pointerId
+            );
+
             down();
+
         }
     );
 
-    element.addEventListener(
+    [
         "pointerup",
-        e=>{
-            e.preventDefault();
-            up();
-        }
-    );
-
-    element.addEventListener(
         "pointercancel",
-        up
-    );
+        "lostpointercapture"
+    ].forEach(type => {
 
-}
+        button.addEventListener(
+            type,
+            event => {
 
+                event.preventDefault();
 
-holdButton(
-    document.getElementById(
-        "leftBtn"
-    ),
-    ()=>leftPressed=true,
-    ()=>leftPressed=false
-);
+                up();
 
-
-holdButton(
-    document.getElementById(
-        "rightBtn"
-    ),
-    ()=>rightPressed=true,
-    ()=>rightPressed=false
-);
-
-
-holdButton(
-    document.getElementById(
-        "fireBtn"
-    ),
-    ()=>shooting=true,
-    ()=>shooting=false
-);
-
-
-document.addEventListener(
-    "keydown",
-    e=>{
-
-        if(e.key==="ArrowLeft")
-            leftPressed=true;
-
-        if(e.key==="ArrowRight")
-            rightPressed=true;
-
-        if(e.key===" ")
-            shooting=true;
-
-    }
-);
-
-
-document.addEventListener(
-    "keyup",
-    e=>{
-
-        if(e.key==="ArrowLeft")
-            leftPressed=false;
-
-        if(e.key==="ArrowRight")
-            rightPressed=false;
-
-        if(e.key===" ")
-            shooting=false;
-
-    }
-);
-
-
-/* =====================================================
-   SPAWN ZOMBIE
-===================================================== */
-
-function spawnZombie(){
-
-    zombies.push({
-
-        x:
-            60+
-            Math.random()*
-            (gameWidth-120),
-
-        y:-100,
-
-        width:55,
-
-        height:80,
-
-        hp:100,
-
-        speed:
-            1.4+
-            Math.random()*1.3
+            }
+        );
 
     });
 
 }
 
 
-/* =====================================================
-   SHOOT
-===================================================== */
+/* ==========================================
+   چپ
+========================================== */
 
-let shootDelay=0;
+holdButton(
+    "left",
+
+    () => {
+        leftOn = true;
+    },
+
+    () => {
+        leftOn = false;
+    }
+);
+
+
+/* ==========================================
+   راست
+========================================== */
+
+holdButton(
+    "right",
+
+    () => {
+        rightOn = true;
+    },
+
+    () => {
+        rightOn = false;
+    }
+);
+
+
+/* ==========================================
+   تیراندازی
+========================================== */
+
+holdButton(
+    "fire",
+
+    () => {
+        fireOn = true;
+    },
+
+    () => {
+        fireOn = false;
+    }
+);
+
+
+/* ==========================================
+   Nitro
+========================================== */
+
+holdButton(
+    "nitro",
+
+    () => {
+        nitroOn = true;
+    },
+
+    () => {
+        nitroOn = false;
+    }
+);
+
+
+/* ==========================================
+   کیبورد
+========================================== */
+
+window.addEventListener(
+    "keydown",
+    event => {
+
+        if(event.key === "ArrowLeft")
+            leftOn = true;
+
+        if(event.key === "ArrowRight")
+            rightOn = true;
+
+        if(event.code === "Space")
+            fireOn = true;
+
+        if(event.key.toLowerCase() === "n")
+            nitroOn = true;
+
+    }
+);
+
+
+window.addEventListener(
+    "keyup",
+    event => {
+
+        if(event.key === "ArrowLeft")
+            leftOn = false;
+
+        if(event.key === "ArrowRight")
+            rightOn = false;
+
+        if(event.code === "Space")
+            fireOn = false;
+
+        if(event.key.toLowerCase() === "n")
+            nitroOn = false;
+
+    }
+);
+
+
+/* ==========================================
+   شروع
+========================================== */
+
+function begin(){
+
+    document.getElementById(
+        "start"
+    ).style.display = "none";
+
+    running = true;
+
+    kills = 0;
+    hp = 100;
+    distance = 0;
+    nitro = 100;
+
+    zombies = [];
+    bullets = [];
+
+    zombieContainer.innerHTML = "";
+
+    x = innerWidth / 2;
+
+    positionCar();
+
+    last =
+        performance.now();
+
+    requestAnimationFrame(loop);
+
+}
+
+
+/* ==========================================
+   شروع مجدد
+========================================== */
+
+function restart(){
+
+    document.getElementById(
+        "result"
+    ).style.display = "none";
+
+    begin();
+
+}
+
+
+/* ==========================================
+   ایجاد زامبی
+========================================== */
+
+function spawnZombie(){
+
+    const side =
+        Math.random() < 0.5
+        ? -1
+        : 1;
+
+    zombies.push({
+
+        side,
+
+        x:
+            innerWidth / 2
+            +
+            side *
+            (
+                innerWidth * 0.18
+                +
+                Math.random() * 70
+            ),
+
+        y:
+            innerHeight * 0.18
+            +
+            Math.random() * 40,
+
+        speed:
+            1.3
+            +
+            Math.random() * 1.4,
+
+        latched:false,
+
+        hp:100
+
+    });
+
+}
+
+
+/* ==========================================
+   تیر
+========================================== */
 
 function shoot(){
 
-    if(shootDelay>0)
+    if(shotTimer > 0)
         return;
 
     bullets.push({
 
-        x:player.x,
+        x:x,
 
-        y:player.y-70,
-
-        speed:13,
-
-        damage:35
+        y:
+            innerHeight * 0.78
 
     });
 
-    shootDelay=8;
+    shotTimer = 7;
 
 }
 
 
-/* =====================================================
-   UPDATE GAME
-===================================================== */
+/* ==========================================
+   آپدیت
+========================================== */
 
-function updateGame(dt){
+function update(dt){
 
-    if(leftPressed){
+    /* حرکت چپ */
 
-        player.x-=7*dt;
+    if(leftOn)
+        x -= 7 * dt;
+
+
+    /* حرکت راست */
+
+    if(rightOn)
+        x += 7 * dt;
+
+
+    positionCar();
+
+
+    /* Nitro */
+
+    if(
+        nitroOn &&
+        nitro > 0
+    ){
+
+        distance +=
+            0.035 * dt;
+
+        nitro -=
+            0.35 * dt;
+
+    }else{
+
+        distance +=
+            0.012 * dt;
 
     }
 
-    if(rightPressed){
 
-        player.x+=7*dt;
+    /* شلیک */
 
-    }
-
-
-    player.x =
-        Math.max(
-            50,
-            Math.min(
-                gameWidth-50,
-                player.x
-            )
-        );
-
-
-    if(shooting)
+    if(fireOn)
         shoot();
 
 
-    shootDelay -= dt;
+    shotTimer -= dt;
 
+
+    /* تولید زامبی */
 
     spawnTimer -= dt;
 
-
-    if(spawnTimer<=0){
+    if(spawnTimer <= 0){
 
         spawnZombie();
 
         spawnTimer =
-            30+
-            Math.random()*35;
+            28 +
+            Math.random() * 35;
 
     }
 
 
-    bullets.forEach(
-        bullet=>{
-            bullet.y -=
-                bullet.speed*dt;
-        }
-    );
+    /* حرکت زامبی‌ها */
 
+    zombies.forEach(z => {
+
+        z.y +=
+            z.speed *
+            (
+                nitroOn
+                ? 1.25
+                : 1
+            )
+            *
+            dt;
+
+
+        /* چسبیدن به ماشین */
+
+        if(
+            Math.abs(z.x-x)<75 &&
+            z.y>innerHeight*0.58
+        ){
+
+            z.latched = true;
+
+        }
+
+
+        if(z.latched){
+
+            z.x +=
+                (
+                    x
+                    +
+                    z.side * 45
+                    -
+                    z.x
+                )
+                *
+                0.04
+                *
+                dt;
+
+            z.y =
+                innerHeight * 0.72;
+
+
+            hp -=
+                0.08 *
+                dt /
+                armor;
+
+        }
+
+    });
+
+
+    /* حرکت گلوله */
 
     for(
         let i=bullets.length-1;
@@ -2424,13 +1094,8 @@ function updateGame(dt){
         const bullet =
             bullets[i];
 
-        if(bullet.y<-50){
-
-            bullets.splice(i,1);
-
-            continue;
-
-        }
+        bullet.y -=
+            18 * dt;
 
 
         for(
@@ -2445,41 +1110,24 @@ function updateGame(dt){
 
             if(
                 Math.abs(
-                    bullet.x-
+                    bullet.x -
                     zombie.x
-                )<35 &&
+                ) < 45 &&
 
                 Math.abs(
-                    bullet.y-
+                    bullet.y -
                     zombie.y
-                )<50
+                ) < 55
             ){
 
-                zombie.hp -=
-                    bullet.damage;
+                zombie.hp -= damage;
 
-                bullets.splice(
-                    i,
-                    1
-                );
+                bullets.splice(i,1);
 
-                if(
-                    zombie.hp<=0
-                ){
 
-                    gameKills++;
+                if(zombie.hp <= 0){
 
-                    gameCoins+=25;
-
-                    explosions.push({
-
-                        x:zombie.x,
-
-                        y:zombie.y,
-
-                        life:30
-
-                    });
+                    kills++;
 
                     zombies.splice(
                         j,
@@ -2497,786 +1145,161 @@ function updateGame(dt){
     }
 
 
-    zombies.forEach(
-        zombie=>{
+    /* نمایش */
 
-            zombie.y +=
-                zombie.speed*dt;
-
-            if(
-                Math.abs(
-                    zombie.x-
-                    player.x
-                )<55 &&
-
-                Math.abs(
-                    zombie.y-
-                    player.y
-                )<80
-            ){
-
-                player.hp -=
-                    0.5*dt;
-
-            }
-
-        }
-    );
-
-
-    for(
-        let i=explosions.length-1;
-        i>=0;
-        i--
-    ){
-
-        explosions[i].life -=
-            dt;
-
-        if(
-            explosions[i].life<=0
-        ){
-
-            explosions.splice(
-                i,
-                1
-            );
-
-        }
-
-    }
-
-
-    if(player.hp<=0){
-
-        player.hp=100;
-
-        alert(
-            "ماشین نابود شد!"
-        );
-
-        exitGame();
-
-    }
+    render();
 
 
     document.getElementById(
-        "gameHP"
-    ).textContent =
-        Math.ceil(
-            player.hp
-        );
+        "kills"
+    ).textContent = kills;
+
 
     document.getElementById(
-        "gameKills"
+        "hp"
     ).textContent =
-        gameKills;
-
-    document.getElementById(
-        "gameCoins"
-    ).textContent =
-        gameCoins;
-
-}
-
-
-/* =====================================================
-   DRAW ROAD
-===================================================== */
-
-function drawRoad(){
-
-    const g =
-        ctx.createLinearGradient(
-            0,
-            0,
-            0,
-            gameHeight
-        );
-
-    g.addColorStop(
-        0,
-        "#161b1d"
-    );
-
-    g.addColorStop(
-        1,
-        "#07090a"
-    );
-
-    ctx.fillStyle=g;
-
-    ctx.fillRect(
-        0,
-        0,
-        gameWidth,
-        gameHeight
-    );
-
-
-    /* buildings */
-
-    for(
-        let i=0;
-        i<14;
-        i++
-    ){
-
-        const width=70+
-            (i%4)*25;
-
-        const height=100+
-            (i%5)*35;
-
-        const x=
-            i*110-
-            50;
-
-        ctx.fillStyle =
-            i%2
-                ? "#101416"
-                : "#171b1d";
-
-        ctx.fillRect(
-            x,
-            250-height,
-            width,
-            height
-        );
-
-    }
-
-
-    /* road */
-
-    const roadWidth =
-        Math.min(
-            gameWidth*.68,
-            700
-        );
-
-    const roadX =
-        (gameWidth-roadWidth)/2;
-
-
-    ctx.fillStyle =
-        "#24282a";
-
-    ctx.fillRect(
-        roadX,
-        0,
-        roadWidth,
-        gameHeight
-    );
-
-
-    /* road edges */
-
-    ctx.fillStyle =
-        "#111516";
-
-    ctx.fillRect(
-        roadX,
-        0,
-        12,
-        gameHeight
-    );
-
-    ctx.fillRect(
-        roadX+
-        roadWidth-12,
-        0,
-        12,
-        gameHeight
-    );
-
-
-    /* center line */
-
-    ctx.strokeStyle =
-        "#dedbd2";
-
-    ctx.lineWidth=5;
-
-    ctx.setLineDash([
-        40,
-        40
-    ]);
-
-    ctx.beginPath();
-
-    ctx.moveTo(
-        gameWidth/2,
-        0
-    );
-
-    ctx.lineTo(
-        gameWidth/2,
-        gameHeight
-    );
-
-    ctx.stroke();
-
-    ctx.setLineDash([]);
-
-}
-
-
-/* =====================================================
-   DRAW CAR
-===================================================== */
-
-function drawCar(){
-
-    ctx.save();
-
-    ctx.translate(
-        player.x,
-        player.y
-    );
-
-
-    /* shadow */
-
-    ctx.fillStyle="#0009";
-
-    ctx.beginPath();
-
-    ctx.ellipse(
-        0,
-        55,
-        62,
-        18,
-        0,
-        0,
-        Math.PI*2
-    );
-
-    ctx.fill();
-
-
-    /* body */
-
-    const g =
-        ctx.createLinearGradient(
-            -45,
-            -70,
-            45,
-            70
-        );
-
-    g.addColorStop(
-        0,
-        "#727477"
-    );
-
-    g.addColorStop(
-        .35,
-        "#202427"
-    );
-
-    g.addColorStop(
-        .65,
-        "#090b0c"
-    );
-
-    g.addColorStop(
-        1,
-        "#4b4e50"
-    );
-
-
-    ctx.fillStyle=g;
-
-    ctx.beginPath();
-
-    ctx.roundRect(
-        -45,
-        -70,
-        90,
-        140,
-        18
-    );
-
-    ctx.fill();
-
-
-    ctx.strokeStyle =
-        "#9b8550";
-
-    ctx.lineWidth=3;
-
-    ctx.stroke();
-
-
-    /* window */
-
-    ctx.fillStyle =
-        "#657e8c";
-
-    ctx.beginPath();
-
-    ctx.roundRect(
-        -29,
-        -45,
-        58,
-        38,
-        9
-    );
-
-    ctx.fill();
-
-
-    ctx.strokeStyle =
-        "#242a2c";
-
-    ctx.stroke();
-
-
-    /* windshield reflection */
-
-    ctx.fillStyle =
-        "#dcecf244";
-
-    ctx.fillRect(
-        -22,
-        -39,
-        6,
-        27
-    );
-
-
-    /* headlights */
-
-    ctx.fillStyle =
-        "#fff3b0";
-
-    ctx.shadowBlur=20;
-
-    ctx.shadowColor =
-        "#fff1a0";
-
-    ctx.fillRect(
-        -31,
-        -61,
-        18,
-        8
-    );
-
-    ctx.fillRect(
-        13,
-        -61,
-        18,
-        8
-    );
-
-    ctx.shadowBlur=0;
-
-
-    /* weapon mount */
-
-    ctx.fillStyle =
-        "#181a1b";
-
-    ctx.fillRect(
-        -8,
-        -92,
-        16,
-        35
-    );
-
-    ctx.fillRect(
-        -4,
-        -115,
-        8,
-        35
-    );
-
-
-    /* machine gun */
-
-    ctx.fillStyle =
-        "#090a0a";
-
-    ctx.fillRect(
-        -4,
-        -123,
-        8,
-        35
-    );
-
-
-    /* wheels */
-
-    ctx.fillStyle =
-        "#050505";
-
-    ctx.fillRect(
-        -51,
-        -25,
-        10,
-        40
-    );
-
-    ctx.fillRect(
-        41,
-        -25,
-        10,
-        40
-    );
-
-
-    /* red tail */
-
-    ctx.fillStyle =
-        "#d71919";
-
-    ctx.fillRect(
-        -27,
-        57,
-        17,
-        6
-    );
-
-    ctx.fillRect(
-        10,
-        57,
-        17,
-        6
-    );
-
-
-    ctx.restore();
-
-}
-
-
-/* =====================================================
-   DRAW ZOMBIE
-===================================================== */
-
-function drawZombie(zombie){
-
-    ctx.save();
-
-    ctx.translate(
-        zombie.x,
-        zombie.y
-    );
-
-
-    /* shadow */
-
-    ctx.fillStyle="#0009";
-
-    ctx.beginPath();
-
-    ctx.ellipse(
-        0,
-        42,
-        32,
-        10,
-        0,
-        0,
-        Math.PI*2
-    );
-
-    ctx.fill();
-
-
-    /* body */
-
-    ctx.fillStyle =
-        "#59684b";
-
-    ctx.beginPath();
-
-    ctx.roundRect(
-        -22,
-        -5,
-        44,
-        50,
-        12
-    );
-
-    ctx.fill();
-
-
-    /* head */
-
-    ctx.fillStyle =
-        "#72855b";
-
-    ctx.beginPath();
-
-    ctx.arc(
-        0,
-        -25,
-        23,
-        0,
-        Math.PI*2
-    );
-
-    ctx.fill();
-
-
-    /* arms */
-
-    ctx.strokeStyle =
-        "#4d5d43";
-
-    ctx.lineWidth=8;
-
-    ctx.beginPath();
-
-    ctx.moveTo(
-        -16,
-        4
-    );
-
-    ctx.lineTo(
-        -39,
-        35
-    );
-
-    ctx.moveTo(
-        16,
-        4
-    );
-
-    ctx.lineTo(
-        39,
-        30
-    );
-
-    ctx.stroke();
-
-
-    /* eyes */
-
-    ctx.fillStyle =
-        "#e0eea5";
-
-    ctx.beginPath();
-
-    ctx.arc(
-        -8,
-        -29,
-        5,
-        0,
-        Math.PI*2
-    );
-
-    ctx.arc(
-        8,
-        -29,
-        5,
-        0,
-        Math.PI*2
-    );
-
-    ctx.fill();
-
-
-    /* mouth */
-
-    ctx.fillStyle =
-        "#111";
-
-    ctx.fillRect(
-        -10,
-        -15,
-        20,
-        6
-    );
-
-
-    /* health */
-
-    ctx.fillStyle =
-        "#151515";
-
-    ctx.fillRect(
-        -25,
-        -58,
-        50,
-        6
-    );
-
-    ctx.fillStyle =
-        "#e11";
-
-    ctx.fillRect(
-        -25,
-        -58,
-        50*
         Math.max(
             0,
-            zombie.hp/100
-        ),
-        6
-    );
+            Math.ceil(hp)
+        );
 
 
-    ctx.restore();
+    document.getElementById(
+        "distance"
+    ).textContent =
+        distance.toFixed(2);
 
-}
+
+    document.getElementById(
+        "nitroText"
+    ).textContent =
+        Math.max(
+            0,
+            Math.floor(nitro)
+        );
 
 
-/* =====================================================
-   DRAW BULLETS
-===================================================== */
+    /* نابودی ماشین */
 
-function drawBullets(){
+    if(hp <= 0){
 
-    bullets.forEach(
-        bullet=>{
+        endGame();
 
-            ctx.save();
-
-            ctx.shadowBlur=20;
-
-            ctx.shadowColor =
-                "#ff9b2e";
-
-            ctx.fillStyle =
-                "#ffe09a";
-
-            ctx.fillRect(
-                bullet.x-3,
-                bullet.y-14,
-                6,
-                18
-            );
-
-            ctx.restore();
-
-        }
-    );
+    }
 
 }
 
 
-/* =====================================================
-   EXPLOSIONS
-===================================================== */
+/* ==========================================
+   نمایش زامبی‌ها
+========================================== */
 
-function drawExplosions(){
+function render(){
 
-    explosions.forEach(
-        e=>{
+    zombieContainer.innerHTML = "";
 
-            const radius =
-                45-
-                e.life;
-
-            const gradient =
-                ctx.createRadialGradient(
-                    e.x,
-                    e.y,
-                    0,
-                    e.x,
-                    e.y,
-                    radius
-                );
-
-            gradient.addColorStop(
-                0,
-                "#fff"
-            );
-
-            gradient.addColorStop(
-                .25,
-                "#ffdf43"
-            );
-
-            gradient.addColorStop(
-                .6,
-                "#ff641e"
-            );
-
-            gradient.addColorStop(
-                1,
-                "transparent"
-            );
-
-            ctx.fillStyle=gradient;
-
-            ctx.beginPath();
-
-            ctx.arc(
-                e.x,
-                e.y,
-                radius,
-                0,
-                Math.PI*2
-            );
-
-            ctx.fill();
-
-        }
-    );
-
-}
-
-
-/* =====================================================
-   DRAW GAME
-===================================================== */
-
-function drawGame(){
-
-    drawRoad();
 
     zombies.forEach(
-        drawZombie
+        zombie => {
+
+            const element =
+                document.createElement(
+                    "div"
+                );
+
+            element.className =
+                "z";
+
+            element.textContent =
+                "🧟";
+
+
+            element.style.left =
+                (
+                    zombie.x - 29
+                ) + "px";
+
+
+            element.style.top =
+                (
+                    zombie.y - 40
+                ) + "px";
+
+
+            zombieContainer.appendChild(
+                element
+            );
+
+        }
     );
-
-    drawBullets();
-
-    drawExplosions();
-
-    drawCar();
 
 }
 
 
-/* =====================================================
-   GAME LOOP
-===================================================== */
+/* ==========================================
+   پایان
+========================================== */
 
-function gameLoop(time){
+function endGame(){
 
-    if(!gameRunning)
+    running = false;
+
+
+    document.getElementById(
+        "finalKills"
+    ).textContent =
+        kills;
+
+
+    document.getElementById(
+        "finalDistance"
+    ).textContent =
+        distance.toFixed(2);
+
+
+    document.getElementById(
+        "result"
+    ).style.display =
+        "grid";
+
+}
+
+
+/* ==========================================
+   حلقه بازی
+========================================== */
+
+function loop(time){
+
+    if(!running)
         return;
 
 
     const dt =
         Math.min(
-            (time-lastGameTime)/16.67,
-            2
+            2,
+            (time-last)/16.67
         );
 
-    lastGameTime=time;
+
+    last = time;
 
 
-    updateGame(dt);
-
-    drawGame();
+    update(dt);
 
 
     requestAnimationFrame(
-        gameLoop
+        loop
     );
 
 }
 
 
-/* =====================================================
-   START
-===================================================== */
+/* ==========================================
+   مقدار اولیه
+========================================== */
 
-updateCoins();
+positionCar();
 
 </script>
 
