@@ -3,10 +3,17 @@ if(tg){tg.ready();tg.expand();}
 
 const canvas=document.getElementById("game"),ctx=canvas.getContext("2d");
 let W,H,dpr,player,bullets=[],zombies=[],particles=[];
-let coins=0,kills=0,hp=100,maxHp=100,score=0,gameOver=false,gameStarted=false,keys={},spawnTimer=0,last=performance.now(),roadOffset=0;
+let coins=0,kills=0,hp=100,maxHp=100,score=0,gameOver=false,keys={},spawnTimer=0,last=performance.now(),roadOffset=0;
 let stage=1,stageKills=0,stageChanging=false,bossActive=false,bossDefeated=false;
 
 const upgrades={hp:0,speed:0,fire:0,damage:0,armor:0};
+
+const missionDefaults=[
+  {id:"kills",title:"شکارچی زامبی",desc:"۲۰ زامبی بکش",target:20,reward:75,progress:0,claimed:false},
+  {id:"coins",title:"جمع‌آوری سکه",desc:"۱۰۰ سکه از بازی به‌دست بیاور",target:100,reward:100,progress:0,claimed:false},
+  {id:"boss",title:"شکار باس",desc:"یک باس را شکست بده",target:1,reward:250,progress:0,claimed:false}
+];
+let missions=missionDefaults.map(m=>({...m}));
 const baseCost={hp:30,speed:40,fire:45,damage:60,armor:70};
 
 function cost(type){return Math.floor(baseCost[type]*Math.pow(1.55,upgrades[type]));}
@@ -20,6 +27,7 @@ function resize(){
  ctx.setTransform(dpr,0,0,dpr,0,0);
 }
 addEventListener("resize",resize);resize();
+buildMissionUI();
 
 function updateHud(){
  document.getElementById("hp").textContent=Math.max(0,Math.round(hp));
@@ -28,6 +36,7 @@ function updateHud(){
  document.getElementById("stageNum").textContent=stage;
  document.getElementById("shopCoins").textContent=coins;
  updateShop();
+ renderMissions();
 }
 
 function updateShop(){
@@ -46,7 +55,8 @@ function saveProgress(){
   try{
     localStorage.setItem(SAVE_KEY, JSON.stringify({
       coins,
-      upgrades
+      upgrades,
+      missions
     }));
   }catch(e){}
 }
@@ -57,6 +67,15 @@ function loadProgress(){
     if(!raw)return;
     const data=JSON.parse(raw);
     if(Number.isFinite(data.coins)) coins=Math.max(0,Math.floor(data.coins));
+    if(Array.isArray(data.missions)){
+      for(const saved of data.missions){
+        const m=missions.find(x=>x.id===saved.id);
+        if(m){
+          m.progress=Math.max(0,Number(saved.progress)||0);
+          m.claimed=!!saved.claimed;
+        }
+      }
+    }
     if(data.upgrades){
       for(const k of Object.keys(upgrades)){
         if(Number.isFinite(data.upgrades[k])){
@@ -71,6 +90,8 @@ function loadProgress(){
 
 function clearProgress(){
   try{localStorage.removeItem(SAVE_KEY)}catch(e){}
+  missions=missionDefaults.map(m=>({...m}));
+  renderMissions();
 }
 
 function reset(){
@@ -90,11 +111,7 @@ function bind(id,key){
 bind("left","l");bind("right","r");bind("fire","f");
 addEventListener("keydown",e=>{if(e.key==="ArrowLeft")keys.l=true;if(e.key==="ArrowRight")keys.r=true;if(e.code==="Space")keys.f=true});
 addEventListener("keyup",e=>{if(e.key==="ArrowLeft")keys.l=false;if(e.key==="ArrowRight")keys.r=false;if(e.code==="Space")keys.f=false});
-document.getElementById("restart").onclick=()=>{
-  reset();
-  gameStarted=true;
-  document.getElementById("startScreen").classList.add("hidden");
-};
+document.getElementById("restart").onclick=reset;
 
 const shop=document.getElementById("shop");
 document.getElementById("shopBtn").onclick=()=>{keys.l=keys.r=keys.f=false;shop.classList.remove("hidden");updateShop()};
@@ -217,7 +234,7 @@ function drawZombie(z){
  ctx.restore();
 }
 
-function fire(){if(!gameStarted||gameOver)return;bullets.push({x:player.x,y:player.y-55,spd:13,r:5,damage:bulletPower()});burst(player.x,player.y-55,"#ffd54f",3)}
+function fire(){bullets.push({x:player.x,y:player.y-55,spd:13,r:5,damage:bulletPower()});burst(player.x,player.y-55,"#ffd54f",3)}
 function hit(a,b){return Math.abs(a.x-b.x)<(a.w+b.w)/2&&Math.abs(a.y-b.y)<(a.h+b.h)/2}
 function burst(x,y,color="#ff7043",amount=12){for(let i=0;i<amount;i++)particles.push({x,y,vx:(Math.random()-.5)*7,vy:(Math.random()-.5)*7,life:25+Math.random()*20,color})}
 function endGame(){gameOver=true;document.getElementById("finalKills").textContent=kills;document.getElementById("finalStage").textContent=stage;document.getElementById("gameover").classList.remove("hidden")}
@@ -253,11 +270,11 @@ function update(dt){
     if(z.type==="boss"){
       updateBossHud(z.hp,z.maxHp);
       if(z.hp<=0){
-        zombies.splice(i,1);kills++;coins+=z.reward;score+=100;saveProgress();
+        zombies.splice(i,1);kills++;coins+=z.reward;missionAdd("boss");missionAdd("coins",z.reward);score+=100;saveProgress();
         burst(z.x,z.y,"#ff1744",45);updateHud();finishBoss();
       }
     }else if(z.hp<=0){
-      zombies.splice(i,1);kills++;stageKills++;coins+=z.reward;score+=10;saveProgress();burst(z.x,z.y,"#ff7043",20);updateHud();if(stageKills>=8+(stage-1)*7)nextStage()
+      zombies.splice(i,1);kills++;stageKills++;coins+=z.reward;missionAdd("kills");missionAdd("coins",z.reward);score+=10;saveProgress();burst(z.x,z.y,"#ff7043",20);updateHud();if(stageKills>=8+(stage-1)*7)nextStage()
     }
     break;
    }
@@ -274,15 +291,8 @@ function draw(){
  particles.forEach(p=>{ctx.globalAlpha=Math.max(0,p.life/40);ctx.fillStyle=p.color;ctx.fillRect(p.x,p.y,5,5)});ctx.globalAlpha=1;
 }
 
-function loop(t){const dt=Math.min((t-last)/16.67,2);last=t;if(gameStarted&&!gameOver)update(dt);draw();requestAnimationFrame(loop)}
-reset();
-gameStarted=false;
-document.getElementById("startGame").onclick=()=>{
-  reset();
-  gameStarted=true;
-  document.getElementById("startScreen").classList.add("hidden");
-};
-requestAnimationFrame(loop);
+function loop(t){const dt=Math.min((t-last)/16.67,2);last=t;if(!gameOver)update(dt);draw();requestAnimationFrame(loop)}
+reset();requestAnimationFrame(loop);
 
 
 const resetSaveBtn=document.getElementById("resetSave");
@@ -297,3 +307,47 @@ if(resetSaveBtn){
     }
   };
 }
+
+const missionStyle=document.createElement('style');missionStyle.textContent='\n#missionBtn{position:fixed;left:12px;bottom:126px;z-index:60;border:0;border-radius:14px;padding:10px 14px;background:#1b5e20;color:#fff;font-weight:900;font-size:15px;box-shadow:0 5px 18px #0008}\n#missionPanel{position:fixed;inset:0;z-index:100;background:#000b;display:none;align-items:center;justify-content:center;padding:18px;font-family:inherit}\n#missionPanel.show{display:flex}\n.mission-box{width:min(440px,94vw);max-height:82vh;overflow:auto;background:#15191c;border:1px solid #ffffff20;border-radius:22px;padding:16px;box-shadow:0 20px 60px #000}\n.mission-head{display:flex;align-items:center;justify-content:space-between;margin-bottom:12px}\n.mission-head h2{margin:0;font-size:22px}.mission-close{border:0;background:#343a40;color:#fff;border-radius:10px;width:38px;height:38px;font-size:20px}\n.mission-row{padding:13px;border-radius:16px;background:#ffffff09;border:1px solid #ffffff12;margin:9px 0}\n.mission-row b{display:block;font-size:16px}.mission-row small{display:block;color:#aaa;margin:4px 0 9px}\n.mission-line{display:flex;align-items:center;justify-content:space-between;gap:8px}\n.mission-progress{color:#ffd54f;font-weight:900}.mission-claim{border:0;border-radius:10px;padding:8px 11px;background:#2e7d32;color:#fff;font-weight:900}.mission-claim:disabled{background:#444;color:#888}\n';document.head.appendChild(missionStyle);
+
+
+function buildMissionUI(){
+ if(document.getElementById("missionBtn"))return;
+ const btn=document.createElement("button");
+ btn.id="missionBtn";btn.textContent="🎯 مأموریت‌ها";document.body.appendChild(btn);
+
+ const panel=document.createElement("div");
+ panel.id="missionPanel";
+ panel.innerHTML='<div class="mission-box"><div class="mission-head"><h2>🎯 مأموریت‌ها</h2><button class="mission-close" id="missionClose">✕</button></div><div id="missionList"></div></div>';
+ document.body.appendChild(panel);
+
+ btn.onclick=()=>{renderMissions();panel.classList.add("show")};
+ document.getElementById("missionClose").onclick=()=>panel.classList.remove("show");
+ panel.addEventListener("pointerdown",e=>{if(e.target===panel)panel.classList.remove("show")});
+ renderMissions();
+}
+
+function renderMissions(){
+ const list=document.getElementById("missionList");if(!list)return;
+ list.innerHTML="";
+ for(const m of missions){
+   const row=document.createElement("div");row.className="mission-row";
+   const done=m.progress>=m.target;
+   row.innerHTML='<b>'+m.title+'</b><small>'+m.desc+' — جایزه 🪙 '+m.reward+'</small><div class="mission-line"><span class="mission-progress">'+Math.min(m.progress,m.target)+' / '+m.target+'</span><button class="mission-claim">'+(m.claimed?"✓ دریافت شد":done?"🎁 دریافت":"در حال انجام")+'</button></div>';
+   const claim=row.querySelector("button");
+   claim.disabled=m.claimed||!done;
+   claim.onclick=()=>{
+     if(m.claimed||m.progress<m.target)return;
+     m.claimed=true;coins+=m.reward;saveProgress();updateHud();renderMissions();
+   };
+   list.appendChild(row);
+ }
+}
+
+function missionAdd(id,amount=1){
+ const m=missions.find(x=>x.id===id);if(!m||m.claimed)return;
+ m.progress=Math.min(m.target,m.progress+amount);
+ saveProgress();
+ renderMissions();
+}
+
